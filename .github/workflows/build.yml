@@ -63,7 +63,6 @@ jobs:
           else
             echo "FAILED" > "$STATUS_FILE"
             echo "❌ BUILD FAILED — Exit Code: $EXIT_CODE"
-            # ⚠️ ALISIN ANG exit 1 — ITUTULOY ANG LAHAT NG HAKBANG!
           fi
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
@@ -206,7 +205,7 @@ jobs:
           fi
 
       # ==========================================
-      # ✅ KONKLUSYON ✅ MALINAW ANG KATAYUAN
+      # ✅ KONKLUSYON ✅ NGAYON — PULA ❌ KUNG WALANG APK!
       # ==========================================
       - name: ✅ Resulta ng Pagbuo
         id: final-result
@@ -216,6 +215,7 @@ jobs:
             echo "✅ TAGUMPAY — May APK, nakopya ang assets"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
-            echo "⚠️ WALANG APK — Pero nakopya pa rin ang assets at errors.md"
-            echo "STATUS=NO_APK" >> $GITHUB_OUTPUT
+            echo "❌ NABIGO — WALANG APK DAHIL MAY ERROR SA BUILD"
+            echo "STATUS=FAILED" >> $GITHUB_OUTPUT
+            exit 1   # ✅ PULA ❌ AGAD KUNG WALANG APK!
           fi
