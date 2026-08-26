@@ -1,0 +1,51 @@
+name: Build APK — Proyekto ni Mark Jann Tampok
+on:
+  push: { branches: [main] }
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle 8.2 & Wrapper
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          export PATH=/tmp/gradle-8.2/bin:$PATH
+          gradle wrapper --gradle-version 8.2
+          chmod +x gradlew
+
+      - name: Build APK — with Error Log
+        run: |
+          LOG_FILE="/tmp/build.log"
+          set +e
+          ./gradlew assembleDebug > "$LOG_FILE" 2>&1
+          EXIT_CODE=$?
+          set -e
+          cat "$LOG_FILE"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ BUILD FAILED — Exit Code: $EXIT_CODE"
+            exit 1
+          fi
+
+      - name: Locate & Rename APK
+        run: |
+          APK_FILE=$(find . -name "app-debug.apk" -path "*/build/*" | head -1)
+          [ -z "$APK_FILE" ] && { echo "❌ APK not found"; exit 1; }
+          cp "$APK_FILE" Proyekto-ni-Mark-Jann-Tampok.apk
+          echo "✅ APK ready: Proyekto-ni-Mark-Jann-Tampok.apk"
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bisyo-APK-v1.0
+          path: Proyekto-ni-Mark-Jann-Tampok.apk
+          retention-days: 30
