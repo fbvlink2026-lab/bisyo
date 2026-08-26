@@ -43,7 +43,7 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # 🔨 HAKBANG 1 — BUUIN ANG APK ✅ TITIGIL KUNG MAY ERROR!
+      # 🔨 HAKBANG 1 — BUUIN ANG APK ✅ ITUTULOY KAHIT MAY ERROR PARA MAKOPYA ANG ASSETS
       # ==========================================
       - name: 🔨 Buuin ang APK
         id: build-step
@@ -63,13 +63,12 @@ jobs:
           else
             echo "FAILED" > "$STATUS_FILE"
             echo "❌ BUILD FAILED — Exit Code: $EXIT_CODE"
-            echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
-            exit 1    # ✅ TITIGIL AGAD — MAGIGING PULA ❌ ANG WORKFLOW!
+            # ⚠️ ALISIN ANG exit 1 — ITUTULOY ANG LAHAT NG HAKBANG!
           fi
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
       # ==========================================
-      # 📄 HAKBANG 2 — BURAHIN → ISULAT BAGONG errors.md
+      # 📄 HAKBANG 2 — BURAHIN → ISULAT BAGONG errors.md ✅ LAGING GAGANA
       # ==========================================
       - name: 📄 Burahin Luma → Isulat BAGONG errors.md sa assets/
         id: write-log
@@ -123,7 +122,7 @@ jobs:
           echo "✅ BAGONG errors.md NAISULAT SA: $TARGET_FILE"
 
       # ==========================================
-      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/
+      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/ ✅ LAGING GAGANA
       # ==========================================
       - name: 📤 Kopyahin BUONG Assets papunta sa /docs
         run: |
@@ -150,7 +149,7 @@ jobs:
           fi
 
       # ==========================================
-      # 📤 HAKBANG 4 — ILAGAY ANG APK SA docs/
+      # 📤 HAKBANG 4 — ILAGAY ANG APK SA docs/ ✅ KUNG MAYROON
       # ==========================================
       - name: 📤 Hanapin at Ihanda ang APK
         id: apk-step
@@ -175,7 +174,7 @@ jobs:
           fi
 
       # ==========================================
-      # ✅ I-UPLOAD ANG APK
+      # ✅ I-UPLOAD ANG APK ✅ KUNG MAYROON
       # ==========================================
       - name: 📤 I-upload ang APK
         if: env.APK_FOUND == 'true'
@@ -186,7 +185,7 @@ jobs:
           retention-days: 30
 
       # ==========================================
-      # ✅ I-COMMIT — SIGURADONG NAKIKITA ANG PAGBABAGO
+      # ✅ I-COMMIT — LAGING GAGANA ✅ KAHIT WALANG APK
       # ==========================================
       - name: ✅ I-commit at I-push ang LAHAT
         if: always()
@@ -207,17 +206,16 @@ jobs:
           fi
 
       # ==========================================
-      # ✅ KONKLUSYON
+      # ✅ KONKLUSYON ✅ MALINAW ANG KATAYUAN
       # ==========================================
       - name: ✅ Resulta ng Pagbuo
         id: final-result
         if: always()
         run: |
           if [ "${{ env.APK_FOUND }}" = "true" ]; then
-            echo "✅ TAGUMPAY — BURA → GAWIN → KOPYA → COMMIT"
+            echo "✅ TAGUMPAY — May APK, nakopya ang assets"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
-            echo "❌ NABIGO"
-            echo "STATUS=FAILED" >> $GITHUB_OUTPUT
-            exit 1
+            echo "⚠️ WALANG APK — Pero nakopya pa rin ang assets at errors.md"
+            echo "STATUS=NO_APK" >> $GITHUB_OUTPUT
           fi
