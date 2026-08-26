@@ -11,15 +11,20 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
 
-        <!-- ✅ DIRETSO SA MAIN — WALANG SPLASH -->
+        <!-- ✅ SPLASH ACTIVITY — SIGURADUHING NANDITO ANG LAUNCHER -->
         <activity 
-            android:name=".MainActivity" 
+            android:name=".SplashActivity" 
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ✅ MAIN ACTIVITY -->
+        <activity 
+            android:name=".MainActivity" 
+            android:exported="false" />
 
     </application>
 </manifest>
