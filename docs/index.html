@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{height:100vh;background:linear-gradient(135deg,#b91c1c 0%,#7f1d1d 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-family:Arial,sans-serif}
+h1{font-size:28px;font-weight:bold;margin-bottom:8px}
+.sub{font-size:16px;opacity:.9;margin-bottom:50px}
+.spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar{width:200px;height:4px;background:rgba(255,255,255,.2);border-radius:4px;margin-top:20px;overflow:hidden}
+.fill{height:100%;background:white;width:0;animation:load 2.5s forwards}
+@keyframes load{to{width:100%}}
+</style>
+</head>
+<body>
+<h1>📚 PROYEKTO</h1>
+<p class="sub">ni Mark Jann Tampok</p>
+<div class="spinner"></div>
+<div class="bar"><div class="fill"></div></div>
+<script>setTimeout(()=>location='main.html',2500)</script>
+</body>
+</html>
