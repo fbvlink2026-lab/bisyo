@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions: write-all
+    outputs:
+      build_status: ${{ steps.final-result.outputs.STATUS }}
     steps:
       - uses: actions/checkout@v4
 
@@ -15,19 +18,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ⚡ KUNG MAYROON NANG gradlew — DERETSO NA LANG, HINDI NA I-DOWNLOAD ANG GRADLE
-      - name: ⚡ Check & Prepare Gradle Wrapper
+      # ⚡ KUNG MAYROON NANG gradlew — DERETSO NA LANG
+      - name: ⚡ Check Gradle Wrapper
         id: wrapper-check
         run: |
           if [ -f "./gradlew" ] && [ -x "./gradlew" ]; then
-            echo "✅ gradlew NANDOON NA — HINDI NA KAILANGANG I-SETUP ANG GRADLE"
+            echo "✅ gradlew NANDOON NA — lalaktaw ang Gradle setup"
             echo "HAS_WRAPPER=true" >> $GITHUB_ENV
           else
-            echo "⚠️ WALANG gradlew — I-DOWNLOAD AT GAGAWIN ANG WRAPPER"
+            echo "⚠️ WALANG gradlew — ise-setup ang Gradle"
             echo "HAS_WRAPPER=false" >> $GITHUB_ENV
           fi
 
-      - name: Setup Gradle 8.2 & Wrapper (KUNG KULANG LANG)
+      - name: Setup Gradle 8.2 (KUNG KULANG LANG)
         if: env.HAS_WRAPPER == 'false'
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip -O /tmp/gradle.zip
@@ -36,33 +39,155 @@ jobs:
           gradle wrapper --gradle-version 8.2
           chmod +x gradlew
 
-      - name: ✅ Siguraduhing May Pahintulot ang gradlew
-        run: |
-          chmod +x ./gradlew 2>/dev/null || true
+      - name: Siguraduhing Pwede ang gradlew
+        run: chmod +x ./gradlew 2>/dev/null || true
 
-      - name: 🔨 BUUIN ANG APK — DERETSO NA!
+      # ==========================================
+      # 🔨 BUUIN ANG APK + KUNIN ANG LOG
+      # ==========================================
+      - name: 🔨 Buuin ang APK
+        id: build-step
         run: |
-          LOG_FILE="/tmp/build.log"
+          mkdir -p /tmp
+          LOG_FILE="/tmp/build-full.log"
+          STATUS_FILE="/tmp/build-status.txt"
+
           set +e
           ./gradlew assembleDebug > "$LOG_FILE" 2>&1
           EXIT_CODE=$?
           set -e
-          cat "$LOG_FILE"
-          if [ $EXIT_CODE -ne 0 ]; then
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "SUCCESS" > "$STATUS_FILE"
+            echo "✅ BUILD SUCCESSFUL"
+          else
+            echo "FAILED" > "$STATUS_FILE"
             echo "❌ BUILD FAILED — Exit Code: $EXIT_CODE"
-            exit 1
           fi
 
-      - name: 📄 Hanapin at Palitan ang Pangalan ng APK
-        run: |
-          APK_FILE=$(find . -name "app-debug.apk" -path "*/build/*" | head -1)
-          [ -z "$APK_FILE" ] && { echo "❌ APK hindi matagpuan"; exit 1; }
-          cp "$APK_FILE" Proyekto-ni-Mark-Jann-Tampok.apk
-          echo "✅ APK handa na: Proyekto-ni-Mark-Jann-Tampok.apk"
+          echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
+      # ==========================================
+      # 📤 HANAPIN ANG APK
+      # ==========================================
+      - name: 📤 Hanapin at Ihanda ang APK
+        id: apk-step
+        run: |
+          mkdir -p docs
+          APK_FILE=$(find . -name "app-debug.apk" -path "*/build/*" | head -1)
+
+          if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
+            APK_SIZE=$(du -h "$APK_FILE" | cut -f1)
+            APK_SIZE_BYTES=$(stat -c%s "$APK_FILE")
+            NEW_NAME="Proyekto-ni-Mark-Jann-Tampok-v1.0.apk"
+
+            cp "$APK_FILE" "docs/$NEW_NAME"
+            cp "$APK_FILE" "$NEW_NAME"
+
+            echo "✅ APK MATAGPUAN: $APK_FILE"
+            echo "📏 Laki: $APK_SIZE ($APK_SIZE_BYTES bytes)"
+            echo "APK_FOUND=true" >> $GITHUB_ENV
+            echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
+            echo "APK_PATH=docs/$NEW_NAME" >> $GITHUB_ENV
+            echo "APK_NAME=$NEW_NAME" >> $GITHUB_ENV
+          else
+            echo "❌ HINDI MATAGPUAN ANG APK"
+            echo "APK_FOUND=false" >> $GITHUB_ENV
+          fi
+
+      # ==========================================
+      # 📄 ISULAT SA errors.md — LAGING GAGAWIN
+      # ==========================================
+      - name: 📄 Isulat ang Resulta sa errors.md
+        id: write-log
+        if: always()
+        run: |
+          DATE=$(date "+%Y-%m-%d %H:%M:%S UTC")
+          STATUS_FILE="/tmp/build-status.txt"
+          LOG_FILE="/tmp/build-full.log"
+
+          if [ -f "$STATUS_FILE" ] && [ "$(cat $STATUS_FILE)" = "SUCCESS" ]; then
+            STATUS_DISPLAY="✅ TAGUMPAY"
+            STATUS_DETAIL="Matagumpay na nabuo ang APK"
+          else
+            STATUS_DISPLAY="❌ NABIGO"
+            STATUS_DETAIL="Hindi nabuo ang APK — tingnan ang log sa ibaba"
+          fi
+
+          {
+            echo "# 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok"
+            echo ""
+            echo "---"
+            echo "📅 **Petsa:** $DATE"
+            echo "🎯 **Katayuan:** $STATUS_DISPLAY"
+            echo "📝 **Detalye:** $STATUS_DETAIL"
+            if [ "${{ env.APK_FOUND }}" = "true" ]; then
+              echo "📦 **APK:** ${{ env.APK_NAME }}"
+              echo "📏 **Laki:** ${{ env.APK_SIZE }}"
+              echo "📂 **Lokasyon:** ${{ env.APK_PATH }}"
+            fi
+            echo "---"
+            echo ""
+            echo "## 📋 Buong Log ng Pagbuo"
+            echo "\`\`\`"
+            if [ -f "$LOG_FILE" ]; then
+              cat "$LOG_FILE"
+            else
+              echo "(Walang nakuhang log)"
+            fi
+            echo "\`\`\`"
+            echo ""
+            echo "---"
+            echo "✅ **Katapusan ng Talaan**"
+          } > errors.md
+
+          echo "✅ errors.md naisulat na!"
+          cat errors.md
+
+      # ==========================================
+      # 📤 I-UPLOAD ANG APK — HINDI ZIPPED
+      # ==========================================
       - name: 📤 I-upload ang APK
+        if: env.APK_FOUND == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Bisyo-APK-v1.0
-          path: Proyekto-ni-Mark-Jann-Tampok.apk
+          path: docs/*.apk
           retention-days: 30
+
+      - name: 📤 I-upload ang errors.md
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs
+          path: errors.md
+          retention-days: 30
+
+      # ==========================================
+      # ✅ I-COMMIT — APK + errors.md
+      # ==========================================
+      - name: ✅ I-commit ang Resulta
+        if: always()
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add errors.md docs/*.apk 2>/dev/null || true
+          git commit -m "📋 Build Result: $(date +%Y-%m-%d)" || true
+          git push || true
+
+      # ==========================================
+      # ✅ KONKLUSYON
+      # ==========================================
+      - name: ✅ Resulta ng Pagbuo
+        id: final-result
+        if: always()
+        run: |
+          if [ "${{ env.APK_FOUND }}" = "true" ]; then
+            echo "✅ TAGUMPAY — APK ay nabuo at nai-save sa docs/"
+            echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
+          else
+            echo "❌ NABIGO — Tingnan ang errors.md at log sa itaas"
+            echo "STATUS=FAILED" >> $GITHUB_OUTPUT
+            exit 1
+          fi
