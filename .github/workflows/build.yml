@@ -43,38 +43,25 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # ✅ BAGONG HAKBANG — KOPYA MULA ROOT → APK ASSETS
+      # ✅ PINAGMULAN: assets/ → KOPYA PAPUNTA SA /docs
       # ==========================================
-      - name: 📤 Kopyahin Website Files papunta sa APK Assets
+      - name: 📤 Kopyahin Assets papunta sa /docs — para sa Website
         run: |
           ASSETS_DIR="app/src/main/assets"
-          mkdir -p "$ASSETS_DIR/pages"
+          DOCS_DIR="./docs"
+          mkdir -p "$DOCS_DIR/pages"
 
-          # Kopyahin index.html mula ROOT papunta sa APK
-          if [ -f "index.html" ]; then
-            cp index.html "$ASSETS_DIR/"
-            echo "✅ Kinopya: index.html → assets/"
-          fi
+          # Burahin ang luma — para laging malinis
+          rm -rf "$DOCS_DIR"/*
 
-          # Kopyahin main.html mula ROOT papunta sa APK
-          if [ -f "main.html" ]; then
-            cp main.html "$ASSETS_DIR/"
-            echo "✅ Kinopya: main.html → assets/"
-          fi
+          # Kopyahin LAHAT mula assets papunta sa docs
+          cp "$ASSETS_DIR"/index.html "$DOCS_DIR"/ 2>/dev/null || true
+          cp "$ASSETS_DIR"/main.html  "$DOCS_DIR"/ 2>/dev/null || true
+          cp "$ASSETS_DIR"/style.css  "$DOCS_DIR"/ 2>/dev/null || true
+          cp -r "$ASSETS_DIR"/pages/* "$DOCS_DIR/pages"/ 2>/dev/null || true
 
-          # Kopyahin style.css
-          if [ -f "style.css" ]; then
-            cp style.css "$ASSETS_DIR/"
-            echo "✅ Kinopya: style.css → assets/"
-          fi
-
-          # Kopyahin lahat ng pahina sa pages/
-          if [ -d "pages" ]; then
-            cp -r pages/* "$ASSETS_DIR/pages/"
-            echo "✅ Kinopya: pages/* → assets/pages/"
-          fi
-
-          echo "✅ LAHAT NG FILE AY NAKOPYA PAPUNTA SA APK ASSETS — LAGING PANTAY ANG LAMAN!"
+          echo "✅ LAHAT NAKOPYA: app/src/main/assets/ → /docs/"
+          ls -la "$DOCS_DIR"
 
       # ==========================================
       # 🔨 BUUIN ANG APK + KUNIN ANG LOG
@@ -102,7 +89,7 @@ jobs:
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
       # ==========================================
-      # 📤 HANAPIN ANG APK
+      # 📤 HANAPIN ANG APK → ILAGAY SA /docs
       # ==========================================
       - name: 📤 Hanapin at Ihanda ang APK
         id: apk-step
@@ -130,7 +117,7 @@ jobs:
           fi
 
       # ==========================================
-      # 📄 ISULAT SA errors.md — LAGING GAGAWIN
+      # 📄 ISULAT SA errors.md
       # ==========================================
       - name: 📄 Isulat ang Resulta sa errors.md
         id: write-log
@@ -179,7 +166,7 @@ jobs:
           cat errors.md
 
       # ==========================================
-      # 📤 I-UPLOAD ANG APK — HINDI ZIPPED
+      # 📤 I-UPLOAD
       # ==========================================
       - name: 📤 I-upload ang APK
         if: env.APK_FOUND == 'true'
@@ -198,7 +185,7 @@ jobs:
           retention-days: 30
 
       # ==========================================
-      # ✅ I-COMMIT — APK + errors.md
+      # ✅ I-COMMIT — /docs + errors.md
       # ==========================================
       - name: ✅ I-commit ang Resulta
         if: always()
@@ -206,7 +193,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add errors.md docs/*.apk 2>/dev/null || true
+          git add docs/ errors.md 2>/dev/null || true
           git commit -m "📋 Build Result: $(date +%Y-%m-%d)" || true
           git push || true
 
@@ -218,10 +205,10 @@ jobs:
         if: always()
         run: |
           if [ "${{ env.APK_FOUND }}" = "true" ]; then
-            echo "✅ TAGUMPAY — APK ay nabuo at nai-save sa docs/"
+            echo "✅ TAGUMPAY — APK at Website files nasa docs/"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
-            echo "❌ NABIGO — Tingnan ang errors.md at log sa itaas"
+            echo "❌ NABIGO — Tingnan ang errors.md"
             echo "STATUS=FAILED" >> $GITHUB_OUTPUT
             exit 1
           fi
