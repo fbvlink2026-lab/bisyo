@@ -8,6 +8,8 @@
         android:minSdkVersion="24"
         android:targetSdkVersion="34" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <permission
         android:name="com.markjann.bisyoapp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
@@ -22,16 +24,25 @@
         android:icon="@android:drawable/sym_def_app_icon"
         android:label="Proyekto ni Mark Jann Tampok"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:usesCleartextTraffic="true" >
+
+        <!-- ✅ ITO NA ANG UNA BUBUKAS — SPLASH SCREEN -->
         <activity
-            android:name="com.markjann.bisyoapp.MainActivity"
-            android:exported="true" >
+            android:name="com.markjann.bisyoapp.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ✅ MainActivity — bubukas pagkatapos ng Splash -->
+        <activity
+            android:name="com.markjann.bisyoapp.MainActivity"
+            android:exported="false" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

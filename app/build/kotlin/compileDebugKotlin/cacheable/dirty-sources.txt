@@ -1,0 +1,2 @@
+/home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt
+/home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/SplashActivity.kt

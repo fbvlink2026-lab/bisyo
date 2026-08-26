@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-26 20:58:06 UTC
+📅 **Petsa:** 2026-08-26 21:00:28 UTC
 🎯 **Katayuan:** ❌ NABIGO
 📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
@@ -34,13 +34,31 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
-> Task :app:processDebugMainManifest FAILED
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:javaPreCompileDebug
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:processDebugManifestForPackage
+> Task :app:compressDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:processDebugResources
+> Task :app:checkDebugDuplicateClasses
+
+> Task :app:compileDebugKotlin
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/SplashActivity.kt:21:12 Type mismatch: inferred type is Int but Long was expected
+
+> Task :app:compileDebugKotlin FAILED
+> Task :app:mergeExtDexDebug
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':app:processDebugMainManifest'.
-> com.android.manifmerger.ManifestMerger2$MergeFailureException: Error parsing /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -48,8 +66,8 @@ Execution failed for task ':app:processDebugMainManifest'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 39s
-10 actionable tasks: 10 executed
+BUILD FAILED in 1m 19s
+21 actionable tasks: 21 executed
 ```
 
 ---

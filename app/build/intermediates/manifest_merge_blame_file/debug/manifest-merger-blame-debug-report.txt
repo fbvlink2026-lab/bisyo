@@ -1,0 +1,97 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.markjann.bisyoapp"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:4:5-67
+11-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:4:22-64
+12
+13    <permission
+13-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/transforms-3/db5c9a0660fb781447a33f89dec5f3ae/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+14        android:name="com.markjann.bisyoapp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+14-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/transforms-3/db5c9a0660fb781447a33f89dec5f3ae/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+15        android:protectionLevel="signature" />
+15-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/transforms-3/db5c9a0660fb781447a33f89dec5f3ae/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+16
+17    <uses-permission android:name="com.markjann.bisyoapp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+17-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/transforms-3/db5c9a0660fb781447a33f89dec5f3ae/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+17-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/transforms-3/db5c9a0660fb781447a33f89dec5f3ae/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+18
+19    <application
+19-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:6:5-30:19
+20        android:allowBackup="true"
+20-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:7:9-35
+21        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+21-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/transforms-3/db5c9a0660fb781447a33f89dec5f3ae/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+22        android:debuggable="true"
+23        android:extractNativeLibs="false"
+24        android:icon="@android:drawable/sym_def_app_icon"
+24-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:8:9-58
+25        android:label="Proyekto ni Mark Jann Tampok"
+25-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:9:9-53
+26        android:supportsRtl="true"
+26-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:10:9-35
+27        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+27-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:11:9-65
+28        android:usesCleartextTraffic="true" >
+28-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:12:9-44
+29
+30        <!-- ✅ ITO NA ANG UNA BUBUKAS — SPLASH SCREEN -->
+31        <activity
+31-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:15:9-23:20
+32            android:name="com.markjann.bisyoapp.SplashActivity"
+32-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:16:13-43
+33            android:exported="true"
+33-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:17:13-36
+34            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+34-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:18:13-69
+35            <intent-filter>
+35-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:19:13-22:29
+36                <action android:name="android.intent.action.MAIN" />
+36-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:20:17-68
+36-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:20:25-66
+37
+38                <category android:name="android.intent.category.LAUNCHER" />
+38-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:21:17-76
+38-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:21:27-74
+39            </intent-filter>
+40        </activity>
+41
+42        <!-- ✅ MainActivity — bubukas pagkatapos ng Splash -->
+43        <activity
+43-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:26:9-28:39
+44            android:name="com.markjann.bisyoapp.MainActivity"
+44-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:27:13-41
+45            android:exported="false" />
+45-->/home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:28:13-37
+46
+47        <provider
+47-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+48            android:name="androidx.startup.InitializationProvider"
+48-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:25:13-67
+49            android:authorities="com.markjann.bisyoapp.androidx-startup"
+49-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:26:13-68
+50            android:exported="false" >
+50-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:27:13-37
+51            <meta-data
+51-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+52                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+52-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:30:17-75
+53                android:value="androidx.startup" />
+53-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:31:17-49
+54            <meta-data
+54-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/transforms-3/970e747f905eab7a569483a84f509a1f/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+55                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+55-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/transforms-3/970e747f905eab7a569483a84f509a1f/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+56                android:value="androidx.startup" />
+56-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/transforms-3/970e747f905eab7a569483a84f509a1f/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+57        </provider>
+58    </application>
+59
+60</manifest>
