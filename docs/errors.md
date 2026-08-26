@@ -1,9 +1,9 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-26 22:00:22 UTC
-🎯 **Katayuan:** ❌ NABIGO
-📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
+📅 **Petsa:** 2026-08-26 22:12:31 UTC
+🎯 **Katayuan:** ✅ TAGUMPAY
+📝 **Detalye:** Matagumpay na nabuo ang APK
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -46,42 +46,27 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:mergeDebugJniLibFolders
 > Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugNativeLibs NO-SOURCE
-> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:processDebugManifestForPackage
 > Task :app:mergeLibDexDebug
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:processDebugManifestForPackage
-> Task :app:mergeExtDexDebug
-> Task :app:processDebugResources
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:processDebugJavaRes
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
 
-> Task :app:compileDebugKotlin FAILED
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:2 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:10 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:11 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:29 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:31 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:37 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:38 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:40 Expecting member declaration
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:8:40 Function declaration must have a name
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/MainActivity.kt:9:24 Unresolved reference: savedInstanceState
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:compileDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
-   > Compilation error. See log for more details
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 1m 30s
-26 actionable tasks: 26 executed
+BUILD SUCCESSFUL in 1m 16s
+33 actionable tasks: 33 executed
 ```
 
 ---
