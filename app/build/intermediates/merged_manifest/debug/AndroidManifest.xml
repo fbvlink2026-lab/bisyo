@@ -27,9 +27,9 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true" >
 
-        <!-- ✅ SPLASH ACTIVITY — SIGURADUHING NANDITO ANG LAUNCHER -->
+        <!-- ✅ KAILANGAN ITO — ALAM NG ANDROID KUNG ANONG BUBUKAS! -->
         <activity
-            android:name="com.markjann.bisyoapp.SplashActivity"
+            android:name="com.markjann.bisyoapp.MainActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,11 +37,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- ✅ MAIN ACTIVITY -->
-        <activity
-            android:name="com.markjann.bisyoapp.MainActivity"
-            android:exported="false" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

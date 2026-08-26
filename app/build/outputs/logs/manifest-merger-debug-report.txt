@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-30:12
-INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-30:12
-INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-30:12
-INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-30:12
+ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-25:12
+INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-25:12
+INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-25:12
+INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:2:1-25:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/runner/.gradle/caches/transforms-3/ff795258b8ac5f66106daf466f77cf20/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/runner/.gradle/caches/transforms-3/3fdcd8fc8fdde99adb1eb4c1f0cd10bd/transformed/appcompat-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.fragment:fragment:1.3.6] /home/runner/.gradle/caches/transforms-3/0c65b3560ae411005aa4821b1a490def/transformed/fragment-1.3.6/AndroidManifest.xml:17:1-24:12
@@ -45,8 +45,8 @@ ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:4:5-67
 	android:name
 		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:4:22-64
 application
-ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:6:5-29:19
-INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:6:5-29:19
+ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:6:5-24:19
+INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:6:5-24:19
 MERGED from [androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/a47287aa1a4f72e566c4fd5b707075b7/transformed/emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.core:core:1.9.0] /home/runner/.gradle/caches/transforms-3/db5c9a0660fb781447a33f89dec5f3ae/transformed/core-1.9.0/AndroidManifest.xml:28:5-89
@@ -73,12 +73,12 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/runne
 		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:11:9-65
 	android:usesCleartextTraffic
 		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:12:9-44
-activity#com.markjann.bisyoapp.SplashActivity
+activity#com.markjann.bisyoapp.MainActivity
 ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:15:9-22:20
 	android:exported
 		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:17:13-36
 	android:name
-		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:16:13-43
+		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:16:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
 ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:18:13-21:29
 action#android.intent.action.MAIN
@@ -89,12 +89,6 @@ category#android.intent.category.LAUNCHER
 ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:20:17-77
 	android:name
 		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:20:27-74
-activity#com.markjann.bisyoapp.MainActivity
-ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:25:9-27:40
-	android:exported
-		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:27:13-37
-	android:name
-		ADDED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml:26:13-41
 uses-sdk
 INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml
