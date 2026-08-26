@@ -43,53 +43,35 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # ✅ SURIIN → BURAHIN LUMANG docs/ → KOPYAHIN BAGO
+      # ✅ KOPYAHIN LAHAT — BURAHIN LUMANG docs/ → KOPYA MULA assets/
       # ==========================================
-      - name: 📤 Kopyahin BUONG Assets papunta sa /docs — SIGURADONG PAPALIT
+      - name: 📤 Kopyahin BUONG Assets papunta sa /docs
         run: |
           ASSETS_DIR="app/src/main/assets"
           DOCS_DIR="./docs"
 
-          echo "=========================================="
-          echo "📂 1. SURIIN ANG PINAGMULAN — assets/"
-          echo "=========================================="
-          if [ ! -d "$ASSETS_DIR" ]; then
-            echo "❌ HINDI MAHANAP: $ASSETS_DIR"
-            exit 1
-          fi
-          ls -la "$ASSETS_DIR"
-          echo ""
-
-          echo "=========================================="
-          echo "🗑️  2. BURAHIN BUONG docs/ — WALANG LUMANG MATITIRA"
-          echo "=========================================="
+          echo "=== ✅ BURAHIN BUONG docs/ ==="
           rm -rf "$DOCS_DIR"
           mkdir -p "$DOCS_DIR"
-          echo "✅ Burado na ang luma"
-          echo ""
 
-          echo "=========================================="
-          echo "📤 3. KOPYAHIN BUONG assets/ → docs/"
-          echo "=========================================="
+          echo "=== 📤 KOPYAHIN BUONG assets/ → /docs ==="
           cp -r "$ASSETS_DIR"/. "$DOCS_DIR"/
-          echo "✅ Nakopya na"
-          echo ""
 
-          echo "=========================================="
-          echo "📁 4. BAGONG LAMAN NG docs/"
-          echo "=========================================="
-          ls -la "$DOCS_DIR"
           echo ""
+          echo "=== 📂 BAGONG LAMAN NG docs/ ==="
+          ls -la "$DOCS_DIR"
 
           if [ -d "$DOCS_DIR/pages" ]; then
-            echo "📄 LAMAN NG pages/"
+            echo ""
+            echo "=== 📄 LAMAN NG pages/ ==="
             ls -la "$DOCS_DIR/pages"
           fi
+
           echo ""
-          echo "✅ LAHAT BAGONG KOPYA — WALANG LUMANG FILE NA MATITIRA!"
+          echo "✅ TAPOS — LAHAT MULA assets/ KASAMA ANG errors.md!"
 
       # ==========================================
-      # 🔨 BUUIN ANG APK + KUNIN ANG LOG
+      # 🔨 BUUIN ANG APK
       # ==========================================
       - name: 🔨 Buuin ang APK
         id: build-step
@@ -141,15 +123,16 @@ jobs:
           fi
 
       # ==========================================
-      # 📄 ISULAT SA errors.md
+      # 📄 I-UPDATE ANG errors.md SA docs/ — KUNG GUSTO MONG ILAGAY ANG LOG
       # ==========================================
-      - name: 📄 Isulat ang Resulta sa errors.md
+      - name: 📄 I-update ang errors.md sa docs/
         id: write-log
         if: always()
         run: |
           DATE=$(date "+%Y-%m-%d %H:%M:%S UTC")
           STATUS_FILE="/tmp/build-status.txt"
           LOG_FILE="/tmp/build-full.log"
+          TARGET_FILE="docs/errors.md"
 
           if [ -f "$STATUS_FILE" ] && [ "$(cat $STATUS_FILE)" = "SUCCESS" ]; then
             STATUS_DISPLAY="✅ TAGUMPAY"
@@ -184,9 +167,9 @@ jobs:
             echo ""
             echo "---"
             echo "✅ **Katapusan ng Talaan**"
-          } > errors.md
+          } > "$TARGET_FILE"
 
-          echo "✅ errors.md naisulat na!"
+          echo "✅ errors.md na-update sa docs/errors.md"
 
       # ==========================================
       # 📤 I-UPLOAD
@@ -204,11 +187,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Build-Logs
-          path: errors.md
+          path: docs/errors.md
           retention-days: 30
 
       # ==========================================
-      # ✅ I-COMMIT — SIGURADUHING MAIPUSH
+      # ✅ I-COMMIT — docs/ LANG
       # ==========================================
       - name: ✅ I-commit at I-push ang Resulta
         if: always()
@@ -217,7 +200,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add docs/ errors.md 2>/dev/null || true
+          git add docs/ 2>/dev/null || true
 
           if git diff --staged --quiet; then
             echo "ℹ️ Walang pagbabago — walang i-commit"
@@ -244,7 +227,7 @@ jobs:
             echo "✅ TAGUMPAY — docs/ updated + APK ready"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
-            echo "❌ NABIGO — Tingnan ang errors.md"
+            echo "❌ NABIGO — Tingnan ang docs/errors.md"
             echo "STATUS=FAILED" >> $GITHUB_OUTPUT
             exit 1
           fi
