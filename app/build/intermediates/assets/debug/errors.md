@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-26 21:00:28 UTC
+📅 **Petsa:** 2026-08-26 21:04:09 UTC
 🎯 **Katayuan:** ❌ NABIGO
 📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
@@ -41,17 +41,22 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:processDebugManifestForPackage
-> Task :app:compressDebugAssets
 > Task :app:desugarDebugFileDependencies
-> Task :app:processDebugResources
+> Task :app:compressDebugAssets
+> Task :app:processDebugManifestForPackage
 > Task :app:checkDebugDuplicateClasses
-
-> Task :app:compileDebugKotlin
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/SplashActivity.kt:21:12 Type mismatch: inferred type is Int but Long was expected
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeLibDexDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
 
 > Task :app:compileDebugKotlin FAILED
-> Task :app:mergeExtDexDebug
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyoapp/SplashActivity.kt:21:12 Type mismatch: inferred type is Int but Long was expected
 
 FAILURE: Build failed with an exception.
 
@@ -66,8 +71,8 @@ Execution failed for task ':app:compileDebugKotlin'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 1m 19s
-21 actionable tasks: 21 executed
+BUILD FAILED in 1m 21s
+26 actionable tasks: 26 executed
 ```
 
 ---
