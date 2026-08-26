@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ✅ Pahintulot sa Internet - KAILANGAN ITO! -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application 
@@ -10,16 +9,23 @@
         android:label="Proyekto ni Mark Jann Tampok" 
         android:supportsRtl="true" 
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-        <!-- ✅ Payagan ang HTTP content - KAILANGAN ITO! -->
         android:usesCleartextTraffic="true">
 
+        <!-- ✅ ITO NA ANG UNA BUBUKAS — SPLASH SCREEN -->
         <activity 
-            android:name=".MainActivity" 
-            android:exported="true">
+            android:name=".SplashActivity" 
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- ✅ MainActivity — bubukas pagkatapos ng Splash -->
+        <activity 
+            android:name=".MainActivity" 
+            android:exported="false"/>
+
     </application>
 </manifest>
