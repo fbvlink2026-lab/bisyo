@@ -43,29 +43,32 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # ✅ KOPYAHIN LAHAT — BUONG ASSETS → /docs
+      # ✅ KOPYAHIN LAHAT — BURAHIN LUNA → KOPYA BAGO
       # ==========================================
-      - name: 📤 Kopyahin BUONG Assets papunta sa /docs
+      - name: 📤 Kopyahin BUONG Assets papunta sa /docs — SIGURADONG PALIT
         run: |
           ASSETS_DIR="app/src/main/assets"
           DOCS_DIR="./docs"
 
-          # Burahin ang luma — malinis na simula
+          echo "=== ✅ BURAHIN BUONG docs/ — WALANG LUMANG MATITIRA ==="
           rm -rf "$DOCS_DIR"
           mkdir -p "$DOCS_DIR"
 
-          # ✅ KOPYAHIN ANG BUONG LAMAN — kasama ang pages/ at lahat!
+          echo "=== 📤 KOPYAHIN BUONG assets/ → /docs ==="
           cp -r "$ASSETS_DIR"/. "$DOCS_DIR"/
 
-          echo "✅ LAHAT NAKOPYA — BUONG assets/ → /docs/"
           echo ""
-          echo "📂 LAMAN NG docs/:"
+          echo "=== 📂 BAGONG LAMAN NG docs/ ==="
           ls -la "$DOCS_DIR"
+
           if [ -d "$DOCS_DIR/pages" ]; then
             echo ""
-            echo "📄 LAMAN NG pages/:"
+            echo "=== 📄 LAMAN NG pages/ ==="
             ls -la "$DOCS_DIR/pages"
           fi
+
+          echo ""
+          echo "✅ TAPOS — LAHAT BAGONG KOPYA MULA assets/"
 
       # ==========================================
       # 🔨 BUUIN ANG APK + KUNIN ANG LOG
@@ -98,7 +101,6 @@ jobs:
       - name: 📤 Hanapin at Ihanda ang APK
         id: apk-step
         run: |
-          mkdir -p docs
           APK_FILE=$(find . -name "app-debug.apk" -path "*/build/*" | head -1)
 
           if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
@@ -109,7 +111,7 @@ jobs:
             cp "$APK_FILE" "docs/$NEW_NAME"
             cp "$APK_FILE" "$NEW_NAME"
 
-            echo "✅ APK MATAGPUAN: $APK_FILE"
+            echo "✅ APK MATAGPUAN: docs/$NEW_NAME"
             echo "📏 Laki: $APK_SIZE ($APK_SIZE_BYTES bytes)"
             echo "APK_FOUND=true" >> $GITHUB_ENV
             echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
@@ -188,17 +190,30 @@ jobs:
           retention-days: 30
 
       # ==========================================
-      # ✅ I-COMMIT — /docs + errors.md
+      # ✅ I-COMMIT — SIGURADUHING MAIPUSH
       # ==========================================
-      - name: ✅ I-commit ang Resulta
+      - name: ✅ I-commit at I-push ang Resulta
         if: always()
         continue-on-error: true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add docs/ errors.md 2>/dev/null || true
-          git commit -m "📋 Build Result: $(date +%Y-%m-%d)" || true
-          git push || true
+
+          if git diff --staged --quiet; then
+            echo "ℹ️ Walang pagbabago — walang i-commit"
+          else
+            git commit -m "📋 Build Result: $(date +%Y-%m-%d)"
+            echo "📤 Ipinapadala sa GitHub..."
+            git push
+            if [ $? -eq 0 ]; then
+              echo "✅ MATAGUMPAY NAIPUSH!"
+            else
+              echo "⚠️ Retry with force..."
+              git push --force
+            fi
+          fi
 
       # ==========================================
       # ✅ KONKLUSYON
@@ -208,7 +223,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ env.APK_FOUND }}" = "true" ]; then
-            echo "✅ TAGUMPAY — APK at Website files nasa docs/"
+            echo "✅ TAGUMPAY — docs/ updated + APK ready"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
             echo "❌ NABIGO — Tingnan ang errors.md"
