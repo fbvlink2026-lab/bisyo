@@ -11,21 +11,15 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
 
-        <!-- ✅ ITO NA ANG UNA BUBUKAS — SPLASH SCREEN -->
-        <activity 
-            android:name=".SplashActivity" 
-            android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-
-        <!-- ✅ MainActivity — bubukas pagkatapos ng Splash -->
+        <!-- ✅ DIRETSO SA MAIN — WALANG SPLASH -->
         <activity 
             android:name=".MainActivity" 
-            android:exported="false"/>
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
     </application>
 </manifest>
