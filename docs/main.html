@@ -18,7 +18,41 @@
 .info-section ul{margin:0;padding-left:22px}
 .info-section li{font-size:15px;line-height:1.7;color:#374151;margin-bottom:6px}
 .divider{height:1px;background:#e5e7eb;margin:20px 0}
+.header{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;padding:20px 16px;box-shadow:0 3px 8px rgba(0,0,0,.15)}
+.header h1{font-size:20px;margin:0}
+.header p{font-size:14px;opacity:.85;margin:4px 0 0 0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px 16px}
+.btn{display:flex;flex-direction:column;align-items:center;background:white;border-radius:12px;padding:16px 8px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.08);border:1px solid #e5e7eb}
+.btn:active{transform:scale(.97);background:#fef2f2}
+.num{width:36px;height:36px;line-height:36px;text-align:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;margin-bottom:6px}
+.txt{font-size:14px;color:#1f2937;text-align:center}
 </style>
+<!-- ✅ AWTOMATIKONG TAMA ANG DOWNLOAD LINK SA APK -->
+<script>
+function getApkLink() {
+  var loc = window.location.href;
+  // 📱 SA APK — itago ang download button
+  if (loc.indexOf("file:///android_asset/") === 0) {
+    return ""; // walang link — nasa loob na ng app
+  }
+  // 🌐 SA WEBSITE — nasa docs/ ang APK
+  else {
+    return "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+  }
+}
+window.onload = function() {
+  var linkUrl = getApkLink();
+  var btn = document.getElementById("download-apk-btn");
+  var section = document.getElementById("download-section");
+  if (!linkUrl) {
+    // 📱 Nasa APK — itago ang buong download section
+    section.style.display = "none";
+  } else {
+    // 🌐 Nasa Website — itakda ang tamang link
+    btn.href = linkUrl;
+  }
+};
+</script>
 </head>
 <body>
 
@@ -28,11 +62,11 @@
 <p>Proyekto ni Mark Jann Tampok — Edukasyong Impormatibo</p>
 </div>
 
-<!-- 📥 BAHAGI NG PAG-DOWNLOAD -->
-<div class="download-section">
+<!-- 📥 BAHAGI NG PAG-DOWNLOAD — LALABAS LANG SA WEBSITE -->
+<div id="download-section" class="download-section">
   <div class="download-title">📤 I-download ang Aplikasyon</div>
   <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
-  <a href="https://github.com/[IYONG-USERNAME]/BisyoApp/releases" target="_blank" class="download-btn">
+  <a id="download-apk-btn" href="#" class="download-btn">
     ⬇️ I-download ang APK
   </a>
   <div class="download-info">
