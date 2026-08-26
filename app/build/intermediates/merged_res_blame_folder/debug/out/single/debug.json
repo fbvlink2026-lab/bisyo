@@ -2,5 +2,9 @@
     {
         "merged": "com.markjann.bisyoapp-merged_res-20:/layout_activity_main.xml.flat",
         "source": "com.markjann.bisyoapp-main-22:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.markjann.bisyoapp-merged_res-20:/layout_activity_splash.xml.flat",
+        "source": "com.markjann.bisyoapp-main-22:/layout/activity_splash.xml"
     }
 ]
