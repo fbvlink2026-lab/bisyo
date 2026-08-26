@@ -43,6 +43,40 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
+      # ✅ BAGONG HAKBANG — KOPYA MULA ROOT → APK ASSETS
+      # ==========================================
+      - name: 📤 Kopyahin Website Files papunta sa APK Assets
+        run: |
+          ASSETS_DIR="app/src/main/assets"
+          mkdir -p "$ASSETS_DIR/pages"
+
+          # Kopyahin index.html mula ROOT papunta sa APK
+          if [ -f "index.html" ]; then
+            cp index.html "$ASSETS_DIR/"
+            echo "✅ Kinopya: index.html → assets/"
+          fi
+
+          # Kopyahin main.html mula ROOT papunta sa APK
+          if [ -f "main.html" ]; then
+            cp main.html "$ASSETS_DIR/"
+            echo "✅ Kinopya: main.html → assets/"
+          fi
+
+          # Kopyahin style.css
+          if [ -f "style.css" ]; then
+            cp style.css "$ASSETS_DIR/"
+            echo "✅ Kinopya: style.css → assets/"
+          fi
+
+          # Kopyahin lahat ng pahina sa pages/
+          if [ -d "pages" ]; then
+            cp -r pages/* "$ASSETS_DIR/pages/"
+            echo "✅ Kinopya: pages/* → assets/pages/"
+          fi
+
+          echo "✅ LAHAT NG FILE AY NAKOPYA PAPUNTA SA APK ASSETS — LAGING PANTAY ANG LAMAN!"
+
+      # ==========================================
       # 🔨 BUUIN ANG APK + KUNIN ANG LOG
       # ==========================================
       - name: 🔨 Buuin ang APK
