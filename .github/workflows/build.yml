@@ -43,7 +43,7 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # 🔨 HAKBANG 1 — BUUIN MUNA ANG APK
+      # 🔨 HAKBANG 1 — BUUIN ANG APK ✅ TITIGIL KUNG MAY ERROR!
       # ==========================================
       - name: 🔨 Buuin ang APK
         id: build-step
@@ -63,11 +63,13 @@ jobs:
           else
             echo "FAILED" > "$STATUS_FILE"
             echo "❌ BUILD FAILED — Exit Code: $EXIT_CODE"
+            echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
+            exit 1    # ✅ TITIGIL AGAD — MAGIGING PULA ❌ ANG WORKFLOW!
           fi
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
       # ==========================================
-      # 📄 HAKBANG 2 — ✅ BURAHIN MUNA ANG LUMANG errors.md → TAPOS ISULAT ANG BAGO!
+      # 📄 HAKBANG 2 — BURAHIN → ISULAT BAGONG errors.md
       # ==========================================
       - name: 📄 Burahin Luma → Isulat BAGONG errors.md sa assets/
         id: write-log
@@ -81,7 +83,7 @@ jobs:
 
           mkdir -p "$ASSETS_DIR"
 
-          # ✅ BURAHIN MUNA ANG LUMANG — SIGURADONG MAGBABAGO!
+          # ✅ BURAHIN MUNA — SIGURADONG MAY PAGBABAGO
           if [ -f "$TARGET_FILE" ]; then
             rm -f "$TARGET_FILE"
             echo "🗑️ BINURA ANG LUMANG errors.md"
@@ -95,7 +97,7 @@ jobs:
             STATUS_DETAIL="Hindi nabuo ang APK — tingnan ang log sa ibaba"
           fi
 
-          # ✅ ISULAT ANG BAGONG — SIGURADONG BAGONG FILE NA ITO!
+          # ✅ ISULAT ANG BAGONG FILE
           {
             echo "# 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok"
             echo ""
@@ -119,10 +121,9 @@ jobs:
           } > "$TARGET_FILE"
 
           echo "✅ BAGONG errors.md NAISULAT SA: $TARGET_FILE"
-          ls -la "$TARGET_FILE"
 
       # ==========================================
-      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/ ✅ SIGURADONG KASAMA ANG BAGONG errors.md
+      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/
       # ==========================================
       - name: 📤 Kopyahin BUONG Assets papunta sa /docs
         run: |
@@ -174,6 +175,17 @@ jobs:
           fi
 
       # ==========================================
+      # ✅ I-UPLOAD ANG APK
+      # ==========================================
+      - name: 📤 I-upload ang APK
+        if: env.APK_FOUND == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bisyo-APK-v1.0
+          path: docs/*.apk
+          retention-days: 30
+
+      # ==========================================
       # ✅ I-COMMIT — SIGURADONG NAKIKITA ANG PAGBABAGO
       # ==========================================
       - name: ✅ I-commit at I-push ang LAHAT
@@ -183,10 +195,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add --all 2>/dev/null || true
+          git add app/src/main/assets/ docs/ 2>/dev/null || true
 
           if git diff --staged --quiet; then
-            echo "ℹ️ WALANG PAGBABAGO — hindi dapat mangyari dahil binura at ginawa ulit ang errors.md!"
+            echo "ℹ️ WALANG PAGBABAGO"
           else
             git commit -m "📋 Build Result: $(date +%Y-%m-%d %H:%M)"
             echo "📤 IPINAPADALA..."
