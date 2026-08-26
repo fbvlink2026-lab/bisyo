@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
@@ -38,7 +37,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // ✅ Subukan ang index.html — kung wala, gamitin ang main.html
             val url = "file:///android_asset/index.html"
             Log.d(TAG, "Naglo-load: $url")
             webView.loadUrl(url)
