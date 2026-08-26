@@ -43,25 +43,29 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # ✅ PINAGMULAN: assets/ → KOPYA PAPUNTA SA /docs
+      # ✅ KOPYAHIN LAHAT — BUONG ASSETS → /docs
       # ==========================================
-      - name: 📤 Kopyahin Assets papunta sa /docs — para sa Website
+      - name: 📤 Kopyahin BUONG Assets papunta sa /docs
         run: |
           ASSETS_DIR="app/src/main/assets"
           DOCS_DIR="./docs"
-          mkdir -p "$DOCS_DIR/pages"
 
-          # Burahin ang luma — para laging malinis
-          rm -rf "$DOCS_DIR"/*
+          # Burahin ang luma — malinis na simula
+          rm -rf "$DOCS_DIR"
+          mkdir -p "$DOCS_DIR"
 
-          # Kopyahin LAHAT mula assets papunta sa docs
-          cp "$ASSETS_DIR"/index.html "$DOCS_DIR"/ 2>/dev/null || true
-          cp "$ASSETS_DIR"/main.html  "$DOCS_DIR"/ 2>/dev/null || true
-          cp "$ASSETS_DIR"/style.css  "$DOCS_DIR"/ 2>/dev/null || true
-          cp -r "$ASSETS_DIR"/pages/* "$DOCS_DIR/pages"/ 2>/dev/null || true
+          # ✅ KOPYAHIN ANG BUONG LAMAN — kasama ang pages/ at lahat!
+          cp -r "$ASSETS_DIR"/. "$DOCS_DIR"/
 
-          echo "✅ LAHAT NAKOPYA: app/src/main/assets/ → /docs/"
+          echo "✅ LAHAT NAKOPYA — BUONG assets/ → /docs/"
+          echo ""
+          echo "📂 LAMAN NG docs/:"
           ls -la "$DOCS_DIR"
+          if [ -d "$DOCS_DIR/pages" ]; then
+            echo ""
+            echo "📄 LAMAN NG pages/:"
+            ls -la "$DOCS_DIR/pages"
+          fi
 
       # ==========================================
       # 🔨 BUUIN ANG APK + KUNIN ANG LOG
@@ -163,7 +167,6 @@ jobs:
           } > errors.md
 
           echo "✅ errors.md naisulat na!"
-          cat errors.md
 
       # ==========================================
       # 📤 I-UPLOAD
