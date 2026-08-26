@@ -5,7 +5,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+ onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         // ✅ WALANG XML, WALANG WEBVIEW — DIRETSONG TEKSTO
