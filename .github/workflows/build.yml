@@ -67,9 +67,9 @@ jobs:
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
       # ==========================================
-      # 📄 HAKBANG 2 — ISULAT MUNA ANG LOG SA assets/errors.md ✅ UNA!
+      # 📄 HAKBANG 2 — ✅ BURAHIN MUNA ANG LUMANG errors.md → TAPOS ISULAT ANG BAGO!
       # ==========================================
-      - name: 📄 Isulat ang Resulta → SA assets/errors.md
+      - name: 📄 Burahin Luma → Isulat BAGONG errors.md sa assets/
         id: write-log
         if: always()
         run: |
@@ -81,6 +81,12 @@ jobs:
 
           mkdir -p "$ASSETS_DIR"
 
+          # ✅ BURAHIN MUNA ANG LUMANG — SIGURADONG MAGBABAGO!
+          if [ -f "$TARGET_FILE" ]; then
+            rm -f "$TARGET_FILE"
+            echo "🗑️ BINURA ANG LUMANG errors.md"
+          fi
+
           if [ -f "$STATUS_FILE" ] && [ "$(cat $STATUS_FILE)" = "SUCCESS" ]; then
             STATUS_DISPLAY="✅ TAGUMPAY"
             STATUS_DETAIL="Matagumpay na nabuo ang APK"
@@ -89,6 +95,7 @@ jobs:
             STATUS_DETAIL="Hindi nabuo ang APK — tingnan ang log sa ibaba"
           fi
 
+          # ✅ ISULAT ANG BAGONG — SIGURADONG BAGONG FILE NA ITO!
           {
             echo "# 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok"
             echo ""
@@ -96,11 +103,6 @@ jobs:
             echo "📅 **Petsa:** $DATE"
             echo "🎯 **Katayuan:** $STATUS_DISPLAY"
             echo "📝 **Detalye:** $STATUS_DETAIL"
-            if [ "${{ env.APK_FOUND }}" = "true" ]; then
-              echo "📦 **APK:** ${{ env.APK_NAME }}"
-              echo "📏 **Laki:** ${{ env.APK_SIZE }}"
-              echo "📂 **Lokasyon:** ${{ env.APK_PATH }}"
-            fi
             echo "---"
             echo ""
             echo "## 📋 Buong Log ng Pagbuo"
@@ -116,12 +118,13 @@ jobs:
             echo "✅ **Katapusan ng Talaan**"
           } > "$TARGET_FILE"
 
-          echo "✅ errors.md NAISULAT SA: $TARGET_FILE"
+          echo "✅ BAGONG errors.md NAISULAT SA: $TARGET_FILE"
+          ls -la "$TARGET_FILE"
 
       # ==========================================
-      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/ ✅ SA HULI — KASAMA ANG LAHAT!
+      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/ ✅ SIGURADONG KASAMA ANG BAGONG errors.md
       # ==========================================
-      - name: 📤 Kopyahin BUONG Assets papunta sa /docs — SABAY-SABAY ANG LAHAT!
+      - name: 📤 Kopyahin BUONG Assets papunta sa /docs
         run: |
           ASSETS_DIR="app/src/main/assets"
           DOCS_DIR="./docs"
@@ -135,16 +138,14 @@ jobs:
           mkdir -p "$DOCS_DIR"
 
           echo "=== 📤 KOPYAHIN BUONG assets/ → docs/ ==="
-          echo "    Kasama: index.html, main.html, style.css, pages/, errors.md ✅"
           cp -R "$ASSETS_DIR"/. "$DOCS_DIR/"
 
           echo ""
-          echo "=== ✅ SABAY-SABAY NA NAKOPYA SA docs/ ==="
+          echo "=== ✅ LAMAN NG docs/ ==="
           ls -la "$DOCS_DIR"
 
-          echo ""
           if [ -f "$DOCS_DIR/errors.md" ]; then
-            echo "✅✅✅ errors.md NAKOPYA — SABAY SA LAHAT NG FILES!"
+            echo "✅✅✅ BAGONG errors.md NAKOPYA — SIGURADO!"
           fi
 
       # ==========================================
@@ -173,28 +174,24 @@ jobs:
           fi
 
       # ==========================================
-      # ✅ I-COMMIT — SABAY-SABAY LAHAT NG PAGBABAGO
+      # ✅ I-COMMIT — SIGURADONG NAKIKITA ANG PAGBABAGO
       # ==========================================
-      - name: ✅ I-commit at I-push ang LAHAT — SABAY-SABAY ANG ORAS
+      - name: ✅ I-commit at I-push ang LAHAT
         if: always()
         continue-on-error: true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add app/src/main/assets/ docs/ 2>/dev/null || true
+          git add --all 2>/dev/null || true
 
           if git diff --staged --quiet; then
-            echo "ℹ️ Walang pagbabago"
+            echo "ℹ️ WALANG PAGBABAGO — hindi dapat mangyari dahil binura at ginawa ulit ang errors.md!"
           else
-            git commit -m "📋 Build Result: $(date +%Y-%m-%d)"
-            echo "📤 SABAY-SABAY NA IPINAPADALA — parehong oras ang lahat!"
-            git push
-            if [ $? -eq 0 ]; then
-              echo "✅ MATAGUMPAY — SABAY-SABAY ANG ORAS NG LAHAT NG FILES SA docs/!"
-            else
-              git push --force
-            fi
+            git commit -m "📋 Build Result: $(date +%Y-%m-%d %H:%M)"
+            echo "📤 IPINAPADALA..."
+            git push || git push --force
+            echo "✅ MATAGUMPAY — SABAY-SABAY ANG LAHAT!"
           fi
 
       # ==========================================
@@ -205,7 +202,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ env.APK_FOUND }}" = "true" ]; then
-            echo "✅ TAGUMPAY — BUONG assets kinopya → docs/ — SABAY-SABAY ANG ORAS!"
+            echo "✅ TAGUMPAY — BURA → GAWIN → KOPYA → COMMIT"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
             echo "❌ NABIGO"
