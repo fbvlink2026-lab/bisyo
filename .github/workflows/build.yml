@@ -43,32 +43,50 @@ jobs:
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # ✅ KOPYAHIN LAHAT — BURAHIN LUNA → KOPYA BAGO
+      # ✅ SURIIN → BURAHIN LUMANG docs/ → KOPYAHIN BAGO
       # ==========================================
-      - name: 📤 Kopyahin BUONG Assets papunta sa /docs — SIGURADONG PALIT
+      - name: 📤 Kopyahin BUONG Assets papunta sa /docs — SIGURADONG PAPALIT
         run: |
           ASSETS_DIR="app/src/main/assets"
           DOCS_DIR="./docs"
 
-          echo "=== ✅ BURAHIN BUONG docs/ — WALANG LUMANG MATITIRA ==="
+          echo "=========================================="
+          echo "📂 1. SURIIN ANG PINAGMULAN — assets/"
+          echo "=========================================="
+          if [ ! -d "$ASSETS_DIR" ]; then
+            echo "❌ HINDI MAHANAP: $ASSETS_DIR"
+            exit 1
+          fi
+          ls -la "$ASSETS_DIR"
+          echo ""
+
+          echo "=========================================="
+          echo "🗑️  2. BURAHIN BUONG docs/ — WALANG LUMANG MATITIRA"
+          echo "=========================================="
           rm -rf "$DOCS_DIR"
           mkdir -p "$DOCS_DIR"
-
-          echo "=== 📤 KOPYAHIN BUONG assets/ → /docs ==="
-          cp -r "$ASSETS_DIR"/. "$DOCS_DIR"/
-
+          echo "✅ Burado na ang luma"
           echo ""
-          echo "=== 📂 BAGONG LAMAN NG docs/ ==="
+
+          echo "=========================================="
+          echo "📤 3. KOPYAHIN BUONG assets/ → docs/"
+          echo "=========================================="
+          cp -r "$ASSETS_DIR"/. "$DOCS_DIR"/
+          echo "✅ Nakopya na"
+          echo ""
+
+          echo "=========================================="
+          echo "📁 4. BAGONG LAMAN NG docs/"
+          echo "=========================================="
           ls -la "$DOCS_DIR"
+          echo ""
 
           if [ -d "$DOCS_DIR/pages" ]; then
-            echo ""
-            echo "=== 📄 LAMAN NG pages/ ==="
+            echo "📄 LAMAN NG pages/"
             ls -la "$DOCS_DIR/pages"
           fi
-
           echo ""
-          echo "✅ TAPOS — LAHAT BAGONG KOPYA MULA assets/"
+          echo "✅ LAHAT BAGONG KOPYA — WALANG LUMANG FILE NA MATITIRA!"
 
       # ==========================================
       # 🔨 BUUIN ANG APK + KUNIN ANG LOG
