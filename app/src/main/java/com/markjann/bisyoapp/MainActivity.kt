@@ -1,57 +1,17 @@
 package com.markjann.bisyoapp
 
 import android.os.Bundle
-import android.util.Log
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var webView: WebView
-    private val TAG = "BisyoApp"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        webView = findViewById(R.id.webview)
-
-        try {
-            webView.settings.apply {
-                javaScriptEnabled = true
-                allowFileAccess = true
-                domStorageEnabled = true
-                loadsImagesAutomatically = true
-            }
-
-            webView.webViewClient = object : WebViewClient() {
-                override fun onReceivedError(
-                    view: WebView?,
-                    request: WebResourceRequest?,
-                    error: WebResourceError?
-                ) {
-                    super.onReceivedError(view, request, error)
-                    Log.e(TAG, "WebView Error: ${error?.description}")
-                }
-            }
-
-            val url = "file:///android_asset/index.html"
-            Log.d(TAG, "Naglo-load: $url")
-            webView.loadUrl(url)
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Error sa WebView: ${e.message}")
-            e.printStackTrace()
-        }
-    }
-
-    override fun onBackPressed() {
-        if (::webView.isInitialized && webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
+        
+        // ✅ WALANG XML, WALANG WEBVIEW — DIRETSONG TEKSTO
+        val textView = TextView(this)
+        textView.text = "GUMAGANA ANG APP!\n\nIndex.html dapat mabasa sa:\nfile:///android_asset/index.html"
+        textView.textSize = 20f
+        setContentView(textView)
     }
 }
