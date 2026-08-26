@@ -110,11 +110,11 @@
                 {
                     "source": "/home/runner/work/bisyo/bisyo/app/src/main/res/values/themes.xml",
                     "from": {
-                        "startLines": "0",
-                        "startColumns": "11",
-                        "startOffsets": "11",
-                        "endColumns": "103",
-                        "endOffsets": "103"
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "97",
+                        "endOffsets": "148"
                     },
                     "to": {
                         "startLines": "1697",
