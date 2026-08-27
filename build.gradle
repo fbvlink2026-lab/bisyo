@@ -15,7 +15,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace 'com.markjann.bisyoapp'
+    namespace 'com.markjann.bisyo'
     compileSdk 34
 
     defaultConfig {
