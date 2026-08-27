@@ -9,6 +9,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -32,6 +34,10 @@ class MainActivity : AppCompatActivity() {
                 setSupportZoom(true)
                 builtInZoomControls = true
                 displayZoomControls = false
+                // ✅ PARA HINDI MAHIRAP SA DOWNLOAD NG APK
+                setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+                    downloadApk(url)
+                }
             }
 
             webView.webViewClient = object : WebViewClient() {
@@ -46,19 +52,17 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, errMsg, Toast.LENGTH_LONG).show()
                 }
 
-                // ✅ KAPAG APK — BUBUKSAN NG SISTEMA PARA MA-DOWNLOAD/MA-INSTALL
+                // ✅ KAPAG APK — BUBUKSAN NG SISTEMA — HINDI SA WEBVIEW
                 override fun shouldOverrideUrlLoading(
                     view: WebView?,
                     request: WebResourceRequest?
                 ): Boolean {
                     val url = request?.url.toString()
 
-                    // 📱 KUNG APK — IBUKSAN SA SISTEMA
+                    // 📱 KUNG APK — IBUKSAN SA SISTEMA PARA I-INSTALL
                     if (url.endsWith(".apk", ignoreCase = true)) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        startActivity(intent)
-                        return true // ✅ HUWAG SA WEBVIEW — SISTEMA NA ANG HAHANDLE
+                        downloadApk(url)
+                        return true // ✅ HINDI SA WEBVIEW — SISTEMA ANG HAHANDLE
                     }
 
                     // ✅ LAHAT IBA — MANATILI SA LOOB NG WEBVIEW
@@ -75,6 +79,33 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "💥 CRASH SA onCreate: ${e.message}", e)
             Toast.makeText(this, "CRASH: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
+        }
+    }
+
+    // 📥 TOTOONG PAG-DOWNLOAD AT PAG-INSTALL NG APK
+    private fun downloadApk(apkUrl: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+
+            // ✅ KUNG REMOTE URL — IBIGAY SA BROWSER O DOWNLOAD MANAGER
+            if (apkUrl.startsWith("http")) {
+                intent.data = Uri.parse(apkUrl)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                Toast.makeText(this, "📤 Sinisimulan ang pag-download...", Toast.LENGTH_SHORT).show()
+            }
+            // ✅ KUNG LOKAL NA FILE — I-INSTALL AGAD
+            else {
+                val uri = Uri.parse(apkUrl)
+                intent.setDataAndType(uri, "application/vnd.android.package-archive")
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                startActivity(intent)
+            }
+            Log.d(TAG, "APK inilunsad: $apkUrl")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Hindi ma-proseso ang APK: ${e.message}")
+            Toast.makeText(this, "❌ Hindi mabuksan ang APK", Toast.LENGTH_LONG).show()
         }
     }
 
