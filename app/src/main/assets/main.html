@@ -8,9 +8,8 @@
 .download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25)}
 .download-title{font-size:19px;font-weight:bold;margin-bottom:6px}
 .download-sub{font-size:14px;opacity:.9;margin-bottom:16px}
-.download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12);border:none;cursor:pointer;font-size:16px}
+.download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12)}
 .download-btn:active{transform:scale(.97)}
-.download-btn:disabled{opacity:0.6;cursor:not-allowed}
 .download-info{margin-top:12px;font-size:13px;opacity:.85;line-height:1.6}
 .info-section{background:white;border-radius:14px;padding:20px;margin:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .info-section h2{font-size:18px;color:#b91c1c;margin:0 0 12px 0;border-left:3px solid #dc2626;padding-left:10px}
@@ -26,76 +25,41 @@
 .btn:active{transform:scale(.97);background:#fef2f2}
 .num{width:36px;height:36px;line-height:36px;text-align:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;margin-bottom:6px}
 .txt{font-size:14px;color:#1f2937;text-align:center}
-.upd-note{margin-top:12px;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;display:none}
 </style>
 <script>
-// ✅ HINDI HARDCODED — KUKUNIN ANG TAMANG BASE URL
-const IS_APK = window.location.href.indexOf("file:///android_asset/") === 0;
-
-// ✅ KUNG NASA APK → GAMITIN ANG GITHUB REPO + docs/
-// ✅ KUNG NASA WEBSITE → KUKUNIN ANG KASALUKUYANG DOMAIN
-let BASE_URL;
-if (IS_APK) {
-    // 📱 NASA LOOB NG APP — TUMAKBO SA GITHUB PAGES /docs/
-    BASE_URL = "https://fbvlink2026-lab.github.io/bisyo/docs/";
-} else {
-    // 🌐 NASA WEBSITE — KUKUNIN ANG KASALUKUYANG LUGAR
-    const loc = window.location.href;
-    // Kung nasa docs folder na — gamitin na iyon
-    if (loc.includes("/docs/")) {
-        BASE_URL = loc.substring(0, loc.lastIndexOf("/")) + "/";
-    } else {
-        // Sa ugat — idagdag ang docs/
-        const path = loc.substring(0, loc.lastIndexOf("/"));
-        BASE_URL = path + "/docs/";
-    }
+// ✅ GANITO ANG GUSTO MO — if-else LANG
+function getApkLink() {
+  var loc = window.location.href;
+  // 📱 SA APK — walang link
+  if (loc.indexOf("file:///android_asset/") === 0) {
+    return "";
+  }
+  // 🌐 SA WEBSITE — ✅ HINDI TINANGGAL — GANITO PA RIN
+  else {
+    return "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+  }
 }
-
-// ✅ PANGALAN NG APK — SIGURADUHING TUMUTUGMA SA INILAGAY SA docs/
-// ✅ HINDI NAGBABAGO — KUNG BAGUHIN MO ANG APK — PALITAN LANG DITO ANG PANGALAN
-const APK_FILENAME = "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
-const APK_URL = BASE_URL + APK_FILENAME;
 
 window.onload = function() {
-  const btn = document.getElementById("action-btn");
-  const note = document.getElementById("upd-note");
-  const linkDisplay = document.getElementById("apk-link-here");
+  var linkName = getApkLink();
+  var btn = document.getElementById("download-apk-btn");
+  var section = document.getElementById("download-section");
+  var note = document.getElementById("update-note");
 
-  if (IS_APK) {
-    // 📱 NASA APK — Ipakita ang UPDATE button
+  if (!linkName) {
+    // 📱 NASA APK — Ipakita ang UPDATE
+    section.style.display = "block";
     btn.textContent = "🔄 I-update ang Aplikasyon";
-    btn.onclick = installUpdate;
-    btn.href = "javascript:void(0)";
+    btn.href = "https://fbvlink2026-lab.github.io/bisyo/Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
     note.style.display = "block";
   } else {
-    // 🌐 NASA WEBSITE — Ipakita ang DOWNLOAD button
+    // 🌐 SA WEBSITE — ✅ GINAMIT ANG IBINALIK NA linkName
+    section.style.display = "block";
     btn.textContent = "⬇️ I-download ang APK";
-    btn.href = APK_URL;
+    btn.href = linkName; // ✅ GANITO GINAMIT — WALANG BINAGO SA ISTRUKTURA
     note.style.display = "none";
   }
-
-  // ✅ Ipakita kung saan nakaturo ang link — para makita mo agad kung tama
-  if (linkDisplay) {
-    linkDisplay.textContent = APK_URL;
-  }
 };
-
-// ✅ AWTOMATIKONG MAG-I-INSTALL
-function installUpdate() {
-  if (!IS_APK) return;
-
-  const btn = document.getElementById("action-btn");
-  btn.disabled = true;
-  btn.textContent = "⏳ Kinukuha ang update...";
-
-  // ✅ Buksan ang APK mula sa GitHub docs/ folder
-  window.location.href = APK_URL;
-
-  setTimeout(() => {
-    btn.textContent = "📂 Buksan at i-install ang APK";
-    btn.disabled = false;
-  }, 1500);
-}
 </script>
 </head>
 <body>
@@ -105,22 +69,19 @@ function installUpdate() {
 <p>Proyekto ni Mark Jann Tampok — Edukasyong Impormatibo</p>
 </div>
 
-<div class="download-section">
-  <div class="download-title">📤 Aplikasyon</div>
+<div id="download-section" class="download-section">
+  <div class="download-title">📤 I-download ang Aplikasyon</div>
   <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
-
-  <a id="action-btn" href="" class="download-btn">⬇️ I-download ang APK</a>
-
-  <div id="upd-note" class="upd-note">
-    📱 <strong>Nasa loob ka na ng aplikasyon!</strong><br>
-    Kapag may bagong bersyon — pindutin ang pindutan sa itaas upang awtomatikong palitan ang luma.
+  <a id="download-apk-btn" href="#" class="download-btn">
+    ⬇️ I-download ang APK
+  </a>
+  <div id="update-note" style="margin-top:12px;display:none;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
+    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Kapag may bagong bersyon — pindutin upang palitan ang luma.
   </div>
-
   <div class="download-info">
     📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Laki: <strong>~3 MB</strong><br>
     📱 Kinakailangan: Android 7.0 (API 24) o mas bago<br>
-    ✅ Libre — Walang Patalastas — Walang Pahintulot na Kailangan<br>
-    <small style="opacity:0.7">📍 Pinagmulan: <span id="apk-link-here">—</span></small>
+    ✅ Libre — Walang Patalastas — Walang Pahintulot na Kailangan
   </div>
 </div>
 
