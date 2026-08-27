@@ -11,16 +11,16 @@
 .download-sub{font-size:14px;opacity:.9;margin-bottom:16px}
 .download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12);border:none;cursor:pointer;font-size:16px}
 .download-btn:disabled{opacity:0.6;cursor:not-allowed}
-.download-btn:active{transform:scale(.97)}
+.download-btn:active{transform:scale(0.97)}
 .download-info{margin-top:14px;font-size:13px;line-height:1.8;opacity:0.9}
 .offline-note{background:#fef3c7;border:1px solid #fcd34d;border-radius:14px;padding:20px;margin:16px;color:#78350f}
 
 /* 📊 PROGRESS BAR */
 .progress-container{margin-top:16px;background:rgba(255,255,255,0.2);border-radius:10px;height:24px;overflow:hidden;display:none}
-.progress-bar{height:100%;background:#ffffff;border-radius:10px;width:0%;transition:width 0.2s ease;display:flex;align-items:center;justify-content:center;color:#b91c1c;font-weight:bold;font-size:13px}
+.progress-bar{height:100%;background:#ffffff;border-radius:10px 0 0 10px;width:0%;transition:width 0.3s ease;display:flex;align-items:center;justify-content:center;color:#b91c1c;font-weight:bold;font-size:13px}
 .progress-text{margin-top:8px;font-size:14px;opacity:0.9;display:none}
 
-/* 🪟 DIALOG — KAPAG TAPOS NA */
+/* 🪟 DIALOG — KAPAG TAPOS NA ANG PAG-DOWNLOAD */
 .dialog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999}
 .dialog-box{background:white;border-radius:16px;padding:24px;margin:24px;max-width:340px;color:#1f2937;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
 .dialog-title{font-size:20px;font-weight:bold;color:#b91c1c;margin-bottom:12px}
@@ -41,7 +41,7 @@
 .header p{font-size:14px;opacity:.85;margin:4px 0 0 0}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px 16px}
 .btn{display:flex;flex-direction:column;align-items:center;background:white;border-radius:12px;padding:16px 8px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.08);border:1px solid #e5e7eb}
-.btn:active{transform:scale(.97);background:#fef2f2}
+.btn:active{transform:scale(0.97);background:#fef2f2}
 .num{width:36px;height:36px;line-height:36px;text-align:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;margin-bottom:6px}
 .txt{font-size:14px;color:#1f2937;text-align:center}
 .hidden{display:none !important}
@@ -116,7 +116,8 @@ function closeDialog() {
 function confirmUpdate() {
   closeDialog();
   if (downloadUrl) {
-    window.open(downloadUrl, "_system");
+    // ✅ DADAAN SA WEBVIEW → KOTLIN ANG HAHANDLE → HINDI SA CHROME
+    window.location.href = downloadUrl;
   }
 }
 
@@ -125,26 +126,27 @@ async function startDownload() {
   const btn = document.getElementById("download-apk-btn");
   btn.disabled = true;
   btn.textContent = "⏳ Sinisimulan...";
-  setProgress(0, "Kumukuha ng file...");
+  setProgress(0, "Inihahanda ang pag-download...");
 
-  try {
-    // 📱 Sa App — diretsong bubuksan sa sistema na may kumpirmasyon
-    if (isInsideApp()) {
-      setProgress(100, "✅ Handa na!");
-      setTimeout(showCompleteDialog, 600);
-      return;
-    }
+  // 📱 SA LOOB NG APP — HAYAAN ANG ANDROID DownloadManager ANG HUMAHANDLE
+  if (isInsideApp()) {
+    btn.textContent = "📤 Tignan ang abiso sa itaas...";
+    setProgress(25, "Nagsimula ang pag-download...");
+    // ✅ DADAAN SA shouldOverrideUrlLoading → KOTLIN → DownloadManager → HINDI CHROME
+    setTimeout(() => {
+      window.location.href = downloadUrl;
+      // ✅ WALANG GAGAWA-GAWANG 100% — TIGNAN ANG NOTIFICATION BAR PARA SA TOTOONG PROGRESS
+      setProgress(50, "✅ Tignan ang abiso sa itaas ng telepono");
+    }, 500);
+    return;
+  }
 
-    // 🌐 Sa Website — aktuwal na pag-download
+  // 🌐 SA WEBSITE — normal na pag-download
+  setProgress(50, "Kumukuha ng file...");
+  setTimeout(() => {
     window.location.href = downloadUrl;
     setProgress(100, "✅ Sinisimulan ang pag-download...");
-
-  } catch(err) {
-    console.error("Error:", err);
-    window.open(downloadUrl, "_blank");
-    setProgress(100, "✅ Binubuksan...");
-    setTimeout(showCompleteDialog, 500);
-  }
+  }, 300);
 }
 
 window.onload = async function() {
@@ -183,17 +185,17 @@ window.addEventListener('offline', updateDownloadVisibility);
 
 <div class="header">
 <h1>MGA ILEGAL NA BISYO</h1>
-<p>Proyekto ni Mark Jann Tampok — Edukasyong Impormatibo</p>
+<p>Proyekto ni Mark Jann Tampok — Edukasyon Laban sa Masamang Bisyo</p>
 </div>
 
 <div id="offline-note" class="offline-note hidden">
   <h2 style="color:#92400e;margin:0 0 8px 0">📡 Walang Koneksyon sa Internet</h2>
-  <p style="margin:0">Ang pag-download at pag-update ay hindi available habang walang internet. Magbabalik ito kapag nakakonekta ka na ulit.</p>
+  <p style="margin:0">Ang pag-download at pag-update ay hindi available habang walang internet. Ang iba pang bahagi ng aplikasyon ay gumagana pa rin nang walang koneksyon.</p>
 </div>
 
 <div id="download-section" class="download-section">
-  <div class="download-title">📤 Aplikasyon</div>
-  <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
+  <div class="download-title">📤 Aplikasyon — Pag-update</div>
+  <div class="download-sub">Kumpletong proyekto — gumagana nang walang internet</div>
 
   <button id="download-apk-btn" class="download-btn">🔍 Hinahanap ang APK...</button>
 
@@ -204,28 +206,28 @@ window.addEventListener('offline', updateDownloadVisibility);
   <div id="progress-text" class="progress-text"></div>
 
   <div id="update-note" style="margin-top:12px;display:none;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
-    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin upang kunin ang bagong bersyon.
+    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin ang pindutan upang simulan ang pag-update. Tignan ang abiso sa itaas ng iyong telepono para sa pag-usad ng pag-download.
   </div>
 
   <div class="download-info">
     📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
     📱 Kinakailangan: Android 7.0 (API 24) o mas bagong bersyon<br>
-    ✅ Libre — Walang Patalastas — Walang Karagdagang Pahintulot na Kailangan<br>
-    📇 Lagda: Opisyal — Proyekto ni Mark Jann Tampok
+    ✅ Libre — Walang Patalastas — Walang Karagdagang Bayad<br>
+    📇 Opisyal — Proyekto ni Mark Jann Tampok
   </div>
 </div>
 
-<!-- 🪟 DIALOG — LALABAS PAG-100% -->
+<!-- 🪟 DIALOG — KAPAG TINAPOS NA ANG PAG-DOWNLOAD SA ABISO -->
 <div id="dialog-overlay" class="dialog-overlay">
   <div class="dialog-box">
     <div class="dialog-title">✅ Handa na ang Pag-update!</div>
     <div class="dialog-body">
-      Na-download na nang buo ang bagong bersyon ng aplikasyon.<br><br>
-      <strong>Gusto mo bang i-update na ang lumang bersyon mo?</strong>
+      Matagumpay na na-download ang bagong bersyon.<br><br>
+      <strong>Gusto mo bang i-install na ang pag-update ngayon?</strong>
     </div>
     <div class="dialog-buttons">
-      <button class="dialog-btn dialog-btn-cancel" onclick="closeDialog()">Sa Pagkakataong Ito</button>
-      <button class="dialog-btn dialog-btn-confirm" onclick="confirmUpdate()">✅ I-update Ngayon</button>
+      <button class="dialog-btn dialog-btn-cancel" onclick="closeDialog()">Mamaya Na</button>
+      <button class="dialog-btn dialog-btn-confirm" onclick="confirmUpdate()">✅ I-install Ngayon</button>
     </div>
   </div>
 </div>
@@ -268,15 +270,15 @@ window.addEventListener('offline', updateDownloadVisibility);
 <a href="pages/marijuana.html" class="btn"><span class="num">5</span><span class="txt">Marijuana</span></a>
 <a href="pages/ecstasy.html" class="btn"><span class="num">6</span><span class="txt">Ecstasy</span></a>
 <a href="pages/cocaine.html" class="btn"><span class="num">7</span><span class="txt">Cocaine</span></a>
-<a href="pages/tinuturok-gamot.html" class="btn"><span class="num">8</span><span class="txt">Tinuturok na Gamot</span></a>
-<a href="pages/tuklaw.html" class="btn"><span class="num">9</span><span class="txt">Tuklaw/Pagkalulong</span></a>
+<a href="pages/tinuturok.html" class="btn"><span class="num">8</span><span class="txt">Tinuturok</span></a>
+<a href="pages/tuklaw.html" class="btn"><span class="num">9</span><span class="txt">Tuklaw</span></a>
 <a href="pages/sugal.html" class="btn"><span class="num">10</span><span class="txt">Sugal</span></a>
 <a href="pages/inhalants.html" class="btn"><span class="num">11</span><span class="txt">Inhalants</span></a>
-<a href="pages/pag-aabuso-gamot.html" class="btn"><span class="num">12</span><span class="txt">Pag-aabuso sa Gamot</span></a>
+<a href="pages/pag-aabuso.html" class="btn"><span class="num">12</span><span class="txt">Pag-aabuso sa Gamot</span></a>
 <a href="pages/lsd.html" class="btn"><span class="num">13</span><span class="txt">LSD</span></a>
 <a href="pages/ketamine.html" class="btn"><span class="num">14</span><span class="txt">Ketamine</span></a>
-<a href="pages/ibang-sugal.html" class="btn"><span class="num">15</span><span class="txt">Ibang Sugal</span></a>
-<a href="pages/internet-laro.html" class="btn"><span class="num">16</span><span class="txt">Internet/Laro</span></a>
+<a href="pages/sugal-iba.html" class="btn"><span class="num">15</span><span class="txt">Ibang Sugal</span></a>
+<a href="pages/internet.html" class="btn"><span class="num">16</span><span class="txt">Internet/Laro</span></a>
 <a href="pages/labis-pagkain.html" class="btn"><span class="num">17</span><span class="txt">Labis na Pagkain</span></a>
 <a href="pages/vaping.html" class="btn"><span class="num">18</span><span class="txt">Vaping</span></a>
 </div>
