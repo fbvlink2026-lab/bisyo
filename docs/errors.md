@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 02:12:43 UTC
+📅 **Petsa:** 2026-08-27 02:13:41 UTC
 🎯 **Katayuan:** ❌ NABIGO
 📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
@@ -30,7 +30,7 @@ FAILURE: Build completed with 2 failures.
 Build file '/home/runner/work/bisyo/bisyo/build.gradle' line: 49
 
 * What went wrong:
-A problem occurred evaluating root project 'BisyoApp'.
+A problem occurred evaluating root project 'bisyo'.
 > Cannot add task 'clean' as a task with that name already exists.
 
 * Try:
@@ -46,7 +46,7 @@ A problem occurred evaluating root project 'BisyoApp'.
 Build file '/home/runner/work/bisyo/bisyo/build.gradle' line: 49
 
 * What went wrong:
-A problem occurred evaluating root project 'BisyoApp'.
+A problem occurred evaluating root project 'bisyo'.
 > Cannot add task 'clean' as a task with that name already exists.
 
 * Try:
@@ -56,7 +56,7 @@ A problem occurred evaluating root project 'BisyoApp'.
 > Get more help at https://help.gradle.org.
 ==============================================================================
 
-BUILD FAILED in 36s
+BUILD FAILED in 33s
 ```
 
 ---
