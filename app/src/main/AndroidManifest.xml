@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
 
-        <!-- ✅ KAILANGAN — PARA MABUKSAN ANG APK FILE SA ANDROID 7+ -->
+        <!-- ✅ KAILANGAN PAGBUKAS NG APK -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
