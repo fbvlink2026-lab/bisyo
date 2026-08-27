@@ -1,10 +1,23 @@
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
+// ✅ DITO ANG BUILDSCRIPT — NASA UNA!
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.2.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20"
+    }
 }
+
+// ✅ GAMITIN ANG apply plugin — HINDI plugins{} BLOCK!
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
 android {
     namespace 'com.markjann.bisyoapp'
     compileSdk 34
+
     defaultConfig {
         applicationId "com.markjann.bisyoapp"
         minSdk 24
@@ -12,19 +25,27 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release { minifyEnabled false }
         debug { minifyEnabled false }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = '17'
     }
 }
+
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "androidx.appcompat:appcompat:1.6.1"
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
