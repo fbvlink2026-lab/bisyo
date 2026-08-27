@@ -11,7 +11,7 @@ import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
-    private val TAG = "BisyoApp"
+    private val TAG = "bisyo"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
