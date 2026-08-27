@@ -2,8 +2,11 @@ package com.markjann.bisyo
 
 import android.Manifest
 import android.app.DownloadManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
@@ -31,14 +34,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private val TAG = "bisyo"
     private var currentDownloadId: Long = -1
+    private var installInProgress = false
+
+    // ✅ TUMATANGGAP — KAPAG TAPOS NA ANG PAG-DOWNLOAD
+    private val downloadReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) ?: -1
+            if (id == currentDownloadId) {
+                checkDownloadAndInstall(id)
+            }
+        }
+    }
 
     private val requestPermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            val allOk = result.all { it.value }
-            if (allOk) {
+            if (result.all { it.value }) {
                 Toast.makeText(this, "✅ Pahintulot ibinigay", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "⚠️ Kailangan ng pahintulot", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -56,7 +67,6 @@ class MainActivity : AppCompatActivity() {
             cacheMode = android.webkit.WebSettings.LOAD_CACHE_ELSE_NETWORK
         }
 
-        // ✅ I-EXPOSE ANG INTERFACE SA HTML
         webView.addJavascriptInterface(this, "AndroidApp")
 
         webView.setDownloadListener(DownloadListener { url, _, _, _, _ ->
@@ -67,7 +77,6 @@ class MainActivity : AppCompatActivity() {
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: android.webkit.WebResourceError?) {
                 Log.e(TAG, "❌ Error: ${request?.url}")
             }
-
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url.toString()
                 if (url.endsWith(".apk", ignoreCase = true)) {
@@ -77,6 +86,9 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         }
+
+        // ✅ MAGHINTAY KAPAG TAPOS NA ANG PAG-DOWNLOAD
+        registerReceiver(downloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         checkPermissions()
         webView.loadUrl("file:///android_asset/index.html")
@@ -93,9 +105,6 @@ class MainActivity : AppCompatActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
                 list.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
                 list.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
@@ -103,6 +112,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun downloadApk(apkUrl: String) {
+        if (installInProgress) {
+            Toast.makeText(this, "⚠️ May pag-update na ginagawa...", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
@@ -111,27 +125,39 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        Toast.makeText(this, "📤 Sinisimulan...", Toast.LENGTH_SHORT).show()
+        // ✅ HUMINGI NG PAHINTULOT SA PAG-INSTALL — ANDROID 8+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!packageManager.canRequestPackageInstalls()) {
+                val intent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:$packageName"))
+                startActivity(intent)
+                Toast.makeText(this, "⚠️ Pahintulutan muna ang pag-install", Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+
+        installInProgress = true
+        Toast.makeText(this, "📤 Sinisimulan ang pag-update...", Toast.LENGTH_SHORT).show()
 
         try {
             val uri = Uri.parse(apkUrl)
             val request = DownloadManager.Request(uri).apply {
                 setTitle("Pag-update — Proyekto ni Mark Jann Tampok")
-                setDescription("Nagda-download...")
+                setDescription "Awtomatikong nag-i-install..."
                 setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                 setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "BisyoApp-update.apk")
                 setMimeType("application/vnd.android.package-archive")
-                // ✅ TINANGGAL — luma na: allowScanningByMediaScanner()
             }
 
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             currentDownloadId = dm.enqueue(request)
 
-            Toast.makeText(this, "✅ Nagsimula — Tignan ang abiso sa itaas", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "✅ Nagsimula — Mag-i-install nang kusa...", Toast.LENGTH_LONG).show()
             observeDownloadProgress(currentDownloadId)
 
         } catch (e: Exception) {
+            installInProgress = false
             Log.e(TAG, "❌ Nabigo: ${e.message}")
             Toast.makeText(this, "❌ Hindi makapagsimula", Toast.LENGTH_LONG).show()
         }
@@ -149,7 +175,6 @@ class MainActivity : AppCompatActivity() {
                         delay(400)
                         continue
                     }
-
                     val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
                     val downloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
                     val total = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
@@ -160,37 +185,43 @@ class MainActivity : AppCompatActivity() {
                             webView.evaluateJavascript("updateProgressFromApp($percent);", null)
                         }
                     }
-
-                    when (status) {
-                        DownloadManager.STATUS_SUCCESSFUL -> {
-                            runOnUiThread {
-                                webView.evaluateJavascript("downloadCompleteFromApp();", null)
-                            }
-                            cursor.close()
-                            break
-                        }
-                        DownloadManager.STATUS_FAILED -> {
-                            runOnUiThread {
-                                webView.evaluateJavascript("downloadErrorFromApp();", null)
-                            }
-                            cursor.close()
-                            break
-                        }
+                    if (status == DownloadManager.STATUS_SUCCESSFUL || status == DownloadManager.STATUS_FAILED) {
+                        cursor.close()
+                        break
                     }
                     cursor.close()
                     delay(400)
-
                 } catch (e: Exception) {
-                    Log.e(TAG, "Progress error: ${e.message}")
                     break
                 }
             }
         }
     }
 
-    // ✅ TAWAGIN MULA SA HTML — BUBUKSAN ANG APK!
-    @JavascriptInterface
-    fun openDownloadedApk() {
+    // ✅ TAPOS NA ANG PAG-DOWNLOAD — KUSA MAG-I-INSTALL!
+    private fun checkDownloadAndInstall(downloadId: Long) {
+        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val query = DownloadManager.Query().setFilterById(downloadId)
+        val cursor = dm.query(query)
+
+        if (cursor?.moveToFirst() == true) {
+            val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+            cursor.close()
+
+            if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                installApkDirectly()
+            } else {
+                runOnUiThread {
+                    Toast.makeText(this, "❌ Nabigo ang pag-download", Toast.LENGTH_LONG).show()
+                    webView.evaluateJavascript("downloadErrorFromApp();", null)
+                }
+                installInProgress = false
+            }
+        }
+    }
+
+    // ✅ DIRETSONG PAG-INSTALL — KUSA MAGSASARA ANG APP!
+    private fun installApkDirectly() {
         try {
             val apkFile = File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
@@ -198,30 +229,66 @@ class MainActivity : AppCompatActivity() {
             )
 
             if (!apkFile.exists()) {
-                Toast.makeText(this, "❌ Hindi mahanap:\nBisyoApp-update.apk sa Downloads", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "❌ Hindi mahanap ang APK", Toast.LENGTH_LONG).show()
+                installInProgress = false
                 return
             }
 
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    FileProvider.getUriForFile(
-                        this@MainActivity,
-                        "$packageName.fileprovider",
-                        apkFile
-                    )
-                } else {
-                    Uri.fromFile(apkFile)
-                }
+            val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(this, "$packageName.fileprovider", apkFile)
+            } else {
+                Uri.fromFile(apkFile)
+            }
+
+            val installIntent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "application/vnd.android.package-archive")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                // ✅ PAGKATAPUS I-INSTALL — BUBUKSAN MULI ANG APP!
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val restartIntent = packageManager.getLaunchIntentForPackage(packageName)
+                    restartIntent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    val restartPending = PendingIntent.getActivity(
+                        this@MainActivity,
+                        9999,
+                        restartIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    putExtra(Intent.EXTRA_INTENT, restartPendingIntent.intent)
+                }
             }
-            startActivity(intent)
+
+            Toast.makeText(this, "✅ Tapos na — Nag-i-install...\nMagsasara ang app at bubukas muli!", Toast.LENGTH_LONG).show()
+
+            // ✅ MAG-I-INSTALL — KUSA MAGSASARA ANG APP!
+            startActivity(installIntent)
+
+            // ✅ PAGKATAPUS ILANG SANDALI — TAPUSIN ANG ACTIVITY (MAGSASARA ANG APP)
+            @Suppress("DEPRECATION")
+            CoroutineScope(Dispatchers.Main).launch {
+                delay(800)
+                finishAffinity() // ✅ ISARA ANG APP — ANG INSTALLER NA ANG PAGPAPATULOY
+            }
 
         } catch (e: Exception) {
             Log.e(TAG, "Install error: ${e.message}")
-            Toast.makeText(this, "❌ Hindi mabuksan:\n${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "❌ Hindi mabuksan: ${e.message}", Toast.LENGTH_LONG).show()
+            installInProgress = false
         }
+    }
+
+    // ✅ TAWAGIN MULA SA HTML — SIMULAN ANG LAHAT!
+    @JavascriptInterface
+    fun openDownloadedApk() {
+        Toast.makeText(this, "📤 Sinisimulan ang awtomatikong pag-update...", Toast.LENGTH_SHORT).show()
+        // ✅ Kapag pinindot — hihintayin na lang na matapos at kusa mag-install
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            unregisterReceiver(downloadReceiver)
+        } catch (e: Exception) {}
     }
 
     override fun onBackPressed() {
