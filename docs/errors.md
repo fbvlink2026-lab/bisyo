@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 02:01:06 UTC
+📅 **Petsa:** 2026-08-27 02:05:42 UTC
 🎯 **Katayuan:** ❌ NABIGO
 📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
@@ -22,24 +22,41 @@ For more details see https://docs.gradle.org/8.2/release-notes.html
 
 Starting a Gradle Daemon (subsequent builds will be faster)
 
-FAILURE: Build failed with an exception.
+FAILURE: Build completed with 2 failures.
 
+1: Task failed with an exception.
+-----------
 * Where:
-Build file '/home/runner/work/bisyo/bisyo/build.gradle' line: 2
+Build file '/home/runner/work/bisyo/bisyo/build.gradle' line: 49
 
 * What went wrong:
-Plugin [id: 'com.android.application'] was not found in any of the following sources:
-
-- Gradle Core Plugins (plugin is not in 'org.gradle' namespace)
-- Plugin Repositories (plugin dependency must include a version number for this source)
+A problem occurred evaluating root project 'BisyoApp'.
+> Cannot add task 'clean' as a task with that name already exists.
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
+==============================================================================
 
-BUILD FAILED in 18s
+2: Task failed with an exception.
+-----------
+* Where:
+Build file '/home/runner/work/bisyo/bisyo/build.gradle' line: 49
+
+* What went wrong:
+A problem occurred evaluating root project 'BisyoApp'.
+> Cannot add task 'clean' as a task with that name already exists.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+BUILD FAILED in 39s
 ```
 
 ---
