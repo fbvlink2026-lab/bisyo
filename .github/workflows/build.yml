@@ -1,5 +1,3 @@
-baguhin mo lang yung root/ dapat app/
-
 name: Build APK — Proyekto ni Mark Jann Tampok
 on:
   push: { branches: [main] }
