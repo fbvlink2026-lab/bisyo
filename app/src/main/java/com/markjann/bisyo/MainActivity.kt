@@ -2,7 +2,6 @@ package com.markjann.bisyo
 
 import android.Manifest
 import android.app.DownloadManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -36,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private var currentDownloadId: Long = -1
     private var installInProgress = false
 
-    // ✅ TUMATANGGAP — KAPAG TAPOS NA ANG PAG-DOWNLOAD
     private val downloadReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) ?: -1
@@ -87,7 +85,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // ✅ MAGHINTAY KAPAG TAPOS NA ANG PAG-DOWNLOAD
         registerReceiver(downloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         checkPermissions()
@@ -125,7 +122,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // ✅ HUMINGI NG PAHINTULOT SA PAG-INSTALL — ANDROID 8+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!packageManager.canRequestPackageInstalls()) {
                 val intent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
@@ -143,7 +139,7 @@ class MainActivity : AppCompatActivity() {
             val uri = Uri.parse(apkUrl)
             val request = DownloadManager.Request(uri).apply {
                 setTitle("Pag-update — Proyekto ni Mark Jann Tampok")
-                setDescription "Awtomatikong nag-i-install..."
+                setDescription("Awtomatikong nag-i-install...") // ✅ INAYOS — may panaklong
                 setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
                 setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "BisyoApp-update.apk")
@@ -198,7 +194,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ TAPOS NA ANG PAG-DOWNLOAD — KUSA MAG-I-INSTALL!
     private fun checkDownloadAndInstall(downloadId: Long) {
         val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val query = DownloadManager.Query().setFilterById(downloadId)
@@ -220,7 +215,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ DIRETSONG PAG-INSTALL — KUSA MAGSASARA ANG APP!
     private fun installApkDirectly() {
         try {
             val apkFile = File(
@@ -244,30 +238,17 @@ class MainActivity : AppCompatActivity() {
                 setDataAndType(uri, "application/vnd.android.package-archive")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                // ✅ PAGKATAPUS I-INSTALL — BUBUKSAN MULI ANG APP!
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    val restartIntent = packageManager.getLaunchIntentForPackage(packageName)
-                    restartIntent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    val restartPending = PendingIntent.getActivity(
-                        this@MainActivity,
-                        9999,
-                        restartIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    putExtra(Intent.EXTRA_INTENT, restartPendingIntent.intent)
-                }
             }
 
             Toast.makeText(this, "✅ Tapos na — Nag-i-install...\nMagsasara ang app at bubukas muli!", Toast.LENGTH_LONG).show()
 
-            // ✅ MAG-I-INSTALL — KUSA MAGSASARA ANG APP!
             startActivity(installIntent)
 
-            // ✅ PAGKATAPUS ILANG SANDALI — TAPUSIN ANG ACTIVITY (MAGSASARA ANG APP)
+            // ✅ ISARA ANG APP — HINTAY MUNA BAGO TAPUSIN
             @Suppress("DEPRECATION")
             CoroutineScope(Dispatchers.Main).launch {
                 delay(800)
-                finishAffinity() // ✅ ISARA ANG APP — ANG INSTALLER NA ANG PAGPAPATULOY
+                finishAffinity() // ✅ MAGSASARA ANG APP
             }
 
         } catch (e: Exception) {
@@ -277,11 +258,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ TAWAGIN MULA SA HTML — SIMULAN ANG LAHAT!
     @JavascriptInterface
     fun openDownloadedApk() {
         Toast.makeText(this, "📤 Sinisimulan ang awtomatikong pag-update...", Toast.LENGTH_SHORT).show()
-        // ✅ Kapag pinindot — hihintayin na lang na matapos at kusa mag-install
     }
 
     override fun onDestroy() {
