@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
 <style>
-/* Dagdag na Estilo — Bagong Bahagi */
 .download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25)}
 .download-title{font-size:19px;font-weight:bold;margin-bottom:6px}
 .download-sub{font-size:14px;opacity:.9;margin-bottom:16px}
-.download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12);border:none;cursor:pointer;font-size:16px}
 .download-btn:active{transform:scale(.97)}
-.download-btn.disabled{opacity:0.7;pointer-events:none;cursor:not-allowed}
+.download-btn:disabled{opacity:0.6;cursor:not-allowed}
 .download-info{margin-top:12px;font-size:13px;opacity:.85;line-height:1.6}
 .info-section{background:white;border-radius:14px;padding:20px;margin:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .info-section h2{font-size:18px;color:#b91c1c;margin:0 0 12px 0;border-left:3px solid #dc2626;padding-left:10px}
@@ -27,67 +26,83 @@
 .btn:active{transform:scale(.97);background:#fef2f2}
 .num{width:36px;height:36px;line-height:36px;text-align:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;margin-bottom:6px}
 .txt{font-size:14px;color:#1f2937;text-align:center}
+.upd-note{margin-top:12px;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;display:none}
 </style>
-<!-- ✅ LALABAS ANG DOWNLOAD KAHIT NASA APK — IBA LANG ANG MENSAHE -->
 <script>
-function getApkLink() {
-  var loc = window.location.href;
-  // 📱 SA APK — walang link pero HINDI ITATAGO
-  if (loc.indexOf("file:///android_asset/") === 0) {
-    return "";
-  }
-  // 🌐 SA WEBSITE — nasa docs/ ang APK
-  else {
-    return "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
-  }
-}
-window.onload = function() {
-  var linkUrl = getApkLink();
-  var btn = document.getElementById("download-apk-btn");
-  var section = document.getElementById("download-section");
-  var note = document.getElementById("apk-note");
+const APK_URL = "https://fbvlink2026-lab.github.io/bisyo/docs/Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+const IS_APK = window.location.href.indexOf("file:///android_asset/") === 0;
 
-  // ✅ HINDI NA ITATAGO — LALABAS PALAGI!
-  if (!linkUrl) {
-    // 📱 NASA APK — baguhin ang button at ipakita ang tala
-    btn.href = "#";
-    btn.textContent = "✅ Naka-install na ang App";
-    btn.classList.add("disabled");
+window.onload = function() {
+  const btn = document.getElementById("action-btn");
+  const note = document.getElementById("upd-note");
+
+  if (IS_APK) {
+    // 📱 NASA APK — Ipakita ang UPDATE button
+    btn.textContent = "🔄 I-update ang Aplikasyon";
+    btn.onclick = installUpdate;
+    btn.href = "javascript:void(0)";
     note.style.display = "block";
   } else {
-    // 🌐 NASA WEBSITE — normal na download
-    btn.href = linkUrl;
+    // 🌐 NASA WEBSITE — Ipakita ang DOWNLOAD button
+    btn.textContent = "⬇️ I-download ang APK";
+    btn.href = APK_URL;
     note.style.display = "none";
   }
 };
+
+// ✅ AWTOMATIKONG MAG-I-INSTALL KAPAG PININDOT
+function installUpdate() {
+  if (!IS_APK) return;
+
+  const btn = document.getElementById("action-btn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Kinukuha ang update...";
+
+  // 📱 Tawagin ang Android para i-download at i-install
+  try {
+    if (window.Android !== undefined && window.Android.downloadAndInstall !== undefined) {
+      // ✅ May katutubong paraan sa App — gamitin ito
+      window.Android.downloadAndInstall(APK_URL);
+      btn.textContent = "✅ Sinimulan na ang pag-update";
+    } else {
+      // ✅ Walang katutubong paraan — buksan ang link — hihingi ng pahintulot ang Android
+      window.location.href = APK_URL;
+      btn.textContent = "📂 Buksan ang na-download na APK";
+    }
+  } catch (e) {
+    // ✅ Pabagsak — buksan lang sa browser
+    window.open(APK_URL, "_system");
+    btn.textContent = "📂 Buksan ang na-download na APK";
+  }
+}
 </script>
 </head>
 <body>
 
-<!-- 📌 ULO NG PAHINA -->
 <div class="header">
 <h1>MGA ILEGAL NA BISYO</h1>
 <p>Proyekto ni Mark Jann Tampok — Edukasyong Impormatibo</p>
 </div>
 
-<!-- 📥 BAHAGI NG PAG-DOWNLOAD — LALABAS PALAGI! -->
-<div id="download-section" class="download-section">
-  <div class="download-title">📤 I-download ang Aplikasyon</div>
+<div class="download-section">
+  <div class="download-title">📤 Aplikasyon</div>
   <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
-  <a id="download-apk-btn" href="#" class="download-btn">
-    ⬇️ I-download ang APK
-  </a>
-  <div id="apk-note" style="margin-top:12px;display:none;color:#fffbeb;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
-    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Hindi na kailangang i-download — handa nang gamitin kahit walang internet.
+
+  <!-- ✅ NAGBABAGO ANG TEKSTO AT KILOS AYON SA KUNG NASA APK O WEBSITE -->
+  <a id="action-btn" href="" class="download-btn">⬇️ I-download ang APK</a>
+
+  <div id="upd-note" class="upd-note">
+    📱 <strong>Nasa loob ka na ng aplikasyon!</strong><br>
+    Kapag may bagong bersyon — pindutin ang pindutan sa itaas upang awtomatikong palitan ang luma.
   </div>
-  <div class="download-info" style="margin-top:12px">
+
+  <div class="download-info">
     📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Laki: <strong>~3 MB</strong><br>
     📱 Kinakailangan: Android 7.0 (API 24) o mas bago<br>
     ✅ Libre — Walang Patalastas — Walang Pahintulot na Kailangan
   </div>
 </div>
 
-<!-- 📄 IMPORMASYON TUNGKOL SA PROYEKTO -->
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
   <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
@@ -115,7 +130,6 @@ window.onload = function() {
   </ul>
 </div>
 
-<!-- 📋 LISTAHAN NG LAHAT NG PAHINA -->
 <div class="info-section" style="padding-top:4px">
   <h2>📖 Mga Pahina — Basahin Dito</h2>
 </div>
