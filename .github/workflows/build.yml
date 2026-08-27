@@ -18,20 +18,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ⚡ KUNG MAYROON NANG gradlew — DERETSO NA LANG
+      # ==========================================
+      # ✅ LAHAT NG UTOS — NASA LOOB NG app/
+      # ==========================================
+
       - name: ⚡ Check Gradle Wrapper
         id: wrapper-check
+        working-directory: ./app
         run: |
           if [ -f "./gradlew" ] && [ -x "./gradlew" ]; then
             echo "✅ gradlew NANDOON NA"
             echo "HAS_WRAPPER=true" >> $GITHUB_ENV
           else
-            echo "⚠️ WALANG gradlew"
+            echo "⚠️ WALANG gradlew — GAGAWIN"
             echo "HAS_WRAPPER=false" >> $GITHUB_ENV
           fi
 
-      - name: Setup Gradle 8.2 (KUNG KULANG LANG)
+      - name: Setup Gradle 8.2
         if: env.HAS_WRAPPER == 'false'
+        working-directory: ./app
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip -O /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
@@ -40,13 +45,15 @@ jobs:
           chmod +x gradlew
 
       - name: Siguraduhing Pwede ang gradlew
+        working-directory: ./app
         run: chmod +x ./gradlew 2>/dev/null || true
 
       # ==========================================
-      # 🔨 HAKBANG 1 — BUUIN ANG APK ✅ ITUTULOY KAHIT MAY ERROR PARA MAKOPYA ANG ASSETS
+      # 🔨 BUUIN ANG APK
       # ==========================================
       - name: 🔨 Buuin ang APK
         id: build-step
+        working-directory: ./app
         run: |
           mkdir -p /tmp
           LOG_FILE="/tmp/build-full.log"
@@ -67,26 +74,28 @@ jobs:
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
 
       # ==========================================
-      # 📄 HAKBANG 2 — BURAHIN → ISULAT BAGONG errors.md ✅ LAGING GAGANA
+      # 📄 ISULAT errors.md SA assets/
       # ==========================================
-      - name: 📄 Burahin Luma → Isulat BAGONG errors.md sa assets/
+      - name: 📄 Isulat errors.md sa assets/
         id: write-log
         if: always()
+        working-directory: ./app
         run: |
           DATE=$(date "+%Y-%m-%d %H:%M:%S UTC")
           STATUS_FILE="/tmp/build-status.txt"
           LOG_FILE="/tmp/build-full.log"
-          ASSETS_DIR="app/src/main/assets"
+          ASSETS_DIR="src/main/assets"
           TARGET_FILE="$ASSETS_DIR/errors.md"
 
           mkdir -p "$ASSETS_DIR"
 
-          # ✅ BURAHIN MUNA — SIGURADONG MAY PAGBABAGO
+          # Burahin muna ang luma
           if [ -f "$TARGET_FILE" ]; then
             rm -f "$TARGET_FILE"
             echo "🗑️ BINURA ANG LUMANG errors.md"
           fi
 
+          # Alamin ang katayuan
           if [ -f "$STATUS_FILE" ] && [ "$(cat $STATUS_FILE)" = "SUCCESS" ]; then
             STATUS_DISPLAY="✅ TAGUMPAY"
             STATUS_DETAIL="Matagumpay na nabuo ang APK"
@@ -95,7 +104,7 @@ jobs:
             STATUS_DETAIL="Hindi nabuo ang APK — tingnan ang log sa ibaba"
           fi
 
-          # ✅ ISULAT ANG BAGONG FILE
+          # Isulat ang bago
           {
             echo "# 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok"
             echo ""
@@ -121,59 +130,46 @@ jobs:
           echo "✅ BAGONG errors.md NAISULAT SA: $TARGET_FILE"
 
       # ==========================================
-      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/ ✅ LAGING GAGANA
+      # 📤 KOPYAHIN assets/ → docs/
       # ==========================================
-      - name: 📤 Kopyahin BUONG Assets papunta sa /docs
+      - name: 📤 Kopyahin Assets papunta sa /docs
+        if: always()
         run: |
           ASSETS_DIR="app/src/main/assets"
           DOCS_DIR="./docs"
 
-          echo "=== 📂 LAMAN NG assets/ BAGO KOPYAHIN ==="
-          ls -la "$ASSETS_DIR"
-          echo ""
-
-          echo "=== ✅ BURAHIN BUONG docs/ ==="
-          rm -rf "$DOCS_DIR"
-          mkdir -p "$DOCS_DIR"
-
           echo "=== 📤 KOPYAHIN BUONG assets/ → docs/ ==="
+          mkdir -p "$DOCS_DIR"
+          rm -rf "$DOCS_DIR"/*
           cp -R "$ASSETS_DIR"/. "$DOCS_DIR/"
 
-          echo ""
-          echo "=== ✅ LAMAN NG docs/ ==="
-          ls -la "$DOCS_DIR"
-
-          if [ -f "$DOCS_DIR/errors.md" ]; then
-            echo "✅✅✅ BAGONG errors.md NAKOPYA — SIGURADO!"
-          fi
+          echo "✅ Nakopya ang buong assets/ papuntang docs/"
+          ls -la "$DOCS_DIR/"
 
       # ==========================================
-      # 📤 HAKBANG 4 — ILAGAY ANG APK SA docs/ ✅ KUNG MAYROON
+      # 📤 ILAGAY ANG APK SA docs/
       # ==========================================
       - name: 📤 Hanapin at Ihanda ang APK
         id: apk-step
         run: |
-          APK_FILE=$(find . -name "app-debug.apk" -path "*/build/*" | head -1)
+          APK_FILE=$(find ./app -name "app-debug.apk" -path "*/build/*" | head -1)
 
           if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
             APK_SIZE=$(du -h "$APK_FILE" | cut -f1)
-            APK_SIZE_BYTES=$(stat -c%s "$APK_FILE")
             NEW_NAME="Proyekto-ni-Mark-Jann-Tampok-v1.0.apk"
 
             cp "$APK_FILE" "docs/$NEW_NAME"
 
-            echo "✅ APK MATAGPUAN: docs/$NEW_NAME"
+            echo "✅ APK MATAGPUAN: docs/$NEW_NAME ($APK_SIZE)"
             echo "APK_FOUND=true" >> $GITHUB_ENV
             echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
-            echo "APK_PATH=docs/$NEW_NAME" >> $GITHUB_ENV
-            echo "APK_NAME=$NEW_NAME" >> $GITHUB_ENV
           else
             echo "❌ HINDI MATAGPUAN ANG APK"
             echo "APK_FOUND=false" >> $GITHUB_ENV
           fi
 
       # ==========================================
-      # ✅ I-UPLOAD ANG APK ✅ KUNG MAYROON
+      # 📤 I-UPLOAD BILANG ARTIFACT
       # ==========================================
       - name: 📤 I-upload ang APK
         if: env.APK_FOUND == 'true'
@@ -184,9 +180,9 @@ jobs:
           retention-days: 30
 
       # ==========================================
-      # ✅ I-COMMIT — LAGING GAGANA ✅ KAHIT WALANG APK
+      # ✅ I-COMMIT ANG MGA PAGBABAGO
       # ==========================================
-      - name: ✅ I-commit at I-push ang LAHAT
+      - name: ✅ I-commit at I-push
         if: always()
         continue-on-error: true
         run: |
@@ -196,26 +192,25 @@ jobs:
           git add app/src/main/assets/ docs/ 2>/dev/null || true
 
           if git diff --staged --quiet; then
-            echo "ℹ️ WALANG PAGBABAGO"
+            echo "ℹ️ WALANG PAGBABAGO — walang isusulat"
           else
             git commit -m "📋 Build Result: $(date +%Y-%m-%d %H:%M)"
-            echo "📤 IPINAPADALA..."
-            git push || git push --force
-            echo "✅ MATAGUMPAY — SABAY-SABAY ANG LAHAT!"
+            git push
+            echo "✅ MATAGUMPAY NA-COMMIT"
           fi
 
       # ==========================================
-      # ✅ KONKLUSYON ✅ NGAYON — PULA ❌ KUNG WALANG APK!
+      # ✅ KONKLUSYON
       # ==========================================
       - name: ✅ Resulta ng Pagbuo
         id: final-result
         if: always()
         run: |
           if [ "${{ env.APK_FOUND }}" = "true" ]; then
-            echo "✅ TAGUMPAY — May APK, nakopya ang assets"
+            echo "✅ TAGUMPAY — APK nakabuo at nakopya"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
-            echo "❌ NABIGO — WALANG APK DAHIL MAY ERROR SA BUILD"
+            echo "❌ NABIGO — WALANG APK"
             echo "STATUS=FAILED" >> $GITHUB_OUTPUT
-            exit 1   # ✅ PULA ❌ AGAD KUNG WALANG APK!
+            exit 1
           fi
