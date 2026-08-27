@@ -9,4 +9,11 @@ buildscript {
     }
 }
 
-// ✅ WALANG allprojects + repositories DITO — NASA settings.gradle NA!
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// ✅ WALANG task clean — TINANGGAL NA!
