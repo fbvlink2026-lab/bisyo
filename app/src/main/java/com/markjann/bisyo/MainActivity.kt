@@ -4,13 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.webkit.DownloadListener
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -23,7 +22,7 @@ class MainActivity : AppCompatActivity() {
             setContentView(R.layout.activity_main)
             webView = findViewById(R.id.webview)
 
-            // ✅ TAMA ANG MGA SETTING — WALANG BINAGO
+            // ✅ TAMA ANG MGA SETTING
             webView.settings.apply {
                 javaScriptEnabled = true
                 allowFileAccess = true
@@ -34,11 +33,12 @@ class MainActivity : AppCompatActivity() {
                 setSupportZoom(true)
                 builtInZoomControls = true
                 displayZoomControls = false
-                // ✅ PARA HINDI MAHIRAP SA DOWNLOAD NG APK
-                setDownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
-                    downloadApk(url)
-                }
             }
+
+            // ✅ 📥 TAMA NA PARAAN NG DOWNLOAD LISTENER — IMPORTED NA!
+            webView.setDownloadListener(DownloadListener { url, userAgent, contentDisposition, mimetype, contentLength ->
+                downloadApk(url)
+            })
 
             webView.webViewClient = object : WebViewClient() {
                 override fun onReceivedError(
@@ -52,51 +52,45 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, errMsg, Toast.LENGTH_LONG).show()
                 }
 
-                // ✅ KAPAG APK — BUBUKSAN NG SISTEMA — HINDI SA WEBVIEW
+                // ✅ KAPAG APK — BUBUKSAN NG SISTEMA
                 override fun shouldOverrideUrlLoading(
                     view: WebView?,
                     request: WebResourceRequest?
                 ): Boolean {
                     val url = request?.url.toString()
 
-                    // 📱 KUNG APK — IBUKSAN SA SISTEMA PARA I-INSTALL
                     if (url.endsWith(".apk", ignoreCase = true)) {
                         downloadApk(url)
-                        return true // ✅ HINDI SA WEBVIEW — SISTEMA ANG HAHANDLE
+                        return true
                     }
-
-                    // ✅ LAHAT IBA — MANATILI SA LOOB NG WEBVIEW
                     return false
                 }
             }
 
-            // ✅ DIRETSONG INA-LOAD — GANITO PA RIN
+            // ✅ DIRETSONG INA-LOAD
             val url = "file:///android_asset/index.html"
             Log.d(TAG, "Naglo-load: $url")
             webView.loadUrl(url)
 
         } catch (e: Exception) {
-            Log.e(TAG, "💥 CRASH SA onCreate: ${e.message}", e)
+            Log.e(TAG, "💥 CRASH: ${e.message}", e)
             Toast.makeText(this, "CRASH: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
 
-    // 📥 TOTOONG PAG-DOWNLOAD AT PAG-INSTALL NG APK
+    // 📥 TOTOONG PAG-DOWNLOAD / PAG-INSTALL NG APK
     private fun downloadApk(apkUrl: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-
-            // ✅ KUNG REMOTE URL — IBIGAY SA BROWSER O DOWNLOAD MANAGER
+            val uri = Uri.parse(apkUrl)
+            
             if (apkUrl.startsWith("http")) {
-                intent.data = Uri.parse(apkUrl)
+                intent.data = uri
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
                 Toast.makeText(this, "📤 Sinisimulan ang pag-download...", Toast.LENGTH_SHORT).show()
-            }
-            // ✅ KUNG LOKAL NA FILE — I-INSTALL AGAD
-            else {
-                val uri = Uri.parse(apkUrl)
+            } else {
                 intent.setDataAndType(uri, "application/vnd.android.package-archive")
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
