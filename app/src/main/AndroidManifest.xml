@@ -11,7 +11,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
 
-        <!-- ✅ DIRETSO NA SA MAIN — WALANG SPLASHACTIVITY -->
+        <!-- ✅ DIRETSO NA SA MAIN — WALANG SPLASHACTIVITY! -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
