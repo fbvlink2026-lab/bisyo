@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- ✅ TUMUTUGMA SA TEMANG NASA MANIFEST -->
-    <style name="Theme.AppCompat.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">#b91c1c</item>
-    </style>
-</resources>
