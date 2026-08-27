@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 17:18:04 UTC
+📅 **Petsa:** 2026-08-27 17:37:29 UTC
 🎯 **Katayuan:** ✅ TAGUMPAY
 📝 **Detalye:** Matagumpay na nabuo ang APK
 ---
@@ -34,27 +34,19 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
-
 > Task :app:processDebugMainManifest
-package="com.markjann.bisyo" found in source AndroidManifest.xml: /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml.
-Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
-Recommendation: remove package="com.markjann.bisyo" from the source AndroidManifest.xml: /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml.
-
 > Task :app:processDebugManifest
 > Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
+> Task :app:processDebugManifestForPackage
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:processDebugManifestForPackage
-> Task :app:desugarDebugFileDependencies
 > Task :app:compressDebugAssets
+> Task :app:desugarDebugFileDependencies
 > Task :app:processDebugResources
 > Task :app:checkDebugDuplicateClasses
-
 > Task :app:compileDebugKotlin
-w: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:121:17 'allowScanningByMediaScanner(): Unit' is deprecated. Deprecated in Java
-
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:dexBuilderDebug
 > Task :app:mergeDebugGlobalSynthetics
@@ -73,7 +65,7 @@ w: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/Mai
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 23s
+BUILD SUCCESSFUL in 1m 21s
 33 actionable tasks: 33 executed
 ```
 
