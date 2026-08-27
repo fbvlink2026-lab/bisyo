@@ -1,9 +1,9 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 20:22:20 UTC
-🎯 **Katayuan:** ✅ TAGUMPAY
-📝 **Detalye:** Matagumpay na nabuo ang APK
+📅 **Petsa:** 2026-08-27 20:23:54 UTC
+🎯 **Katayuan:** ❌ NABIGO
+📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -43,30 +43,39 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:mergeDebugAssets
 > Task :app:desugarDebugFileDependencies
 > Task :app:compressDebugAssets
-> Task :app:processDebugManifestForPackage
-> Task :app:checkDebugDuplicateClasses
-> Task :app:processDebugResources
-> Task :app:mergeExtDexDebug
-> Task :app:mergeLibDexDebug
 > Task :app:mergeDebugJniLibFolders
+> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:processDebugManifestForPackage
 > Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:mergeLibDexDebug
+> Task :app:processDebugResources
 > Task :app:validateSigningDebug
+> Task :app:mergeExtDexDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:compileDebugKotlin
-> Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:dexBuilderDebug
-> Task :app:mergeDebugGlobalSynthetics
-> Task :app:processDebugJavaRes
-> Task :app:mergeProjectDexDebug
-> Task :app:mergeDebugJavaResource
-> Task :app:packageDebug
-> Task :app:createDebugApkListingFileRedirect
-> Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 14s
-33 actionable tasks: 33 executed
+> Task :app:compileDebugKotlin FAILED
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:146:32 Unexpected tokens (use ';' to separate expressions on the same line)
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:146:17 Function invocation 'setDescription(...)' expected
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:146:17 No value passed for parameter 'p0'
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:257:51 Unresolved reference: restartPendingIntent
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 14s
+26 actionable tasks: 26 executed
 ```
 
 ---
