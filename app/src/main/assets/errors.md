@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 02:41:37 UTC
+📅 **Petsa:** 2026-08-27 02:46:32 UTC
 🎯 **Katayuan:** ❌ NABIGO
 📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
@@ -21,15 +21,50 @@ Here are the highlights of this release:
 For more details see https://docs.gradle.org/8.2/release-notes.html
 
 Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:mergeDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:javaPreCompileDebug
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:compressDebugAssets
+> Task :app:mergeDebugJniLibFolders
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:mergeLibDexDebug
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeExtDexDebug
+> Task :app:processDebugResources
+
+> Task :app:compileDebugKotlin FAILED
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/SplashActivity.kt:14:24 Unresolved reference: R
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/SplashActivity.kt:17:39 Unresolved reference: MainActivity
 
 FAILURE: Build failed with an exception.
 
-* Where:
-Build file '/home/runner/work/bisyo/bisyo/build.gradle' line: 14
-
 * What went wrong:
-A problem occurred evaluating root project 'bisyo'.
-> Build was configured to prefer settings repositories over project repositories but repository 'Google' was added by build file 'build.gradle'
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -37,7 +72,8 @@ A problem occurred evaluating root project 'bisyo'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 32s
+BUILD FAILED in 1m 16s
+26 actionable tasks: 26 executed
 ```
 
 ---
