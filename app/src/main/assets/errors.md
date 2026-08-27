@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 17:07:21 UTC
+📅 **Petsa:** 2026-08-27 17:10:48 UTC
 🎯 **Katayuan:** ❌ NABIGO
 📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
@@ -34,13 +34,41 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
-> Task :app:processDebugMainManifest FAILED
+
+> Task :app:processDebugMainManifest
+package="com.markjann.bisyo" found in source AndroidManifest.xml: /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="com.markjann.bisyo" from the source AndroidManifest.xml: /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml.
+
+> Task :app:processDebugManifest
+> Task :app:javaPreCompileDebug
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:compressDebugAssets
+> Task :app:mergeDebugJniLibFolders
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:mergeLibDexDebug
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeExtDexDebug
+> Task :app:processDebugResources
+
+> Task :app:compileDebugKotlin FAILED
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:181:20 Unresolved reference: isActive
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Execution failed for task ':app:processDebugMainManifest'.
-> com.android.manifmerger.ManifestMerger2$MergeFailureException: Error parsing /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -48,8 +76,8 @@ Execution failed for task ':app:processDebugMainManifest'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 40s
-10 actionable tasks: 10 executed
+BUILD FAILED in 1m 16s
+26 actionable tasks: 26 executed
 ```
 
 ---
