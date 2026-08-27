@@ -20,7 +20,7 @@
 .progress-bar{height:100%;background:#ffffff;border-radius:10px 0 0 10px;width:0%;transition:width 0.3s ease;display:flex;align-items:center;justify-content:center;color:#b91c1c;font-weight:bold;font-size:13px}
 .progress-text{margin-top:8px;font-size:14px;opacity:0.9;display:none}
 
-/* 🪟 DIALOG — KAPAG TAPOS NA ANG PAG-DOWNLOAD */
+/* 🪟 DIALOG — KAPAG TAPOS NA */
 .dialog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999}
 .dialog-box{background:white;border-radius:16px;padding:24px;margin:24px;max-width:340px;color:#1f2937;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
 .dialog-title{font-size:20px;font-weight:bold;color:#b91c1c;margin-bottom:12px}
@@ -47,26 +47,19 @@
 .hidden{display:none !important}
 </style>
 <script>
-// ✅ HANAPIN ANG APK GAMIT ANG API — HINDI HULAAN
+// ✅ HANAPIN ANG APK — TOTOONG % GALING SA KOTLIN
 const GITHUB_API_URL = "https://api.github.com/repos/fbvlink2026-lab/bisyo/contents/docs";
 const RAW_BASE_URL = "https://github.com/fbvlink2026-lab/bisyo/raw/main/docs/";
-const PAGES_BASE_URL = "";
-let foundApk = null;
-let downloadUrl = null;
+let foundApk = null, downloadUrl = null;
+let gotProgressFromApp = false; // ✅ TANDAAN KUNG MAY DUMATING NA TOTOONG %
 
 function isOnline() { return navigator.onLine; }
-function isInsideApp() { return window.location.href.indexOf("file:///android_asset/") === 0; }
+function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
 
 function updateDownloadVisibility() {
-  const downloadSection = document.getElementById("download-section");
-  const offlineNote = document.getElementById("offline-note");
-  if (isOnline()) {
-    downloadSection.classList.remove("hidden");
-    offlineNote.style.display = "none";
-  } else {
-    downloadSection.classList.add("hidden");
-    offlineNote.style.display = "block";
-  }
+  const ds = document.getElementById("download-section");
+  const on = document.getElementById("offline-note");
+  isOnline() ? (ds.classList.remove("hidden"), on.style.display = "none") : (ds.classList.add("hidden"), on.style.display = "block");
 }
 
 async function findAnyApk() {
@@ -75,50 +68,56 @@ async function findAnyApk() {
     const res = await fetch(GITHUB_API_URL, { cache: "no-store" });
     if (!res.ok) throw new Error("API Error");
     const files = await res.json();
-    const apkFiles = files.filter(f => f.name.toLowerCase().endsWith(".apk"));
-    if (apkFiles.length > 0) {
-      foundApk = apkFiles[0].name;
-      downloadUrl = isInsideApp() ? RAW_BASE_URL + foundApk : PAGES_BASE_URL + foundApk;
-      console.log("✅ Natagpuan ang APK:", foundApk);
+    const apk = files.filter(f => f.name.toLowerCase().endsWith(".apk"))[0];
+    if (apk) {
+      foundApk = apk.name;
+      downloadUrl = RAW_BASE_URL + foundApk;
       return foundApk;
     }
     return null;
-  } catch(e) {
-    console.error("❌", e);
-    return null;
-  }
+  } catch(e) { return null; }
 }
 
 function setProgress(percent, text) {
-  const container = document.getElementById("progress-container");
-  const bar = document.getElementById("progress-bar");
-  const ptext = document.getElementById("progress-text");
+  const c = document.getElementById("progress-container");
+  const b = document.getElementById("progress-bar");
+  const t = document.getElementById("progress-text");
   if (percent > 0) {
-    container.style.display = "block";
-    ptext.style.display = "block";
-    bar.style.width = percent + "%";
-    bar.textContent = Math.round(percent) + "%";
-    ptext.textContent = text || "";
+    c.style.display = "block";
+    t.style.display = "block";
+    b.style.width = percent + "%";
+    b.textContent = percent + "%";
+    t.textContent = text || "";
   } else {
-    container.style.display = "none";
-    ptext.style.display = "none";
+    c.style.display = "none";
+    t.style.display = "none";
   }
 }
 
-function showCompleteDialog() {
-  document.getElementById("dialog-overlay").style.display = "flex";
+function showCompleteDialog() { document.getElementById("dialog-overlay").style.display = "flex"; }
+function closeDialog() { document.getElementById("dialog-overlay").style.display = "none"; }
+function confirmUpdate() { closeDialog(); }
+
+// ✅ TINATANGGAP ANG TOTOONG % MULA SA KOTLIN — HINDI NA HULA!
+function updateProgressFromApp(percent) {
+  gotProgressFromApp = true; // ✅ NAKATANGGAP — TOTOONG ITO!
+  setProgress(percent, percent < 100 ? "Nagda-download mula sa server..." : "✅ Halos tapos na...");
+  document.getElementById("download-apk-btn").textContent = percent + "%";
 }
 
-function closeDialog() {
-  document.getElementById("dialog-overlay").style.display = "none";
+// ✅ KAPAG TALAGANG TAPOS NA — GALING SA KOTLIN
+function downloadCompleteFromApp() {
+  setProgress(100, "✅ Tapos na! Tignan ang abiso sa itaas para i-install");
+  document.getElementById("download-apk-btn").textContent = "✅ Tapos na";
+  setTimeout(showCompleteDialog, 500);
 }
 
-function confirmUpdate() {
-  closeDialog();
-  if (downloadUrl) {
-    // ✅ DADAAN SA WEBVIEW → KOTLIN ANG HAHANDLE → HINDI SA CHROME
-    window.location.href = downloadUrl;
-  }
+// ✅ KAPAG MAY ERROR
+function downloadErrorFromApp() {
+  setProgress(0, "❌ Nabigo — Subukan muli");
+  const btn = document.getElementById("download-apk-btn");
+  btn.textContent = "🔄 Subukan Muli";
+  btn.disabled = false;
 }
 
 async function startDownload() {
@@ -126,55 +125,44 @@ async function startDownload() {
   const btn = document.getElementById("download-apk-btn");
   btn.disabled = true;
   btn.textContent = "⏳ Sinisimulan...";
-  setProgress(0, "Inihahanda ang pag-download...");
+  setProgress(5, "Kumukuha ng impormasyon...");
+  gotProgressFromApp = false; // I-reset
 
-  // 📱 SA LOOB NG APP — HAYAAN ANG ANDROID DownloadManager ANG HUMAHANDLE
+  // 📱 SA LOOB NG APP — HINTAYIN ANG TOTOONG % MULA SA KOTLIN
   if (isInsideApp()) {
-    btn.textContent = "📤 Tignan ang abiso sa itaas...";
-    setProgress(25, "Nagsimula ang pag-download...");
-    // ✅ DADAAN SA shouldOverrideUrlLoading → KOTLIN → DownloadManager → HINDI CHROME
     setTimeout(() => {
+      // ✅ DADAAN SA KOTLIN → DownloadManager → IPAPADALA ANG % BAWAT HAKBANG
       window.location.href = downloadUrl;
-      // ✅ WALANG GAGAWA-GAWANG 100% — TIGNAN ANG NOTIFICATION BAR PARA SA TOTOONG PROGRESS
-      setProgress(50, "✅ Tignan ang abiso sa itaas ng telepono");
-    }, 500);
+      // ⚠️ KUNG WALANG SIGNAL MULA SA KOTLIN — SABIHIN LANG TIGNAN ANG ABISO
+      setTimeout(() => {
+        if (!gotProgressFromApp) {
+          setProgress(0, "⬆️ Tignan ang abiso sa itaas ng telepono");
+          btn.textContent = "Nagda-download...";
+        }
+      }, 900);
+    }, 400);
     return;
   }
 
-  // 🌐 SA WEBSITE — normal na pag-download
-  setProgress(50, "Kumukuha ng file...");
-  setTimeout(() => {
-    window.location.href = downloadUrl;
-    setProgress(100, "✅ Sinisimulan ang pag-download...");
-  }, 300);
+  // 🌐 SA WEBSITE
+  window.location.href = downloadUrl;
+  setProgress(100, "✅ Sinisimulan...");
 }
 
 window.onload = async function() {
   updateDownloadVisibility();
   if (!isOnline()) return;
-
   const btn = document.getElementById("download-apk-btn");
   const note = document.getElementById("update-note");
-
   foundApk = await findAnyApk();
   if (!foundApk) {
-    btn.textContent = "❌ Walang APK na matagpuan";
+    btn.textContent = "❌ Walang APK";
     btn.disabled = true;
     return;
   }
-
-  if (isInsideApp()) {
-    btn.textContent = "🔄 I-update ang Aplikasyon";
-    note.style.display = "block";
-  } else {
-    btn.textContent = "⬇️ I-download ang APK";
-    note.style.display = "none";
-  }
-
-  btn.onclick = function(e) {
-    e.preventDefault();
-    startDownload();
-  };
+  btn.textContent = isInsideApp() ? "🔄 I-update ang Aplikasyon" : "⬇️ I-download ang APK";
+  note.style.display = isInsideApp() ? "block" : "none";
+  btn.onclick = e => { e.preventDefault(); startDownload(); };
 };
 
 window.addEventListener('online', updateDownloadVisibility);
@@ -199,14 +187,14 @@ window.addEventListener('offline', updateDownloadVisibility);
 
   <button id="download-apk-btn" class="download-btn">🔍 Hinahanap ang APK...</button>
 
-  <!-- 📊 PROGRESS BAR -->
+  <!-- 📊 PROGRESS BAR — TOTOONG % GALING SA KOTLIN -->
   <div id="progress-container" class="progress-container">
     <div id="progress-bar" class="progress-bar"></div>
   </div>
   <div id="progress-text" class="progress-text"></div>
 
   <div id="update-note" style="margin-top:12px;display:none;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
-    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin ang pindutan upang simulan ang pag-update. Tignan ang abiso sa itaas ng iyong telepono para sa pag-usad ng pag-download.
+    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Ang porsyento sa itaas ay galing mismo sa pag-download — tignan din ang abiso sa itaas ng iyong telepono.
   </div>
 
   <div class="download-info">
@@ -217,7 +205,7 @@ window.addEventListener('offline', updateDownloadVisibility);
   </div>
 </div>
 
-<!-- 🪟 DIALOG — KAPAG TINAPOS NA ANG PAG-DOWNLOAD SA ABISO -->
+<!-- 🪟 DIALOG — LALABAS KAPAG TALAGANG TAPOS NA -->
 <div id="dialog-overlay" class="dialog-overlay">
   <div class="dialog-box">
     <div class="dialog-title">✅ Handa na ang Pag-update!</div>
@@ -270,15 +258,15 @@ window.addEventListener('offline', updateDownloadVisibility);
 <a href="pages/marijuana.html" class="btn"><span class="num">5</span><span class="txt">Marijuana</span></a>
 <a href="pages/ecstasy.html" class="btn"><span class="num">6</span><span class="txt">Ecstasy</span></a>
 <a href="pages/cocaine.html" class="btn"><span class="num">7</span><span class="txt">Cocaine</span></a>
-<a href="pages/tinuturok.html" class="btn"><span class="num">8</span><span class="txt">Tinuturok</span></a>
-<a href="pages/tuklaw.html" class="btn"><span class="num">9</span><span class="txt">Tuklaw</span></a>
+<a href="pages/tinuturok-gamot.html" class="btn"><span class="num">8</span><span class="txt">Tinuturok na Gamot</span></a>
+<a href="pages/tuklaw.html" class="btn"><span class="num">9</span><span class="txt">Tuklaw/Pagkalulong</span></a>
 <a href="pages/sugal.html" class="btn"><span class="num">10</span><span class="txt">Sugal</span></a>
 <a href="pages/inhalants.html" class="btn"><span class="num">11</span><span class="txt">Inhalants</span></a>
-<a href="pages/pag-aabuso.html" class="btn"><span class="num">12</span><span class="txt">Pag-aabuso sa Gamot</span></a>
+<a href="pages/pag-aabuso-gamot.html" class="btn"><span class="num">12</span><span class="txt">Pag-aabuso sa Gamot</span></a>
 <a href="pages/lsd.html" class="btn"><span class="num">13</span><span class="txt">LSD</span></a>
 <a href="pages/ketamine.html" class="btn"><span class="num">14</span><span class="txt">Ketamine</span></a>
-<a href="pages/sugal-iba.html" class="btn"><span class="num">15</span><span class="txt">Ibang Sugal</span></a>
-<a href="pages/internet.html" class="btn"><span class="num">16</span><span class="txt">Internet/Laro</span></a>
+<a href="pages/ibang-sugal.html" class="btn"><span class="num">15</span><span class="txt">Ibang Sugal</span></a>
+<a href="pages/internet-laro.html" class="btn"><span class="num">16</span><span class="txt">Internet/Laro</span></a>
 <a href="pages/labis-pagkain.html" class="btn"><span class="num">17</span><span class="txt">Labis na Pagkain</span></a>
 <a href="pages/vaping.html" class="btn"><span class="num">18</span><span class="txt">Vaping</span></a>
 </div>
