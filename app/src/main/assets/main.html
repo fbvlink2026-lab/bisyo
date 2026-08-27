@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
 <style>
-.download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25);transition: opacity 0.3s ease, height 0.3s ease;}
-.download-section.offline{opacity:0.5;pointer-events:none}
+.download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25);transition:opacity 0.3s ease}
+.download-section.hidden{display:none !important}
 .download-title{font-size:19px;font-weight:bold;margin-bottom:6px}
 .download-sub{font-size:14px;opacity:.9;margin-bottom:16px}
 .download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12)}
 .download-btn:active{transform:scale(.97)}
 .download-info{margin-top:12px;font-size:13px;opacity:.85;line-height:1.6}
-.offline-note{margin-top:12px;font-size:14px;opacity:.9}
+.offline-note{background:#fef3c7;border:1px solid #fcd34d;border-radius:14px;padding:20px;margin:16px;color:#78350f}
 .info-section{background:white;border-radius:14px;padding:20px;margin:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .info-section h2{font-size:18px;color:#b91c1c;margin:0 0 12px 0;border-left:3px solid #dc2626;padding-left:10px}
 .info-section p{font-size:15px;line-height:1.7;color:#374151;margin:0 0 10px}
@@ -27,59 +27,20 @@
 .btn:active{transform:scale(.97);background:#fef2f2}
 .num{width:36px;height:36px;line-height:36px;text-align:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;margin-bottom:6px}
 .txt{font-size:14px;color:#1f2937;text-align:center}
-.hidden{display:none !important}
 </style>
 <script>
-// ✅ KUKUNIN ANG LISTAHAN MULA SA GITHUB
+// ✅ PANATILIHIN ANG API — KUKUNIN ANG TOTOONG PANGALAN NG APK
 const GITHUB_API_URL = "https://api.github.com/repos/fbvlink2026-lab/bisyo/contents/docs";
-const BASE_DOCS_URL = "https://fbvlink2026-lab.github.io/bisyo/docs/";
-let foundApk = null;
+
+// ✅ DALAWANG BASE URL — AWTOMATIKONG PIPILIIN
+const RAW_BASE_URL = "https://github.com/fbvlink2026-lab/bisyo/raw/main/docs/";      // 📄 Para sa loob ng App
+const PAGES_BASE_URL = "";                                                          // 🌐 Para sa Website (magkatabi sa folder)
+
+let foundApkName = null;
 
 // ✅ TIGNAN KUNG MAY INTERNET
 function isOnline() {
   return navigator.onLine;
-}
-
-// ✅ I-UPDATE ANG TANDA — KUNG MAY INTERNET LANG IPALITAW
-function updateDownloadVisibility() {
-  const downloadSection = document.getElementById("download-section");
-  const offlineNote = document.getElementById("offline-note");
-  const btn = document.getElementById("download-apk-btn");
-
-  if (isOnline()) {
-    // ✅ MAY INTERNET — IPALITAW ANG DOWNLOAD
-    downloadSection.classList.remove("hidden");
-    offlineNote.style.display = "none";
-    btn.style.display = "inline-flex";
-  } else {
-    // ❌ WALANG INTERNET — ITAGO ANG DOWNLOAD
-    downloadSection.classList.add("hidden");
-    offlineNote.style.display = "block";
-    btn.style.display = "none";
-  }
-}
-
-// ✅ HANAPIN ANG APK — KUNG MAY INTERNET LANG
-async function findAnyApk() {
-  if (!isOnline()) return null;
-  
-  try {
-    const res = await fetch(GITHUB_API_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("API Error");
-    
-    const files = await res.json();
-    const apkFiles = files.filter(f => f.name.toLowerCase().endsWith(".apk"));
-    
-    if (apkFiles.length > 0) {
-      foundApk = apkFiles[0].name;
-      console.log("✅ Natagpuan ang APK:", foundApk);
-      return foundApk;
-    }
-    return null;
-  } catch(e) {
-    console.error("❌ Hindi makuha ang listahan:", e);
-    return null;
-  }
 }
 
 // ✅ ALAM KUNG NASA APP O WEBSITE
@@ -87,44 +48,77 @@ function isInsideApp() {
   return window.location.href.indexOf("file:///android_asset/") === 0;
 }
 
+// ✅ HANAPIN ANG APK MULA SA GITHUB API — KAHIT ANONG PANGALAN!
+async function findAnyApk() {
+  try {
+    const res = await fetch(GITHUB_API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("API Error: " + res.status);
+
+    const files = await res.json();
+    const apkFiles = files.filter(f => f.name.toLowerCase().endsWith(".apk"));
+
+    if (apkFiles.length > 0) {
+      foundApkName = apkFiles[0].name; // kunin ang unang .apk
+      console.log("✅ Natagpuan ang APK:", foundApkName);
+      return foundApkName;
+    }
+    console.warn("⚠️ Walang .apk sa docs/");
+    return null;
+  } catch(e) {
+    console.error("❌ Hindi makuha ang listahan:", e);
+    return null;
+  }
+}
+
+// ✅ I-UPDATE ANG TANDA — ITAGO KUNG WALANG INTERNET
+function updateDownloadVisibility() {
+  const downloadSection = document.getElementById("download-section");
+  const offlineNote = document.getElementById("offline-note");
+  if (isOnline()) {
+    downloadSection.classList.remove("hidden");
+    offlineNote.style.display = "none";
+  } else {
+    downloadSection.classList.add("hidden");
+    offlineNote.style.display = "block";
+  }
+}
+
 window.onload = async function() {
-  // ✅ UNANG TIGNAN — MAY INTERNET BA?
   updateDownloadVisibility();
-  
-  if (!isOnline()) return; // ❌ WALANG INTERNET — HUWAG NANG ITULOY
+  if (!isOnline()) return;
 
   const btn = document.getElementById("download-apk-btn");
   const note = document.getElementById("update-note");
 
-  // ✅ HANAPIN ANG APK
-  foundApk = await findAnyApk();
-
-  if (!foundApk) {
+  // ✅ HANAPIN MUNA ANG PANGALAN NG APK — KAHIT ANO IYON
+  foundApkName = await findAnyApk();
+  if (!foundApkName) {
     btn.textContent = "❌ Walang APK na matagpuan";
     btn.style.pointerEvents = "none";
     return;
   }
 
   if (isInsideApp()) {
-    // 📱 NASA APP — BUONG URL
+    // 📱 NASA APP — GUMAMIT NG RAW LINK!
+    const downloadUrl = RAW_BASE_URL + foundApkName;
     btn.textContent = "🔄 I-update ang Aplikasyon";
-    btn.href = BASE_DOCS_URL + foundApk;
+    btn.href = downloadUrl;
     note.style.display = "block";
     btn.onclick = function(e) {
       e.preventDefault();
-      window.open(BASE_DOCS_URL + foundApk, "_system");
+      window.open(downloadUrl, "_system");
       return false;
     };
   } else {
     // 🌐 NASA WEBSITE — PANGALAN LANG
     btn.textContent = "⬇️ I-download ang APK";
-    btn.href = foundApk;
+    btn.href = PAGES_BASE_URL + foundApkName;
     note.style.display = "none";
     btn.onclick = null;
   }
 };
 
-// ✅ KAPAG NAWALA O BUMALIK ANG INTERNET — KUSANG BABAGO
+// ✅ KUSANG BABAGO KAPAG NAWALA/BUMALIK ANG INTERNET
 window.addEventListener('online', updateDownloadVisibility);
 window.addEventListener('offline', updateDownloadVisibility);
 </script>
@@ -136,10 +130,9 @@ window.addEventListener('offline', updateDownloadVisibility);
 <p>Proyekto ni Mark Jann Tampok — Edukasyong Impormatibo</p>
 </div>
 
-<!-- ✅ KAPAG WALANG INTERNET — LALABAS ITO SA HALIP -->
-<div id="offline-note" class="info-section hidden" style="background:#fef3c7;border:1px solid #fcd34d;">
-  <h2 style="color:#92400e">📡 Walang Koneksyon sa Internet</h2>
-  <p style="color:#78350f">Ang pag-download at pag-update ay hindi available habang walang internet. Magbabalik ito kapag nakakonekta ka na ulit.</p>
+<div id="offline-note" class="offline-note hidden">
+  <h2 style="color:#92400e;margin:0 0 8px 0">📡 Walang Koneksyon sa Internet</h2>
+  <p style="margin:0">Ang pag-download at pag-update ay hindi available habang walang internet. Babalik ito kapag nakakonekta ka na ulit.</p>
 </div>
 
 <div id="download-section" class="download-section">
