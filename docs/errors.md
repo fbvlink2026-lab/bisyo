@@ -1,9 +1,9 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 10:36:57 UTC
-🎯 **Katayuan:** ✅ TAGUMPAY
-📝 **Detalye:** Matagumpay na nabuo ang APK
+📅 **Petsa:** 2026-08-27 10:38:23 UTC
+🎯 **Katayuan:** ❌ NABIGO
+📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -29,44 +29,24 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:checkDebugAarMetadata
 > Task :app:mapDebugSourceSetPaths
 > Task :app:generateDebugResources
-> Task :app:packageDebugResources
-> Task :app:mergeDebugResources
-> Task :app:createDebugCompatibleScreenManifests
-> Task :app:extractDeepLinksDebug
-> Task :app:parseDebugLocalResources
-> Task :app:processDebugMainManifest
-> Task :app:processDebugManifest
-> Task :app:javaPreCompileDebug
-> Task :app:mergeDebugShaders
-> Task :app:compileDebugShaders NO-SOURCE
-> Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugAssets
-> Task :app:desugarDebugFileDependencies
-> Task :app:compressDebugAssets
-> Task :app:mergeDebugJniLibFolders
-> Task :app:processDebugManifestForPackage
-> Task :app:checkDebugDuplicateClasses
-> Task :app:processDebugResources
-> Task :app:mergeExtDexDebug
-> Task :app:mergeLibDexDebug
-> Task :app:mergeDebugNativeLibs NO-SOURCE
-> Task :app:stripDebugDebugSymbols NO-SOURCE
-> Task :app:validateSigningDebug
-> Task :app:writeDebugAppMetadata
-> Task :app:writeDebugSigningConfigVersions
-> Task :app:compileDebugKotlin
-> Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:dexBuilderDebug
-> Task :app:mergeDebugGlobalSynthetics
-> Task :app:processDebugJavaRes
-> Task :app:mergeProjectDexDebug
-> Task :app:mergeDebugJavaResource
-> Task :app:packageDebug
-> Task :app:createDebugApkListingFileRedirect
-> Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 10s
-33 actionable tasks: 33 executed
+> Task :app:mergeDebugResources FAILED
+ERROR: [style/Theme.AppCompat.Light.NoActionBar] /home/runner/work/bisyo/bisyo/app/src/main/res/values/themes.xml [style/Theme.AppCompat.Light.NoActionBar] /home/runner/work/bisyo/bisyo/app/src/main/res/values/styles.xml: Resource and asset merger: Duplicate resources
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeDebugResources'.
+> [style/Theme.AppCompat.Light.NoActionBar] /home/runner/work/bisyo/bisyo/app/src/main/res/values/themes.xml	[style/Theme.AppCompat.Light.NoActionBar] /home/runner/work/bisyo/bisyo/app/src/main/res/values/styles.xml: Error: Duplicate resources
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 37s
+5 actionable tasks: 5 executed
 ```
 
 ---
