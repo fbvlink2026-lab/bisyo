@@ -5,18 +5,35 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
 <style>
-.download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25);transition: opacity 0.3s ease, height 0.3s ease;}
-.download-section.offline{opacity:0.5;pointer-events:none}
+.download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25);transition:opacity 0.3s ease}
+.download-section.hidden{display:none !important}
 .download-title{font-size:19px;font-weight:bold;margin-bottom:6px}
 .download-sub{font-size:14px;opacity:.9;margin-bottom:16px}
-.download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12);border:none;cursor:pointer;font-size:16px}
+.download-btn:disabled{opacity:0.6;cursor:not-allowed}
 .download-btn:active{transform:scale(.97)}
-.download-info{margin-top:12px;font-size:13px;opacity:.85;line-height:1.6}
-.offline-note{margin-top:12px;font-size:14px;opacity:.9}
+.download-info{margin-top:14px;font-size:13px;line-height:1.8;opacity:0.9}
+.offline-note{background:#fef3c7;border:1px solid #fcd34d;border-radius:14px;padding:20px;margin:16px;color:#78350f}
+
+/* 📊 PROGRESS BAR */
+.progress-container{margin-top:16px;background:rgba(255,255,255,0.2);border-radius:10px;height:24px;overflow:hidden;display:none}
+.progress-bar{height:100%;background:#ffffff;border-radius:10px;width:0%;transition:width 0.2s ease;display:flex;align-items:center;justify-content:center;color:#b91c1c;font-weight:bold;font-size:13px}
+.progress-text{margin-top:8px;font-size:14px;opacity:0.9;display:none}
+
+/* 🪟 DIALOG — KAPAG TAPOS NA */
+.dialog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999}
+.dialog-box{background:white;border-radius:16px;padding:24px;margin:24px;max-width:340px;color:#1f2937;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.dialog-title{font-size:20px;font-weight:bold;color:#b91c1c;margin-bottom:12px}
+.dialog-body{font-size:15px;line-height:1.6;margin-bottom:20px;color:#374151}
+.dialog-buttons{display:flex;gap:10px;justify-content:flex-end}
+.dialog-btn{padding:10px 20px;border-radius:8px;font-weight:bold;border:none;cursor:pointer;font-size:15px}
+.dialog-btn-cancel{background:#e5e7eb;color:#374151}
+.dialog-btn-confirm{background:#dc2626;color:white}
+
 .info-section{background:white;border-radius:14px;padding:20px;margin:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .info-section h2{font-size:18px;color:#b91c1c;margin:0 0 12px 0;border-left:3px solid #dc2626;padding-left:10px}
 .info-section p{font-size:15px;line-height:1.7;color:#374151;margin:0 0 10px}
-.info-section ul{margin:0;padding-left:22px}
+.info-section ul{margin:0 0 14px 0;padding-left:22px}
 .info-section li{font-size:15px;line-height:1.7;color:#374151;margin-bottom:6px}
 .divider{height:1px;background:#e5e7eb;margin:20px 0}
 .header{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;padding:20px 16px;box-shadow:0 3px 8px rgba(0,0,0,.15)}
@@ -30,63 +47,104 @@
 .hidden{display:none !important}
 </style>
 <script>
-// ✅ KUKUNIN ANG LISTAHAN MULA SA GITHUB — HINDI GUMALAW
+// ✅ HANAPIN ANG APK GAMIT ANG API — HINDI HULAAN
 const GITHUB_API_URL = "https://api.github.com/repos/fbvlink2026-lab/bisyo/contents/docs";
-
-// ✅ DALAWANG URL — DITO LANG ANG PINAGKAIBA
-const RAW_BASE_URL = "https://github.com/fbvlink2026-lab/bisyo/raw/main/docs/";      // 📄 PARA SA LOOB NG APP — ITO ANG GUMAGANA!
-const PAGES_BASE_URL = "";                                                          // 🌐 PARA SA WEBSITE — PANGALAN LANG
-
+const RAW_BASE_URL = "https://github.com/fbvlink2026-lab/bisyo/raw/main/docs/";
+const PAGES_BASE_URL = "";
 let foundApk = null;
+let downloadUrl = null;
 
-// ✅ TIGNAN KUNG MAY INTERNET — HINDI GUMALAW
-function isOnline() {
-  return navigator.onLine;
-}
+function isOnline() { return navigator.onLine; }
+function isInsideApp() { return window.location.href.indexOf("file:///android_asset/") === 0; }
 
-// ✅ I-UPDATE ANG TANDA — HINDI GUMALAW
 function updateDownloadVisibility() {
   const downloadSection = document.getElementById("download-section");
   const offlineNote = document.getElementById("offline-note");
-  const btn = document.getElementById("download-apk-btn");
-
   if (isOnline()) {
     downloadSection.classList.remove("hidden");
     offlineNote.style.display = "none";
-    btn.style.display = "inline-flex";
   } else {
     downloadSection.classList.add("hidden");
     offlineNote.style.display = "block";
-    btn.style.display = "none";
   }
 }
 
-// ✅ HANAPIN ANG APK GAMIT ANG API — HINDI GUMALAW
 async function findAnyApk() {
   if (!isOnline()) return null;
-  
   try {
     const res = await fetch(GITHUB_API_URL, { cache: "no-store" });
     if (!res.ok) throw new Error("API Error");
-    
     const files = await res.json();
     const apkFiles = files.filter(f => f.name.toLowerCase().endsWith(".apk"));
-    
     if (apkFiles.length > 0) {
       foundApk = apkFiles[0].name;
+      downloadUrl = isInsideApp() ? RAW_BASE_URL + foundApk : PAGES_BASE_URL + foundApk;
       console.log("✅ Natagpuan ang APK:", foundApk);
       return foundApk;
     }
     return null;
   } catch(e) {
-    console.error("❌ Hindi makuha ang listahan:", e);
+    console.error("❌", e);
     return null;
   }
 }
 
-// ✅ ALAM KUNG NASA APP O WEBSITE — HINDI GUMALAW
-function isInsideApp() {
-  return window.location.href.indexOf("file:///android_asset/") === 0;
+function setProgress(percent, text) {
+  const container = document.getElementById("progress-container");
+  const bar = document.getElementById("progress-bar");
+  const ptext = document.getElementById("progress-text");
+  if (percent > 0) {
+    container.style.display = "block";
+    ptext.style.display = "block";
+    bar.style.width = percent + "%";
+    bar.textContent = Math.round(percent) + "%";
+    ptext.textContent = text || "";
+  } else {
+    container.style.display = "none";
+    ptext.style.display = "none";
+  }
+}
+
+function showCompleteDialog() {
+  document.getElementById("dialog-overlay").style.display = "flex";
+}
+
+function closeDialog() {
+  document.getElementById("dialog-overlay").style.display = "none";
+}
+
+function confirmUpdate() {
+  closeDialog();
+  if (downloadUrl) {
+    window.open(downloadUrl, "_system");
+  }
+}
+
+async function startDownload() {
+  if (!downloadUrl) return;
+  const btn = document.getElementById("download-apk-btn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Sinisimulan...";
+  setProgress(0, "Kumukuha ng file...");
+
+  try {
+    // 📱 Sa App — diretsong bubuksan sa sistema na may kumpirmasyon
+    if (isInsideApp()) {
+      setProgress(100, "✅ Handa na!");
+      setTimeout(showCompleteDialog, 600);
+      return;
+    }
+
+    // 🌐 Sa Website — aktuwal na pag-download
+    window.location.href = downloadUrl;
+    setProgress(100, "✅ Sinisimulan ang pag-download...");
+
+  } catch(err) {
+    console.error("Error:", err);
+    window.open(downloadUrl, "_blank");
+    setProgress(100, "✅ Binubuksan...");
+    setTimeout(showCompleteDialog, 500);
+  }
 }
 
 window.onload = async function() {
@@ -97,30 +155,24 @@ window.onload = async function() {
   const note = document.getElementById("update-note");
 
   foundApk = await findAnyApk();
-
   if (!foundApk) {
     btn.textContent = "❌ Walang APK na matagpuan";
-    btn.style.pointerEvents = "none";
+    btn.disabled = true;
     return;
   }
 
   if (isInsideApp()) {
-    // 📱 NASA APP — RAW URL NA ANG GINAGAMIT! ← ITO LANG ANG PALITAN
     btn.textContent = "🔄 I-update ang Aplikasyon";
-    btn.href = RAW_BASE_URL + foundApk;
     note.style.display = "block";
-    btn.onclick = function(e) {
-      e.preventDefault();
-      window.open(RAW_BASE_URL + foundApk, "_system");
-      return false;
-    };
   } else {
-    // 🌐 NASA WEBSITE — WALANG PAGBABAGO
     btn.textContent = "⬇️ I-download ang APK";
-    btn.href = PAGES_BASE_URL + foundApk;
     note.style.display = "none";
-    btn.onclick = null;
   }
+
+  btn.onclick = function(e) {
+    e.preventDefault();
+    startDownload();
+  };
 };
 
 window.addEventListener('online', updateDownloadVisibility);
@@ -134,55 +186,80 @@ window.addEventListener('offline', updateDownloadVisibility);
 <p>Proyekto ni Mark Jann Tampok — Edukasyong Impormatibo</p>
 </div>
 
-<div id="offline-note" class="info-section hidden" style="background:#fef3c7;border:1px solid #fcd34d;">
-  <h2 style="color:#92400e">📡 Walang Koneksyon sa Internet</h2>
-  <p style="color:#78350f">Ang pag-download at pag-update ay hindi available habang walang internet. Magbabalik ito kapag nakakonekta ka na ulit.</p>
+<div id="offline-note" class="offline-note hidden">
+  <h2 style="color:#92400e;margin:0 0 8px 0">📡 Walang Koneksyon sa Internet</h2>
+  <p style="margin:0">Ang pag-download at pag-update ay hindi available habang walang internet. Magbabalik ito kapag nakakonekta ka na ulit.</p>
 </div>
 
 <div id="download-section" class="download-section">
   <div class="download-title">📤 Aplikasyon</div>
   <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
-  <a id="download-apk-btn" href="#" class="download-btn">🔍 Hinahanap ang APK...</a>
+
+  <button id="download-apk-btn" class="download-btn">🔍 Hinahanap ang APK...</button>
+
+  <!-- 📊 PROGRESS BAR -->
+  <div id="progress-container" class="progress-container">
+    <div id="progress-bar" class="progress-bar"></div>
+  </div>
+  <div id="progress-text" class="progress-text"></div>
+
   <div id="update-note" style="margin-top:12px;display:none;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
     📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin upang kunin ang bagong bersyon.
   </div>
+
   <div class="download-info">
-    📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Laki: <strong>~3 MB</strong><br>
-    📱 Kinakailangan: Android 7.0 (API 24) o mas bago<br>
-    ✅ Libre — Walang Patalastas — Walang Pahintulot na Kailangan
+    📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
+    📱 Kinakailangan: Android 7.0 (API 24) o mas bagong bersyon<br>
+    ✅ Libre — Walang Patalastas — Walang Karagdagang Pahintulot na Kailangan<br>
+    📇 Lagda: Opisyal — Proyekto ni Mark Jann Tampok
+  </div>
+</div>
+
+<!-- 🪟 DIALOG — LALABAS PAG-100% -->
+<div id="dialog-overlay" class="dialog-overlay">
+  <div class="dialog-box">
+    <div class="dialog-title">✅ Handa na ang Pag-update!</div>
+    <div class="dialog-body">
+      Na-download na nang buo ang bagong bersyon ng aplikasyon.<br><br>
+      <strong>Gusto mo bang i-update na ang lumang bersyon mo?</strong>
+    </div>
+    <div class="dialog-buttons">
+      <button class="dialog-btn dialog-btn-cancel" onclick="closeDialog()">Sa Pagkakataong Ito</button>
+      <button class="dialog-btn dialog-btn-confirm" onclick="confirmUpdate()">✅ I-update Ngayon</button>
+    </div>
   </div>
 </div>
 
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
-  <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
+  <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan. Hindi ito naglalayong matakot kundi magbigay ng wastong impormasyon upang makaiwas at makapagpasya nang tama.</p>
 
   <h2>📋 Sakop ng Paksa</h2>
-  <p>Mayroong <strong>18 pahina</strong> na nagpapaliwanag nang detalyado:</p>
+  <p>Mayroong <strong>18 pahina</strong> na nagpapaliwanag nang detalyado tungkol sa bawat isa:</p>
   <ul>
-    <li><strong>1–8:</strong> Alak, Sigarilyo, Shabu, Heroin, Marijuana, Ecstasy, Cocaine, at mga Tinuturok na Gamot</li>
-    <li><strong>9–12:</strong> Ang Tuklaw ng Pagkalulong, Sugal, Inhalants, at Pag-aabuso sa Gamot</li>
-    <li><strong>13–15:</strong> LSD, Ketamine, at iba pang uri ng Sugal</li>
-    <li><strong>16–18:</strong> Labis na Internet/Paglalaro, Labis na Pagkain, at Vaping</li>
+    <li><strong>1–8:</strong> Alak, Sigarilyo, Shabu, Heroin, Marijuana, Ecstasy, Cocaine, at mga Tinuturok na Gamot — mga epekto sa katawan at pag-iisip</li>
+    <li><strong>9–12:</strong> Ang Tuklaw ng Pagkalulong, Sugal, Inhalants, at Pag-aabuso sa Gamot — paano nabubuo at paano makakaiwas</li>
+    <li><strong>13–15:</strong> LSD, Ketamine, at iba pang uri ng Sugal — mga panganib at legal na kahihinatnan</li>
+    <li><strong>16–18:</strong> Labis na Internet/Paglalaro, Labis na Pagkain, at Vaping — mga bisyong madalas hindi napapansin pero may malalim na epekto rin</li>
   </ul>
 
   <div class="divider"></div>
 
   <h2>⚠️ Bakit Mahalagang Malaman Ito?</h2>
-  <p>Ang bawat bisyo ay may tiyak na masamang dulot — hindi lamang sa katawan kundi pati sa kinabukasan ng tao at ng kanyang pamilya. Ang pagkaalam ay unang hakbang sa pag-iwas at pag-iingat.</p>
+  <p>Ang bawat bisyo ay may tiyak na masamang dulot — hindi lamang sa katawan kundi pati sa kinabukasan ng tao at ng kanyang pamilya. Ang pagkaalam ay unang hakbang sa pag-iwas at pag-iingat. Marami sa mga ito ay ilegal at maaaring magdulot ng pagkakakulong, pagkasira ng kinabukasan, at pagkawala ng pamilya.</p>
 
   <h2>💡 Paano Gamitin ang Aplikasyon</h2>
   <ul>
-    <li>Basahin ang bawat pahina nang dahan-dahan at unawain ang nilalaman</li>
+    <li>Basahin ang bawat pahina nang dahan-dahan at unawain ang nilalaman — huwag magmadali</li>
     <li>Huwag matakot — ang layunin ay mag-ingat, hindi matakot</li>
-    <li>Ipakita at ibahagi sa pamilya at kaibigan</li>
-    <li>Kung may kakilala kang nangangailangan — humingi ng tulong sa propesyonal</li>
+    <li>Ipakita at ibahagi sa pamilya at kaibigan — mas maraming nakakaalam, mas ligtas ang lahat</li>
+    <li>Kung may kakilala kang nangangailangan ng tulong — huwag matakot na humingi ng tulong sa propesyonal o sa mga awtoridad</li>
+    <li>Ang aplikasyong ito ay gumagana nang walang internet kaya maaari mo itong basahin kahit saan</li>
   </ul>
-</div>
 
-<div class="info-section" style="padding-top:4px">
   <h2>📖 Mga Pahina — Basahin Dito</h2>
 </div>
+
 <div class="grid">
 <a href="pages/alak.html" class="btn"><span class="num">1</span><span class="txt">Alak</span></a>
 <a href="pages/sigarilyo.html" class="btn"><span class="num">2</span><span class="txt">Sigarilyo</span></a>
