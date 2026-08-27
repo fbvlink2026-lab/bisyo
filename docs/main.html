@@ -28,6 +28,8 @@
 </style>
 <script>
 // ✅ ORIHINAL NA ISTRUKTURA — HINDI BINAGO ANG IF-ELSE
+const APK_NAME = "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+
 function getApkLink() {
   var loc = window.location.href;
   // 📱 KAPAG NASA APK — WALANG PANGALAN ANG IBINABALIK
@@ -36,12 +38,12 @@ function getApkLink() {
   }
   // 🌐 KAPAG NASA WEBSITE — PANGALAN LANG — GANITO GUSTO MO
   else {
-    return "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+    return APK_NAME;
   }
 }
 
-// ✅ BUONG URL — PARA SA KAPAG NASA APP LANG
-const FULL_APK_URL = "https://fbvlink2026-lab.github.io/bisyo/Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+// ✅ BUONG URL — NASA /docs/ NA — ITO ANG KULANG KANINA!
+const FULL_APK_URL = "https://fbvlink2026-lab.github.io/bisyo/docs/" + APK_NAME;
 
 window.onload = function() {
   var linkName = getApkLink();
@@ -49,27 +51,22 @@ window.onload = function() {
   var note = document.getElementById("update-note");
 
   if (!linkName) {
-    // 📱 NASA APP — UPDATE — GUMAMIT NG BUONG URL + BUKAS SA LABAS NG WEBVIEW
+    // 📱 NASA APP — UPDATE — BUONG URL NASA /docs/
     btn.textContent = "🔄 I-update ang Aplikasyon";
     btn.href = FULL_APK_URL;
     note.style.display = "block";
     
-    // ✅ SIGURADUHING BUBUKSAN SA LABAS — HINDI SA LOOB NG WEBVIEW
     btn.onclick = function(e) {
       e.preventDefault();
-      if (window.open) {
-        window.open(FULL_APK_URL, "_system");
-      } else {
-        window.location.href = FULL_APK_URL;
-      }
+      window.open(FULL_APK_URL, "_blank");
       return false;
     };
   } else {
-    // 🌐 NASA WEBSITE — PANGALAN LANG — GANITO GUSTO MO — WALANG BINAGO
+    // 🌐 NASA WEBSITE — PANGALAN LANG — NASA /docs/ KAYA DIRETSO
     btn.textContent = "⬇️ I-download ang APK";
     btn.href = linkName;
     note.style.display = "none";
-    btn.onclick = null; // ✅ WALANG DAGDAG — GANITO DATI
+    btn.onclick = null;
   }
 };
 </script>
@@ -95,7 +92,6 @@ window.onload = function() {
   </div>
 </div>
 
-<!-- ✅ NATITIRANG LAMAN — GANITO PA RIN -->
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
   <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
