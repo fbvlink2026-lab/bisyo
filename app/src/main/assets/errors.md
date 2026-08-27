@@ -1,9 +1,9 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 17:10:48 UTC
-🎯 **Katayuan:** ❌ NABIGO
-📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
+📅 **Petsa:** 2026-08-27 17:15:41 UTC
+🎯 **Katayuan:** ✅ TAGUMPAY
+📝 **Detalye:** Matagumpay na nabuo ang APK
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -48,36 +48,33 @@ Recommendation: remove package="com.markjann.bisyo" from the source AndroidManif
 > Task :app:mergeDebugAssets
 > Task :app:desugarDebugFileDependencies
 > Task :app:compressDebugAssets
-> Task :app:mergeDebugJniLibFolders
+> Task :app:processDebugManifestForPackage
 > Task :app:checkDebugDuplicateClasses
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeLibDexDebug
 > Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:stripDebugDebugSymbols NO-SOURCE
-> Task :app:mergeLibDexDebug
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:processDebugManifestForPackage
-> Task :app:mergeExtDexDebug
-> Task :app:processDebugResources
 
-> Task :app:compileDebugKotlin FAILED
-e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:181:20 Unresolved reference: isActive
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:121:17 'allowScanningByMediaScanner(): Unit' is deprecated. Deprecated in Java
 
-FAILURE: Build failed with an exception.
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:processDebugJavaRes
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
 
-* What went wrong:
-Execution failed for task ':app:compileDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
-   > Compilation error. See log for more details
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 1m 16s
-26 actionable tasks: 26 executed
+BUILD SUCCESSFUL in 1m 18s
+33 actionable tasks: 33 executed
 ```
 
 ---
