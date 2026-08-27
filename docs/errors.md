@@ -1,9 +1,9 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 15:30:43 UTC
-🎯 **Katayuan:** ✅ TAGUMPAY
-📝 **Detalye:** Matagumpay na nabuo ang APK
+📅 **Petsa:** 2026-08-27 15:52:50 UTC
+🎯 **Katayuan:** ❌ NABIGO
+📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -54,19 +54,30 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:processDebugManifestForPackage
 > Task :app:mergeExtDexDebug
 > Task :app:processDebugResources
-> Task :app:compileDebugKotlin
-> Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:dexBuilderDebug
-> Task :app:mergeDebugGlobalSynthetics
-> Task :app:processDebugJavaRes
-> Task :app:mergeProjectDexDebug
-> Task :app:mergeDebugJavaResource
-> Task :app:packageDebug
-> Task :app:createDebugApkListingFileRedirect
-> Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 22s
-33 actionable tasks: 33 executed
+> Task :app:compileDebugKotlin FAILED
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:38:17 Unresolved reference: setDownloadListener
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:38:39 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:38:44 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:38:55 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:38:75 Cannot infer a type for this parameter. Please specify it explicitly.
+e: file:///home/runner/work/bisyo/bisyo/app/src/main/java/com/markjann/bisyo/MainActivity.kt:38:85 Cannot infer a type for this parameter. Please specify it explicitly.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 18s
+26 actionable tasks: 26 executed
 ```
 
 ---
