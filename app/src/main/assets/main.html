@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
 <style>
-.download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25)}
+.download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25);transition: opacity 0.3s ease, height 0.3s ease;}
+.download-section.offline{opacity:0.5;pointer-events:none}
 .download-title{font-size:19px;font-weight:bold;margin-bottom:6px}
 .download-sub{font-size:14px;opacity:.9;margin-bottom:16px}
 .download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12)}
 .download-btn:active{transform:scale(.97)}
 .download-info{margin-top:12px;font-size:13px;opacity:.85;line-height:1.6}
+.offline-note{margin-top:12px;font-size:14px;opacity:.9}
 .info-section{background:white;border-radius:14px;padding:20px;margin:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .info-section h2{font-size:18px;color:#b91c1c;margin:0 0 12px 0;border-left:3px solid #dc2626;padding-left:10px}
 .info-section p{font-size:15px;line-height:1.7;color:#374151;margin:0 0 10px}
@@ -25,45 +27,59 @@
 .btn:active{transform:scale(.97);background:#fef2f2}
 .num{width:36px;height:36px;line-height:36px;text-align:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;margin-bottom:6px}
 .txt{font-size:14px;color:#1f2937;text-align:center}
+.hidden{display:none !important}
 </style>
 <script>
-// ✅ LISTAHAN NG MGA POSIBLENG PANGALAN NG APK — SUSUBUKAN LAHAT
-const APK_CANDIDATES = [
-  "app-debug.apk",
-  "app-release.apk",
-  "bisyo-app.apk",
-  "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk",
-  "Proyekto-ni-Mark-Jann-Tampok.apk",
-  "bisyo-v1.0.apk",
-  "bisyo.apk"
-];
-
+// ✅ KUKUNIN ANG LISTAHAN MULA SA GITHUB
+const GITHUB_API_URL = "https://api.github.com/repos/fbvlink2026-lab/bisyo/contents/docs";
 const BASE_DOCS_URL = "https://fbvlink2026-lab.github.io/bisyo/docs/";
 let foundApk = null;
 
-// ✅ TIGNAN KUNG UMIIRAL ANG APK
-async function probeApk(filename) {
-  try {
-    const res = await fetch(BASE_DOCS_URL + filename, { 
-      method: 'HEAD', 
-      cache: 'no-store'
-    });
-    return res.ok;
-  } catch(e) {
-    return false;
+// ✅ TIGNAN KUNG MAY INTERNET
+function isOnline() {
+  return navigator.onLine;
+}
+
+// ✅ I-UPDATE ANG TANDA — KUNG MAY INTERNET LANG IPALITAW
+function updateDownloadVisibility() {
+  const downloadSection = document.getElementById("download-section");
+  const offlineNote = document.getElementById("offline-note");
+  const btn = document.getElementById("download-apk-btn");
+
+  if (isOnline()) {
+    // ✅ MAY INTERNET — IPALITAW ANG DOWNLOAD
+    downloadSection.classList.remove("hidden");
+    offlineNote.style.display = "none";
+    btn.style.display = "inline-flex";
+  } else {
+    // ❌ WALANG INTERNET — ITAGO ANG DOWNLOAD
+    downloadSection.classList.add("hidden");
+    offlineNote.style.display = "block";
+    btn.style.display = "none";
   }
 }
 
-// ✅ HANAPIN ANG KAHIT ANONG .apk
+// ✅ HANAPIN ANG APK — KUNG MAY INTERNET LANG
 async function findAnyApk() {
-  for (const name of APK_CANDIDATES) {
-    if (await probeApk(name)) {
-      console.log("✅ Natagpuan ang APK:", name);
-      return name;
+  if (!isOnline()) return null;
+  
+  try {
+    const res = await fetch(GITHUB_API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("API Error");
+    
+    const files = await res.json();
+    const apkFiles = files.filter(f => f.name.toLowerCase().endsWith(".apk"));
+    
+    if (apkFiles.length > 0) {
+      foundApk = apkFiles[0].name;
+      console.log("✅ Natagpuan ang APK:", foundApk);
+      return foundApk;
     }
+    return null;
+  } catch(e) {
+    console.error("❌ Hindi makuha ang listahan:", e);
+    return null;
   }
-  console.warn("⚠️ Walang natagpuang APK — gagamitin ang una bilang default");
-  return APK_CANDIDATES[0];
 }
 
 // ✅ ALAM KUNG NASA APP O WEBSITE
@@ -72,11 +88,22 @@ function isInsideApp() {
 }
 
 window.onload = async function() {
+  // ✅ UNANG TIGNAN — MAY INTERNET BA?
+  updateDownloadVisibility();
+  
+  if (!isOnline()) return; // ❌ WALANG INTERNET — HUWAG NANG ITULOY
+
   const btn = document.getElementById("download-apk-btn");
   const note = document.getElementById("update-note");
 
-  // ✅ HANAPIN MUNA ANG APK
+  // ✅ HANAPIN ANG APK
   foundApk = await findAnyApk();
+
+  if (!foundApk) {
+    btn.textContent = "❌ Walang APK na matagpuan";
+    btn.style.pointerEvents = "none";
+    return;
+  }
 
   if (isInsideApp()) {
     // 📱 NASA APP — BUONG URL
@@ -96,6 +123,10 @@ window.onload = async function() {
     btn.onclick = null;
   }
 };
+
+// ✅ KAPAG NAWALA O BUMALIK ANG INTERNET — KUSANG BABAGO
+window.addEventListener('online', updateDownloadVisibility);
+window.addEventListener('offline', updateDownloadVisibility);
 </script>
 </head>
 <body>
@@ -105,12 +136,18 @@ window.onload = async function() {
 <p>Proyekto ni Mark Jann Tampok — Edukasyong Impormatibo</p>
 </div>
 
+<!-- ✅ KAPAG WALANG INTERNET — LALABAS ITO SA HALIP -->
+<div id="offline-note" class="info-section hidden" style="background:#fef3c7;border:1px solid #fcd34d;">
+  <h2 style="color:#92400e">📡 Walang Koneksyon sa Internet</h2>
+  <p style="color:#78350f">Ang pag-download at pag-update ay hindi available habang walang internet. Magbabalik ito kapag nakakonekta ka na ulit.</p>
+</div>
+
 <div id="download-section" class="download-section">
   <div class="download-title">📤 Aplikasyon</div>
   <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
   <a id="download-apk-btn" href="#" class="download-btn">🔍 Hinahanap ang APK...</a>
   <div id="update-note" style="margin-top:12px;display:none;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
-    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin upang kunin ang bagong bersyon at i-update.
+    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin upang kunin ang bagong bersyon.
   </div>
   <div class="download-info">
     📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Laki: <strong>~3 MB</strong><br>
@@ -119,7 +156,6 @@ window.onload = async function() {
   </div>
 </div>
 
-<!-- ✅ BUONG NILALAMAN — IBINALIK LAHAT -->
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
   <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
