@@ -1,12 +1,14 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
 
 android {
     namespace 'com.markjann.bisyo'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.markjann.bisyo"   // ✅ NAGKATULAD NA!
+        applicationId "com.markjann.bisyo"
         minSdk 24
         targetSdk 34
         versionCode 1
@@ -14,8 +16,12 @@ android {
     }
 
     buildTypes {
-        release { minifyEnabled false }
-        debug { minifyEnabled false }
+        release {
+            minifyEnabled false
+        }
+        debug {
+            minifyEnabled false
+        }
     }
 
     compileOptions {
@@ -31,6 +37,5 @@ android {
 dependencies {
     implementation "androidx.core:core-ktx:1.12.0"
     implementation "androidx.appcompat:appcompat:1.6.1"
-    // ✅ IBA MO NANDOON NA...
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
 }
