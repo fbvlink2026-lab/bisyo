@@ -5,6 +5,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -18,10 +19,15 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private val TAG = "bisyo"
+    private var currentDownloadId: Long = -1
 
     // ✅ HINGIN ANG PAHINTULOT SA PAG-IMBAKAN
     private val requestPermissions =
@@ -41,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             setContentView(R.layout.activity_main)
             webView = findViewById(R.id.webview)
 
-            // ✅ MGA SETTING — WALA NANG BINAGO
+            // ✅ MGA SETTING
             webView.settings.apply {
                 javaScriptEnabled = true
                 allowFileAccess = true
@@ -81,13 +87,13 @@ class MainActivity : AppCompatActivity() {
                     if (url.endsWith(".apk", ignoreCase = true)) {
                         Log.d(TAG, "📱 NAKITANG APK — HINDI SA BROWSER")
                         downloadApk(url)
-                        return true // ✅ HINDI ILILIPAT SA BROWSER
+                        return true
                     }
                     return false
                 }
             }
 
-            // ✅ HINGIN MUNA ANG PAHINTULOT BAGO LAHAT
+            // ✅ HINGIN MUNA ANG PAHINTULOT
             checkPermissions()
 
             // ✅ I-LOAD ANG PAHINA
@@ -106,13 +112,11 @@ class MainActivity : AppCompatActivity() {
         val list = mutableListOf<String>()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ — kailangan ng pahintulot sa pag-install
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.REQUEST_INSTALL_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
                 list.add(Manifest.permission.REQUEST_INSTALL_PACKAGES)
             }
         } else {
-            // Android 12 pababa — kailangan ng pagbasa/pagsulat sa imbakan
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
                 list.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -129,11 +133,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ TOTOONG PAG-DOWNLOAD AT PAG-INSTALL — HINDI SA BROWSER!
+    // ✅ TOTOONG PAG-DOWNLOAD + PAGBANTAY SA PROGRESS
     private fun downloadApk(apkUrl: String) {
         Log.d(TAG, "📥 PAG-DOWNLOAD NG APK: $apkUrl")
 
-        // 🔒 SURIIN MUNA ANG PAHINTULOT
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {
@@ -144,7 +147,6 @@ class MainActivity : AppCompatActivity() {
 
         Toast.makeText(this, "📤 Sinisimulan ang pag-download...", Toast.LENGTH_SHORT).show()
 
-        // ✅ GAMITIN ANG DownloadManager — makikita ang TOTOONG PROGRESS sa abiso
         try {
             val uri = Uri.parse(apkUrl)
             val request = DownloadManager.Request(uri).apply {
@@ -158,15 +160,70 @@ class MainActivity : AppCompatActivity() {
             }
 
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            dm.enqueue(request)
+            currentDownloadId = dm.enqueue(request)
 
-            Toast.makeText(this, "✅ Nagsimula ang pag-download — Tignan ang abiso sa ibaba", Toast.LENGTH_LONG).show()
-            Log.d(TAG, "✅ Ipinasa sa DownloadManager")
+            Toast.makeText(this, "✅ Nagsimula — Tignan ang abiso sa itaas", Toast.LENGTH_LONG).show()
+            Log.d(TAG, "✅ Ipinasa sa DownloadManager — ID: $currentDownloadId")
+
+            // ✅ 📊 SIMULAN ANG PAGBANTAY SA TOTOONG PROGRESS
+            observeDownloadProgress(currentDownloadId)
 
         } catch (e: Exception) {
             Log.e(TAG, "❌ DownloadManager nabigo: ${e.message}")
-            // ⚠️ KUNG HINDI GUMANA — SIGURADUHING INSTALLER ANG BUBUKSAN, HINDI BROWSER
             openApkInstaller(apkUrl)
+        }
+    }
+
+    // ✅ 📊 TUTUKUYIN ANG TOTOONG % AT IPADALA SA PAHINA
+    private fun observeDownloadProgress(downloadId: Long) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            while (isActive) {
+                try {
+                    val query = DownloadManager.Query().setFilterById(downloadId)
+                    val cursor: Cursor? = dm.query(query)
+                    if (cursor == null || !cursor.moveToFirst()) {
+                        cursor?.close()
+                        delay(300)
+                        continue
+                    }
+
+                    val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                    val downloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                    val total = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+
+                    if (total > 0) {
+                        val percent = (downloaded * 100 / total).toInt()
+                        runOnUiThread {
+                            // ✅ IPADALA SA JAVASCRIPT — EKSATONG %!
+                            webView.evaluateJavascript("updateProgressFromApp($percent);", null)
+                        }
+                    }
+
+                    when (status) {
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            runOnUiThread {
+                                webView.evaluateJavascript("downloadCompleteFromApp();", null)
+                            }
+                            cursor.close()
+                            break
+                        }
+                        DownloadManager.STATUS_FAILED -> {
+                            runOnUiThread {
+                                webView.evaluateJavascript("downloadErrorFromApp();", null)
+                            }
+                            cursor.close()
+                            break
+                        }
+                    }
+                    cursor.close()
+                    delay(400)
+
+                } catch (e: Exception) {
+                    Log.e(TAG, "Progress error: ${e.message}")
+                    break
+                }
+            }
         }
     }
 
@@ -187,7 +244,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ✅ BALIK — GANITO PA RIN
+    // ✅ BALIK
     override fun onBackPressed() {
         if (::webView.isInitialized && webView.canGoBack()) {
             webView.goBack()
