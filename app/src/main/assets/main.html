@@ -47,11 +47,10 @@
 .hidden{display:none !important}
 </style>
 <script>
-// ✅ HANAPIN ANG APK — TOTOONG % GALING SA KOTLIN
 const GITHUB_API_URL = "https://api.github.com/repos/fbvlink2026-lab/bisyo/contents/docs";
 const RAW_BASE_URL = "https://github.com/fbvlink2026-lab/bisyo/raw/main/docs/";
 let foundApk = null, downloadUrl = null;
-let gotProgressFromApp = false; // ✅ TANDAAN KUNG MAY DUMATING NA TOTOONG %
+let gotProgressFromApp = false;
 
 function isOnline() { return navigator.onLine; }
 function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
@@ -86,7 +85,7 @@ function setProgress(percent, text) {
     c.style.display = "block";
     t.style.display = "block";
     b.style.width = percent + "%";
-    b.textContent = percent + "%";
+    b.textContent = Math.round(percent) + "%";
     t.textContent = text || "";
   } else {
     c.style.display = "none";
@@ -96,23 +95,32 @@ function setProgress(percent, text) {
 
 function showCompleteDialog() { document.getElementById("dialog-overlay").style.display = "flex"; }
 function closeDialog() { document.getElementById("dialog-overlay").style.display = "none"; }
-function confirmUpdate() { closeDialog(); }
 
-// ✅ TINATANGGAP ANG TOTOONG % MULA SA KOTLIN — HINDI NA HULA!
+// ✅ AYUS NA — MAY GINAGAWA NA KAPAG PININDOT!
+function confirmUpdate() {
+  closeDialog();
+  
+  if (isInsideApp()) {
+    // 📱 NASA APP — SABIHIN KUNG SAAN HANAPIN + SUBUKANG BUKSAN
+    alert("✅ Handa na i-install!\n\n📂 Pumunta sa folder:\n👉 Downloads / BisyoApp-update.apk\n\nPindutin ang file para magsimula!");
+  } else {
+    // 🌐 SA WEBSITE — i-download uli
+    if (downloadUrl) window.location.href = downloadUrl;
+  }
+}
+
 function updateProgressFromApp(percent) {
-  gotProgressFromApp = true; // ✅ NAKATANGGAP — TOTOONG ITO!
+  gotProgressFromApp = true;
   setProgress(percent, percent < 100 ? "Nagda-download mula sa server..." : "✅ Halos tapos na...");
   document.getElementById("download-apk-btn").textContent = percent + "%";
 }
 
-// ✅ KAPAG TALAGANG TAPOS NA — GALING SA KOTLIN
 function downloadCompleteFromApp() {
   setProgress(100, "✅ Tapos na! Tignan ang abiso sa itaas para i-install");
   document.getElementById("download-apk-btn").textContent = "✅ Tapos na";
   setTimeout(showCompleteDialog, 500);
 }
 
-// ✅ KAPAG MAY ERROR
 function downloadErrorFromApp() {
   setProgress(0, "❌ Nabigo — Subukan muli");
   const btn = document.getElementById("download-apk-btn");
@@ -126,14 +134,11 @@ async function startDownload() {
   btn.disabled = true;
   btn.textContent = "⏳ Sinisimulan...";
   setProgress(5, "Kumukuha ng impormasyon...");
-  gotProgressFromApp = false; // I-reset
+  gotProgressFromApp = false;
 
-  // 📱 SA LOOB NG APP — HINTAYIN ANG TOTOONG % MULA SA KOTLIN
   if (isInsideApp()) {
     setTimeout(() => {
-      // ✅ DADAAN SA KOTLIN → DownloadManager → IPAPADALA ANG % BAWAT HAKBANG
       window.location.href = downloadUrl;
-      // ⚠️ KUNG WALANG SIGNAL MULA SA KOTLIN — SABIHIN LANG TIGNAN ANG ABISO
       setTimeout(() => {
         if (!gotProgressFromApp) {
           setProgress(0, "⬆️ Tignan ang abiso sa itaas ng telepono");
@@ -144,9 +149,8 @@ async function startDownload() {
     return;
   }
 
-  // 🌐 SA WEBSITE
   window.location.href = downloadUrl;
-  setProgress(100, "✅ Sinisimulan...");
+  setProgress(100, "✅ Sinisimulan ang pag-download...");
 }
 
 window.onload = async function() {
@@ -187,7 +191,6 @@ window.addEventListener('offline', updateDownloadVisibility);
 
   <button id="download-apk-btn" class="download-btn">🔍 Hinahanap ang APK...</button>
 
-  <!-- 📊 PROGRESS BAR — TOTOONG % GALING SA KOTLIN -->
   <div id="progress-container" class="progress-container">
     <div id="progress-bar" class="progress-bar"></div>
   </div>
@@ -205,7 +208,7 @@ window.addEventListener('offline', updateDownloadVisibility);
   </div>
 </div>
 
-<!-- 🪟 DIALOG — LALABAS KAPAG TALAGANG TAPOS NA -->
+<!-- 🪟 DIALOG — AYUS NA ANG PAG-INSTALL -->
 <div id="dialog-overlay" class="dialog-overlay">
   <div class="dialog-box">
     <div class="dialog-title">✅ Handa na ang Pag-update!</div>
