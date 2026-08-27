@@ -7,7 +7,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -25,10 +24,10 @@ class MainActivity : AppCompatActivity() {
         webView.settings.apply {
             javaScriptEnabled = true
             allowFileAccess = true
+            allowContentAccess = true
             domStorageEnabled = true
             loadsImagesAutomatically = true
-            allowContentAccess = true
-            cacheMode = android.webkit.WebSettings.LOAD_CACHE_ELSE_NETWORK // ✅ Unahin ang lokal
+            cacheMode = android.webkit.WebSettings.LOAD_CACHE_ELSE_NETWORK
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -38,22 +37,23 @@ class MainActivity : AppCompatActivity() {
                 error: android.webkit.WebResourceError?
             ) {
                 super.onReceivedError(view, request, error)
-                val errMsg = "❌ HINDI MA-LOAD: ${request?.url} → ${error?.description}"
+                val errMsg = "❌ HINDI MA-LOAD: ${request?.url}"
                 Log.e(TAG, errMsg)
-                // ✅ Magpakita ng mensahe sa screen
                 Toast.makeText(this@MainActivity, errMsg, Toast.LENGTH_LONG).show()
             }
         }
 
+        // ✅ Ina-load ang index.html na nasa ugat ng assets
         val url = "file:///android_asset/index.html"
         Log.d(TAG, "Naglo-load: $url")
         webView.loadUrl(url)
     }
 
-    // ✅ SURIIN KUNG MAY MGA KAILANGANG FILES BAGO BUKSAN
+    // ✅ SURIIN ANG LAHAT NG KAILANGANG FILES — KASAMA NA ANG main.html!
     private fun verifyAssets() {
         val requiredFiles = listOf(
             "index.html",
+            "main.html",              // ✅ IDINAGDAG — HINDI NA NAWAWALA!
             "style.css",
             "pages/alak.html",
             "pages/sigarilyo.html",
@@ -80,8 +80,7 @@ class MainActivity : AppCompatActivity() {
 
         for (filename in requiredFiles) {
             try {
-                val stream = assetManager.open(filename)
-                stream.close()
+                assetManager.open(filename).close()
                 Log.d(TAG, "✅ NANDITO: $filename")
             } catch (e: Exception) {
                 Log.e(TAG, "❌ NAWAWALA: $filename — ${e.message}")
