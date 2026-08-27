@@ -1,9 +1,9 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 03:46:10 UTC
-🎯 **Katayuan:** ❌ NABIGO
-📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
+📅 **Petsa:** 2026-08-27 03:50:29 UTC
+🎯 **Katayuan:** ✅ TAGUMPAY
+📝 **Detalye:** Matagumpay na nabuo ang APK
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -34,22 +34,44 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
-> Task :app:processDebugMainManifest FAILED
 
-FAILURE: Build failed with an exception.
+> Task :app:processDebugMainManifest
+package="com.markjann.bisyo" found in source AndroidManifest.xml: /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml.
+Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+Recommendation: remove package="com.markjann.bisyo" from the source AndroidManifest.xml: /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml.
 
-* What went wrong:
-Execution failed for task ':app:processDebugMainManifest'.
-> com.android.manifmerger.ManifestMerger2$MergeFailureException: Error parsing /home/runner/work/bisyo/bisyo/app/src/main/AndroidManifest.xml
+> Task :app:processDebugManifest
+> Task :app:javaPreCompileDebug
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:compressDebugAssets
+> Task :app:processDebugResources
+> Task :app:checkDebugDuplicateClasses
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:processDebugJavaRes
+> Task :app:mergeLibDexDebug
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeProjectDexDebug
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:mergeDebugJavaResource
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:mergeExtDexDebug
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
 
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 40s
-10 actionable tasks: 10 executed
+BUILD SUCCESSFUL in 1m 21s
+33 actionable tasks: 33 executed
 ```
 
 ---
