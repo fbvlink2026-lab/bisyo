@@ -1,4 +1,4 @@
-package com.markjann.bisyoapp
+package com.markjann.bisyo
 
 import android.os.Bundle
 import android.util.Log
