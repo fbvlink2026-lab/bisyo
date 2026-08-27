@@ -27,44 +27,71 @@
 .txt{font-size:14px;color:#1f2937;text-align:center}
 </style>
 <script>
-// ✅ ORIHINAL NA ISTRUKTURA — HINDI BINAGO ANG IF-ELSE
-const APK_NAME = "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+// ✅ LISTAHAN NG MGA POSIBLENG PANGALAN NG APK — SUSUBUKAN LAHAT
+const APK_CANDIDATES = [
+  "app-debug.apk",
+  "app-release.apk",
+  "bisyo-app.apk",
+  "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk",
+  "Proyekto-ni-Mark-Jann-Tampok.apk",
+  "bisyo-v1.0.apk",
+  "bisyo.apk"
+];
 
-function getApkLink() {
-  var loc = window.location.href;
-  // 📱 KAPAG NASA APK — WALANG PANGALAN ANG IBINABALIK
-  if (loc.indexOf("file:///android_asset/") === 0) {
-    return "";
-  }
-  // 🌐 KAPAG NASA WEBSITE — PANGALAN LANG — GANITO GUSTO MO
-  else {
-    return APK_NAME;
+const BASE_DOCS_URL = "https://fbvlink2026-lab.github.io/bisyo/docs/";
+let foundApk = null;
+
+// ✅ TIGNAN KUNG UMIIRAL ANG APK
+async function probeApk(filename) {
+  try {
+    const res = await fetch(BASE_DOCS_URL + filename, { 
+      method: 'HEAD', 
+      cache: 'no-store'
+    });
+    return res.ok;
+  } catch(e) {
+    return false;
   }
 }
 
-// ✅ BUONG URL — NASA /docs/ NA — ITO ANG KULANG KANINA!
-const FULL_APK_URL = "https://fbvlink2026-lab.github.io/bisyo/docs/" + APK_NAME;
+// ✅ HANAPIN ANG KAHIT ANONG .apk
+async function findAnyApk() {
+  for (const name of APK_CANDIDATES) {
+    if (await probeApk(name)) {
+      console.log("✅ Natagpuan ang APK:", name);
+      return name;
+    }
+  }
+  console.warn("⚠️ Walang natagpuang APK — gagamitin ang una bilang default");
+  return APK_CANDIDATES[0];
+}
 
-window.onload = function() {
-  var linkName = getApkLink();
-  var btn = document.getElementById("download-apk-btn");
-  var note = document.getElementById("update-note");
+// ✅ ALAM KUNG NASA APP O WEBSITE
+function isInsideApp() {
+  return window.location.href.indexOf("file:///android_asset/") === 0;
+}
 
-  if (!linkName) {
-    // 📱 NASA APP — UPDATE — BUONG URL NASA /docs/
+window.onload = async function() {
+  const btn = document.getElementById("download-apk-btn");
+  const note = document.getElementById("update-note");
+
+  // ✅ HANAPIN MUNA ANG APK
+  foundApk = await findAnyApk();
+
+  if (isInsideApp()) {
+    // 📱 NASA APP — BUONG URL
     btn.textContent = "🔄 I-update ang Aplikasyon";
-    btn.href = FULL_APK_URL;
+    btn.href = BASE_DOCS_URL + foundApk;
     note.style.display = "block";
-    
     btn.onclick = function(e) {
       e.preventDefault();
-      window.open(FULL_APK_URL, "_blank");
+      window.open(BASE_DOCS_URL + foundApk, "_system");
       return false;
     };
   } else {
-    // 🌐 NASA WEBSITE — PANGALAN LANG — NASA /docs/ KAYA DIRETSO
+    // 🌐 NASA WEBSITE — PANGALAN LANG
     btn.textContent = "⬇️ I-download ang APK";
-    btn.href = linkName;
+    btn.href = foundApk;
     note.style.display = "none";
     btn.onclick = null;
   }
@@ -81,9 +108,9 @@ window.onload = function() {
 <div id="download-section" class="download-section">
   <div class="download-title">📤 Aplikasyon</div>
   <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
-  <a id="download-apk-btn" href="#" class="download-btn">⬇️ I-download ang APK</a>
+  <a id="download-apk-btn" href="#" class="download-btn">🔍 Hinahanap ang APK...</a>
   <div id="update-note" style="margin-top:12px;display:none;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
-    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin upang kunin ang bagong bersyon at palitan ang luma.
+    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin upang kunin ang bagong bersyon at i-update.
   </div>
   <div class="download-info">
     📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Laki: <strong>~3 MB</strong><br>
@@ -92,6 +119,7 @@ window.onload = function() {
   </div>
 </div>
 
+<!-- ✅ BUONG NILALAMAN — IBINALIK LAHAT -->
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
   <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
