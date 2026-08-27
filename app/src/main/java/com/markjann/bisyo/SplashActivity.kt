@@ -1,4 +1,4 @@
-package com.markjann.bisyoapp
+package com.markjann.bisyo
 
 import android.content.Intent
 import android.os.Bundle
