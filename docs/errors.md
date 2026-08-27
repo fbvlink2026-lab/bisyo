@@ -1,9 +1,9 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 00:51:49 UTC
-🎯 **Katayuan:** ✅ TAGUMPAY
-📝 **Detalye:** Matagumpay na nabuo ang APK
+📅 **Petsa:** 2026-08-27 01:01:17 UTC
+🎯 **Katayuan:** ❌ NABIGO
+📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -21,52 +21,21 @@ Here are the highlights of this release:
 For more details see https://docs.gradle.org/8.2/release-notes.html
 
 Starting a Gradle Daemon (subsequent builds will be faster)
-> Task :app:preBuild UP-TO-DATE
-> Task :app:preDebugBuild UP-TO-DATE
-> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:checkKotlinGradlePluginConfigurationErrors
-> Task :app:generateDebugResValues
-> Task :app:checkDebugAarMetadata
-> Task :app:mapDebugSourceSetPaths
-> Task :app:generateDebugResources
-> Task :app:packageDebugResources
-> Task :app:mergeDebugResources
-> Task :app:createDebugCompatibleScreenManifests
-> Task :app:extractDeepLinksDebug
-> Task :app:parseDebugLocalResources
-> Task :app:processDebugMainManifest
-> Task :app:processDebugManifest
-> Task :app:javaPreCompileDebug
-> Task :app:mergeDebugShaders
-> Task :app:compileDebugShaders NO-SOURCE
-> Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugAssets
-> Task :app:desugarDebugFileDependencies
-> Task :app:compressDebugAssets
-> Task :app:mergeDebugJniLibFolders
-> Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugNativeLibs NO-SOURCE
-> Task :app:stripDebugDebugSymbols NO-SOURCE
-> Task :app:processDebugManifestForPackage
-> Task :app:mergeLibDexDebug
-> Task :app:processDebugResources
-> Task :app:mergeExtDexDebug
-> Task :app:validateSigningDebug
-> Task :app:writeDebugAppMetadata
-> Task :app:writeDebugSigningConfigVersions
-> Task :app:compileDebugKotlin
-> Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:dexBuilderDebug
-> Task :app:mergeDebugGlobalSynthetics
-> Task :app:processDebugJavaRes
-> Task :app:mergeProjectDexDebug
-> Task :app:mergeDebugJavaResource
-> Task :app:packageDebug
-> Task :app:createDebugApkListingFileRedirect
-> Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 9s
-33 actionable tasks: 33 executed
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Task 'assembleDebug' not found in root project 'bisyo'.
+
+* Try:
+> Run gradlew tasks to get a list of available tasks.
+> For more on name expansion, please refer to https://docs.gradle.org/8.2/userguide/command_line_interface.html#sec:name_abbreviation in the Gradle documentation.
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 35s
 ```
 
 ---
