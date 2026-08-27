@@ -1,7 +1,7 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-27 01:01:17 UTC
+📅 **Petsa:** 2026-08-27 01:07:07 UTC
 🎯 **Katayuan:** ❌ NABIGO
 📝 **Detalye:** Hindi nabuo ang APK — tingnan ang log sa ibaba
 ---
@@ -25,17 +25,23 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 FAILURE: Build failed with an exception.
 
 * What went wrong:
-Task 'assembleDebug' not found in root project 'bisyo'.
+Directory '/home/runner/work/bisyo/bisyo' does not contain a Gradle build.
+
+A Gradle build should contain a 'settings.gradle' or 'settings.gradle.kts' file in its root directory. It may also contain a 'build.gradle' or 'build.gradle.kts' file.
+
+To create a new Gradle build in this directory run 'gradlew init'
+
+For more information about the 'init' task, please refer to https://docs.gradle.org/8.2/userguide/build_init_plugin.html in the Gradle documentation.
+
+For more details on creating a Gradle build, please refer to https://docs.gradle.org/8.2/userguide/tutorial_using_tasks.html in the Gradle documentation.
 
 * Try:
-> Run gradlew tasks to get a list of available tasks.
-> For more on name expansion, please refer to https://docs.gradle.org/8.2/userguide/command_line_interface.html#sec:name_abbreviation in the Gradle documentation.
+> Run gradlew init to create a new Gradle build in this directory.
 > Run with --stacktrace option to get the stack trace.
 > Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 35s
+BUILD FAILED in 6s
 ```
 
 ---
