@@ -1,5 +1,7 @@
 package com.markjann.bisyo
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.webkit.WebResourceRequest
@@ -19,7 +21,7 @@ class MainActivity : AppCompatActivity() {
             setContentView(R.layout.activity_main)
             webView = findViewById(R.id.webview)
 
-            // ✅ TAMA ANG MGA SETTING
+            // ✅ TAMA ANG MGA SETTING — WALANG BINAGO
             webView.settings.apply {
                 javaScriptEnabled = true
                 allowFileAccess = true
@@ -44,16 +46,27 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, errMsg, Toast.LENGTH_LONG).show()
                 }
 
-                // ✅ SIGURADUHING HINDI ILILIPAT SA IBANG BROWSER
+                // ✅ DITO ANG AYUSIN — KAPAG APK — BUKAS SA LABAS NG WEBVIEW!
                 override fun shouldOverrideUrlLoading(
                     view: WebView?,
                     request: WebResourceRequest?
                 ): Boolean {
+                    val url = request?.url.toString()
+
+                    // 📱 KUNG APK ANG PININDOT — BUKAS SA SISTEMA PARA MA-DOWNLOAD/MA-INSTALL
+                    if (url.endsWith(".apk", ignoreCase = true)) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(intent)
+                        return true // ✅ HUWAG SA WEBVIEW — ILIPAT SA LABAS
+                    }
+
+                    // ✅ LAHAT NG IBA — MANATILI SA LOOB NG WEBVIEW — GANITO DATI
                     return false
                 }
             }
 
-            // ✅ DIRETSONG INA-LOAD — WALANG SURIING NAGBUBUKAS NG FILES
+            // ✅ DIRETSONG INA-LOAD — GANITO PA RIN
             val url = "file:///android_asset/index.html"
             Log.d(TAG, "Naglo-load: $url")
             webView.loadUrl(url)
@@ -62,13 +75,10 @@ class MainActivity : AppCompatActivity() {
             Log.e(TAG, "💥 CRASH SA onCreate: ${e.message}", e)
             Toast.makeText(this, "CRASH: ${e.message}", Toast.LENGTH_LONG).show()
             e.printStackTrace()
-            // ✅ Hindi isasara — mananatili para makita ang mensahe
         }
     }
 
-    // ✅ TINANGGAL ANG verifyAssets — DAHIL ITO ANG NAGDUDULOT NG CRASH!
-    // Hindi kailangang buksan ang lahat ng file bago ipakita — hayaan na lang ang WebView ang gagawa!
-
+    // ✅ BALIK — GANITO PA RIN
     override fun onBackPressed() {
         if (::webView.isInitialized && webView.canGoBack()) {
             webView.goBack()
