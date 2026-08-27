@@ -46,22 +46,22 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, errMsg, Toast.LENGTH_LONG).show()
                 }
 
-                // ✅ DITO ANG AYUSIN — KAPAG APK — BUKAS SA LABAS NG WEBVIEW!
+                // ✅ KAPAG APK — BUBUKSAN NG SISTEMA PARA MA-DOWNLOAD/MA-INSTALL
                 override fun shouldOverrideUrlLoading(
                     view: WebView?,
                     request: WebResourceRequest?
                 ): Boolean {
                     val url = request?.url.toString()
 
-                    // 📱 KUNG APK ANG PININDOT — BUKAS SA SISTEMA PARA MA-DOWNLOAD/MA-INSTALL
+                    // 📱 KUNG APK — IBUKSAN SA SISTEMA
                     if (url.endsWith(".apk", ignoreCase = true)) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         startActivity(intent)
-                        return true // ✅ HUWAG SA WEBVIEW — ILIPAT SA LABAS
+                        return true // ✅ HUWAG SA WEBVIEW — SISTEMA NA ANG HAHANDLE
                     }
 
-                    // ✅ LAHAT NG IBA — MANATILI SA LOOB NG WEBVIEW — GANITO DATI
+                    // ✅ LAHAT IBA — MANATILI SA LOOB NG WEBVIEW
                     return false
                 }
             }
