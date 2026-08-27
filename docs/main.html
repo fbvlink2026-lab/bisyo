@@ -27,37 +27,49 @@
 .txt{font-size:14px;color:#1f2937;text-align:center}
 </style>
 <script>
-// ✅ GANITO ANG GUSTO MO — if-else LANG
+// ✅ ORIHINAL NA ISTRUKTURA — HINDI BINAGO ANG IF-ELSE
 function getApkLink() {
   var loc = window.location.href;
-  // 📱 SA APK — walang link
+  // 📱 KAPAG NASA APK — WALANG PANGALAN ANG IBINABALIK
   if (loc.indexOf("file:///android_asset/") === 0) {
     return "";
   }
-  // 🌐 SA WEBSITE — ✅ HINDI TINANGGAL — GANITO PA RIN
+  // 🌐 KAPAG NASA WEBSITE — PANGALAN LANG — GANITO GUSTO MO
   else {
     return "Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
   }
 }
 
+// ✅ BUONG URL — PARA SA KAPAG NASA APP LANG
+const FULL_APK_URL = "https://fbvlink2026-lab.github.io/bisyo/Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+
 window.onload = function() {
   var linkName = getApkLink();
   var btn = document.getElementById("download-apk-btn");
-  var section = document.getElementById("download-section");
   var note = document.getElementById("update-note");
 
   if (!linkName) {
-    // 📱 NASA APK — Ipakita ang UPDATE
-    section.style.display = "block";
+    // 📱 NASA APP — UPDATE — GUMAMIT NG BUONG URL + BUKAS SA LABAS NG WEBVIEW
     btn.textContent = "🔄 I-update ang Aplikasyon";
-    btn.href = "https://fbvlink2026-lab.github.io/bisyo/Proyekto-ni-Mark-Jann-Tampok-v1.0.apk";
+    btn.href = FULL_APK_URL;
     note.style.display = "block";
+    
+    // ✅ SIGURADUHING BUBUKSAN SA LABAS — HINDI SA LOOB NG WEBVIEW
+    btn.onclick = function(e) {
+      e.preventDefault();
+      if (window.open) {
+        window.open(FULL_APK_URL, "_system");
+      } else {
+        window.location.href = FULL_APK_URL;
+      }
+      return false;
+    };
   } else {
-    // 🌐 SA WEBSITE — ✅ GINAMIT ANG IBINALIK NA linkName
-    section.style.display = "block";
+    // 🌐 NASA WEBSITE — PANGALAN LANG — GANITO GUSTO MO — WALANG BINAGO
     btn.textContent = "⬇️ I-download ang APK";
-    btn.href = linkName; // ✅ GANITO GINAMIT — WALANG BINAGO SA ISTRUKTURA
+    btn.href = linkName;
     note.style.display = "none";
+    btn.onclick = null; // ✅ WALANG DAGDAG — GANITO DATI
   }
 };
 </script>
@@ -70,13 +82,11 @@ window.onload = function() {
 </div>
 
 <div id="download-section" class="download-section">
-  <div class="download-title">📤 I-download ang Aplikasyon</div>
+  <div class="download-title">📤 Aplikasyon</div>
   <div class="download-sub">Kumpletong proyekto — tumatakbo nang walang internet</div>
-  <a id="download-apk-btn" href="#" class="download-btn">
-    ⬇️ I-download ang APK
-  </a>
+  <a id="download-apk-btn" href="#" class="download-btn">⬇️ I-download ang APK</a>
   <div id="update-note" style="margin-top:12px;display:none;background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;">
-    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Kapag may bagong bersyon — pindutin upang palitan ang luma.
+    📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Pindutin upang kunin ang bagong bersyon at palitan ang luma.
   </div>
   <div class="download-info">
     📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Laki: <strong>~3 MB</strong><br>
@@ -85,6 +95,7 @@ window.onload = function() {
   </div>
 </div>
 
+<!-- ✅ NATITIRANG LAMAN — GANITO PA RIN -->
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
   <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
