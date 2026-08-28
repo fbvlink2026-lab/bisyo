@@ -46,8 +46,11 @@ class MainActivity : AppCompatActivity() {
 
     private val requestPermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            if (result.all { it.value }) {
+            val allGranted = result.all { it.value }
+            if (allGranted) {
                 Toast.makeText(this, "✅ Pahintulot ibinigay", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "⚠️ Kailangan ng pahintulot para mag-download", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -67,15 +70,23 @@ class MainActivity : AppCompatActivity() {
 
         webView.addJavascriptInterface(this, "AndroidApp")
 
-        webView.setDownloadListener(DownloadListener { url, _, _, _, _ ->
+        webView.setDownloadListener { url, _, _, _, _ ->
             downloadApk(url)
-        })
+        }
 
         webView.webViewClient = object : WebViewClient() {
-            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: android.webkit.WebResourceError?) {
-                Log.e(TAG, "❌ Error: ${request?.url}")
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: android.webkit.WebResourceError?
+            ) {
+                Log.e(TAG, "❌ Error loading: ${request?.url} — ${error?.description}")
             }
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
                 val url = request?.url.toString()
                 if (url.endsWith(".apk", ignoreCase = true)) {
                     downloadApk(url)
@@ -85,27 +96,38 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        registerReceiver(downloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        registerReceiver(
+            downloadReceiver,
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        )
 
         checkPermissions()
-        webView.loadUrl("file:///android_asset/index.html")
+        webView.loadUrl("file:///android_asset/main.html") // ✅ PUMUNTA AGAD SA MAIN.HTML
     }
 
     private fun checkPermissions() {
-        val list = mutableListOf<String>()
+        val neededPermissions = mutableListOf<String>()
+
+        // Android 13+ — kailangan ng pahintulot na mag-install
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.REQUEST_INSTALL_PACKAGES)
-                != PackageManager.PERMISSION_GRANTED) {
-                list.add(Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                neededPermissions.add(Manifest.permission.REQUEST_INSTALL_PACKAGES)
             }
         } else {
+            // Android 12 at mas luma — kailangan ng imbakan
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-                list.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                list.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                neededPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                neededPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
-        if (list.isNotEmpty()) requestPermissions.launch(list.toTypedArray())
+
+        if (neededPermissions.isNotEmpty()) {
+            requestPermissions.launch(neededPermissions.toTypedArray())
+        }
     }
 
     private fun downloadApk(apkUrl: String) {
@@ -114,20 +136,29 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // Suriin ang pahintulot bago magpatuloy
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "⚠️ Kailangan muna ng pahintulot", Toast.LENGTH_LONG).show()
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(this, "⚠️ Kailangan muna ng pahintulot — subukan muli", Toast.LENGTH_LONG).show()
             checkPermissions()
             return
         }
 
+        // Android 8+ — pahintulot mula sa "Hindi Kilalang Pinagmulan"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!packageManager.canRequestPackageInstalls()) {
-                val intent = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                    Uri.parse("package:$packageName"))
+                val intent = Intent(
+                    android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:$packageName")
+                )
                 startActivity(intent)
-                Toast.makeText(this, "⚠️ Pahintulutan muna ang pag-install", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    "⚠️ Pahintulutan muna ang pag-install mula sa app na ito",
+                    Toast.LENGTH_LONG
+                ).show()
                 return
             }
         }
@@ -139,23 +170,29 @@ class MainActivity : AppCompatActivity() {
             val uri = Uri.parse(apkUrl)
             val request = DownloadManager.Request(uri).apply {
                 setTitle("Pag-update — Proyekto ni Mark Jann Tampok")
-                setDescription("Awtomatikong nag-i-install...") // ✅ INAYOS — may panaklong
-                setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+                setDescription("Awtomatikong nag-i-install...")
+                setAllowedNetworkTypes(
+                    DownloadManager.Request.NETWORK_WIFI or
+                    DownloadManager.Request.NETWORK_MOBILE
+                )
                 setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "BisyoApp-update.apk")
+                setDestinationInExternalPublicDir(
+                    Environment.DIRECTORY_DOWNLOADS,
+                    "BisyoApp-update.apk"
+                )
                 setMimeType("application/vnd.android.package-archive")
             }
 
             val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             currentDownloadId = dm.enqueue(request)
 
-            Toast.makeText(this, "✅ Nagsimula — Mag-i-install nang kusa...", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "✅ Nagsimula ang pag-download...", Toast.LENGTH_SHORT).show()
             observeDownloadProgress(currentDownloadId)
 
         } catch (e: Exception) {
             installInProgress = false
-            Log.e(TAG, "❌ Nabigo: ${e.message}")
-            Toast.makeText(this, "❌ Hindi makapagsimula", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "❌ Nabigo: ${e.message}", e)
+            Toast.makeText(this, "❌ Hindi makapagsimula: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -168,12 +205,19 @@ class MainActivity : AppCompatActivity() {
                     val cursor: Cursor? = dm.query(query)
                     if (cursor == null || !cursor.moveToFirst()) {
                         cursor?.close()
-                        delay(400)
+                        delay(300)
                         continue
                     }
-                    val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-                    val downloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-                    val total = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+
+                    val status = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)
+                    )
+                    val downloaded = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                    )
+                    val total = cursor.getLong(
+                        cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                    )
 
                     if (total > 0) {
                         val percent = ((downloaded * 100) / total).toInt()
@@ -181,13 +225,29 @@ class MainActivity : AppCompatActivity() {
                             webView.evaluateJavascript("updateProgressFromApp($percent);", null)
                         }
                     }
-                    if (status == DownloadManager.STATUS_SUCCESSFUL || status == DownloadManager.STATUS_FAILED) {
+
+                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                        runOnUiThread {
+                            webView.evaluateJavascript("downloadCompleteFromApp();", null)
+                        }
                         cursor.close()
                         break
                     }
+
+                    if (status == DownloadManager.STATUS_FAILED) {
+                        runOnUiThread {
+                            webView.evaluateJavascript("downloadErrorFromApp();", null)
+                            Toast.makeText(this@MainActivity, "❌ Nabigo ang pag-download", Toast.LENGTH_LONG).show()
+                        }
+                        installInProgress = false
+                        cursor.close()
+                        break
+                    }
+
                     cursor.close()
-                    delay(400)
+                    delay(300)
                 } catch (e: Exception) {
+                    Log.e(TAG, "Progress check error: ${e.message}")
                     break
                 }
             }
@@ -200,7 +260,9 @@ class MainActivity : AppCompatActivity() {
         val cursor = dm.query(query)
 
         if (cursor?.moveToFirst() == true) {
-            val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+            val status = cursor.getInt(
+                cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS)
+            )
             cursor.close()
 
             if (status == DownloadManager.STATUS_SUCCESSFUL) {
@@ -229,7 +291,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                FileProvider.getUriForFile(this, "$packageName.fileprovider", apkFile)
+                FileProvider.getUriForFile(
+                    this,
+                    "$packageName.fileprovider",
+                    apkFile
+                )
             } else {
                 Uri.fromFile(apkFile)
             }
@@ -240,20 +306,23 @@ class MainActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
-            Toast.makeText(this, "✅ Tapos na — Nag-i-install...\nMagsasara ang app at bubukas muli!", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this,
+                "✅ Tapos na! Bubukas ang installer...\nMagsasara ang app at mag-uupdate.",
+                Toast.LENGTH_LONG
+            ).show()
 
             startActivity(installIntent)
 
-            // ✅ ISARA ANG APP — HINTAY MUNA BAGO TAPUSIN
-            @Suppress("DEPRECATION")
+            // ✅ ISARA ANG APP — HINTAY BAGO TAPUSIN
             CoroutineScope(Dispatchers.Main).launch {
                 delay(800)
-                finishAffinity() // ✅ MAGSASARA ANG APP
+                finishAffinity() // ✅ MAGSASARA ANG APP — papalitan ng bago
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "Install error: ${e.message}")
-            Toast.makeText(this, "❌ Hindi mabuksan: ${e.message}", Toast.LENGTH_LONG).show()
+            Log.e(TAG, "Install error: ${e.message}", e)
+            Toast.makeText(this, "❌ Hindi mabuksan ang installer: ${e.message}", Toast.LENGTH_LONG).show()
             installInProgress = false
         }
     }
@@ -267,11 +336,17 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         try {
             unregisterReceiver(downloadReceiver)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+            Log.e(TAG, "Receiver unregister error: ${e.message}")
+        }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (::webView.isInitialized && webView.canGoBack()) webView.goBack()
-        else super.onBackPressed()
+        if (::webView.isInitialized && webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
+        }
     }
 }
