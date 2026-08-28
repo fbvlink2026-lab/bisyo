@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         checkPermissions()
-        webView.loadUrl("file:///android_asset/main.html") // ✅ PUMUNTA AGAD SA MAIN.HTML
+        webView.loadUrl("file:///android_asset/index.html") // ✅ PUMUNTA AGAD SA MAIN.HTML
     }
 
     private fun checkPermissions() {
