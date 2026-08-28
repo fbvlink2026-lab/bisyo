@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- ✅ IISA LANG — WALANG NAKATAGONG <style> SA LOOB! -->
 <link rel="stylesheet" href="style.css">
 <title>Admin Panel — Mga Ilegal na Bisyo</title>
 </head>
@@ -18,6 +17,10 @@ const BRANCH = "main";
 const ASSETS_PATH = "app/src/main/assets";
 const STORAGE_KEY = "bisyo_offline_changes";
 const CACHE_PREFIX = "bisyo_cache_";
+
+// ✅ 30-MINUTONG LIMITASYON SA SESSION
+const SESSION_DURATION_MINUTES = 30;
+const SESSION_DURATION_MS = SESSION_DURATION_MINUTES * 60 * 1000;
 </script>
 
 <div class="header">
@@ -38,7 +41,7 @@ const CACHE_PREFIX = "bisyo_cache_";
   <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
   <button class="btn btn-primary" onclick="doLogin()">🔑 Mag-login</button>
   <p style="text-align:center;margin-top:12px;font-size:13px;color:#6b7280">
-    💡 Tandaan: Ito rin ang gagamitin sa pag-setup ng Token.
+    💡 Tandaan: Ito rin ang gagamitin sa pag-setup ng Token. Session ay tatagal ng 30 minuto lamang.
   </p>
 </div>
 
@@ -270,8 +273,22 @@ function clearAllPending(){ if(!confirm("Burahin lahat?"))return; localStorage.r
 
 // ========== ENCRYPTION ==========
 async function deriveKey(p){
-  const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),{name:"PBKDF2"},false,["deriveKey"]);
-  return crypto.subtle.deriveKey({name:"PBKDF2",salt:new TextEncoder().encode("BisyoSalt2026"),iterations:100000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["decrypt"]);
+  const encoder = new TextEncoder();
+  const salt = encoder.encode("BisyoSalt2026");
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(p),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
 }
 async function decryptToken(enc,p){
   try{
@@ -281,11 +298,30 @@ async function decryptToken(enc,p){
   }catch{return null}
 }
 
+// ========== SESSION EXPIRY CHECK ==========
+function checkSessionExpiry() {
+  const loginTime = localStorage.getItem('bisyo_admin_login_time');
+  if (!loginTime) return false;
+
+  const elapsed = Date.now() - parseInt(loginTime, 10);
+  if (elapsed > SESSION_DURATION_MS) {
+    doLogout();
+    showError("⏹️ Lumipas na ang 30 minuto — kailangang mag-login muli.");
+    return false;
+  }
+  return true;
+}
+
 // ========== LOGIN ==========
 async function doLogin(){
   const p=document.getElementById('admin-pass').value;
   if(p!==ADMIN_PASSWORD)return showError("❌ Maling Password");
   ADMIN_PASSWORD_ENTERED=p;
+
+  // ✅ IIMBAK ANG PASSWORD + ORAS — MAKIKITA NG SETUP-TOKEN.HTML
+  localStorage.setItem('bisyo_admin_password', p);
+  localStorage.setItem('bisyo_admin_login_time', Date.now().toString());
+
   if(ENCRYPTED_TOKEN!=="PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN")decryptedToken=await decryptToken(ENCRYPTED_TOKEN,p);
   document.getElementById('login-form').classList.add('hidden');
   document.getElementById('admin-panel').classList.remove('hidden');
@@ -294,6 +330,9 @@ async function doLogin(){
 }
 function showError(m){document.getElementById('login-error').textContent=m}
 function doLogout(){
+  // ✅ BURAHIN ANG LAHAT NG SESSION
+  localStorage.removeItem('bisyo_admin_password');
+  localStorage.removeItem('bisyo_admin_login_time');
   ADMIN_PASSWORD_ENTERED=decryptedToken=currentPageId=null;
   document.getElementById('admin-panel').classList.add('hidden');
   document.getElementById('login-form').classList.remove('hidden');
@@ -318,7 +357,6 @@ async function selectPage(id){
   document.getElementById('status').className='status'; document.getElementById('status').textContent='';
   updateLastSaved();
 
-  // 1. May lokal na pagbabago? — Ipakita
   const loc=getChanges().find(c=>c.pageId===id);
   if(loc){
     document.getElementById('editor').value=loc.content;
@@ -326,7 +364,6 @@ async function selectPage(id){
     return showStatus("📌 Ipinapakita ang iyong naka-imbak na pagbabago","warning");
   }
 
-  // 2. Online + Token? — Kunin sa GitHub
   if(isOnline && decryptedToken){
     try{
       const res=await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html?ref=${BRANCH}`,{
@@ -356,7 +393,6 @@ async function selectPage(id){
       }
     }
   }else{
-    // 3. Walang internet — Gamitin ang cache
     const cached=getCached(id);
     if(cached){
       document.getElementById('editor').value=cached;
@@ -445,7 +481,38 @@ function changePassword(){
   closePwModal();
 }
 
-window.addEventListener('load',()=>{updateConnUI();updatePendingUI()});
+// ========== INIT — ✅ AWTOMATIKONG IBABALIK SA LOOB KAHIT NI-REFRESH ==========
+window.addEventListener('load', async () => {
+  const savedPassword = localStorage.getItem('bisyo_admin_password');
+
+  // ✅ KUNG MAY SESSION PA AT HINDI PA LUMILIPAS ANG 30 MINUTO — IBABALIK KA AGAD SA LOOB
+  if (savedPassword && checkSessionExpiry()) {
+    ADMIN_PASSWORD_ENTERED = savedPassword;
+
+    // Subukang i-decrypt ang token kung mayroon
+    if (ENCRYPTED_TOKEN !== "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN") {
+      decryptedToken = await decryptToken(ENCRYPTED_TOKEN, savedPassword);
+    }
+
+    // Itago ang login form, ipakita ang panel
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('admin-panel').classList.remove('hidden');
+    buildPageList();
+
+    showStatus(decryptedToken ? "✅ Session naibalik — handa nang gamitin!" : "⚠️ Session naibalik — walang Token", "info");
+  }
+
+  updateConnUI();
+  updatePendingUI();
+});
+
+// ✅ Suriin bawat 1 minuto habang nakabukas
+setInterval(() => {
+  if (ADMIN_PASSWORD_ENTERED) {
+    checkSessionExpiry();
+  }
+}, 60 * 1000);
 </script>
+
 </body>
 </html>
