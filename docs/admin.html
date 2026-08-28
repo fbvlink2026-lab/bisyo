@@ -24,9 +24,14 @@
     <small>Ilagay ang gusto mong oras bago kusa mag-logout (1–480 minuto)</small>
   </div>
 
+  <label style="display:flex;align-items:center;gap:8px;margin:8px 0 12px 0;cursor:pointer">
+    <input type="checkbox" id="keep-logged-in" checked>
+    ✅ Manatiling naka-login kahit i-refresh ang pahina
+  </label>
+
   <button class="btn btn-primary" style="width:100%" onclick="doLogin()">🔑 Mag-login</button>
   <p style="text-align:center;margin-top:12px;font-size:13px;color:#6b7280">
-    💡 Ang password ay hinihingi lamang — HINDI nakasulat sa code. Ikaw lang ang nakakaalam.
+    💡 Ang password ay hinihingi lamang — HINDI nakasulat o naiimbak. Ikaw lang ang nakakaalam.
   </p>
 </div>
 
@@ -43,7 +48,6 @@
       </div>
     </div>
 
-    <!-- 🆕 BAHAGI: PAGPAPALIT NG PINAGKUKUNAN / PAGBUBURA NG CACHE -->
     <div style="margin-top:12px;padding:10px;background:rgba(0,0,0,0.05);border-radius:8px">
       <div style="font-weight:bold;margin-bottom:8px;font-size:14px">📂 Pinagkukunan at Paglilinis</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">
@@ -120,8 +124,9 @@
 
 <script>
 // ==================================================
-// ✅ WALANG NAKASULAT NA PASSWORD
-// ✅ MAY PAGPIPILIAN NG PINAGKUKUNAN: GitHub / Cache / Lokal
+// ✅ PANATILI ANG LOGIN PAG NI-REFRESH
+// ✅ TAMA ANG DAAN: assets/pages/
+// ✅ HINDI NAKAIMBAK ANG PASSWORD — LIGTAS PA RIN
 // ==================================================
 
 const ENCRYPTED_TOKEN = "ofh4h1R4+juy/tfcN2F+f0gep5TrUsA9QLuR/grLaVTN8GAfCgbL9UjOI8SNRpoRWKrMlpIsgv5oJb+UH8bwbofDRvw=";
@@ -129,9 +134,11 @@ const ENCRYPTED_TOKEN = "ofh4h1R4+juy/tfcN2F+f0gep5TrUsA9QLuR/grLaVTN8GAfCgbL9Uj
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
-const ASSETS_PATH = "app/src/main/assets";
+const ASSETS_PATH = "app/src/main/assets/pages";
+
 const STORAGE_KEY = "bisyo_offline_changes";
 const CACHE_PREFIX = "bisyo_cache_";
+const SESSION_STORAGE_KEY = "bisyo_session_data"; // ✅ Tanda ng session — dito na ilalagay
 
 let ADMIN_PASSWORD = null;
 let decryptedToken = null;
@@ -139,9 +146,7 @@ let currentPageId = null;
 let isOnline = navigator.onLine;
 let SESSION_DURATION_MS = 30 * 60 * 1000;
 let sessionCountdownTimer = null;
-
-// 🆕 TANDA KUNG ANONG PINAGKUKUNAN ANG GINAGAMIT
-let forceSource = null; // null=awtomatiko, "github"=mula sa GitHub, "local"=mula sa lokal
+let forceSource = null;
 
 const pages = [
   {id:"index", name:"🏠 Panimulang Pahina"},
@@ -197,9 +202,10 @@ function setSessionDurationFromInput(){
 function startSessionCountdown(){
   if(sessionCountdownTimer) clearInterval(sessionCountdownTimer);
   sessionCountdownTimer = setInterval(() => {
-    const loginTime = parseInt(sessionStorage.getItem('bisyo_admin_login_time') || '0', 10);
-    const elapsed = Date.now() - loginTime;
-    const remaining = SESSION_DURATION_MS - elapsed;
+    const sessionData = loadSessionData();
+    if(!sessionData) return;
+    const elapsed = Date.now() - sessionData.loginTime;
+    const remaining = sessionData.durationMs - elapsed;
     if(remaining <= 0){
       doLogout();
       showStatus("⏹️ Lumipas na ang itinakdang oras — kusa kang nag-logout.", "warning");
@@ -208,25 +214,75 @@ function startSessionCountdown(){
     const m = Math.floor(remaining / 60000);
     const s = Math.floor((remaining % 60000) / 1000);
     document.getElementById('session-countdown').textContent = `⏳ Natitira: ${m}m ${s}s`;
+    // ✅ I-update ang natitirang oras sa imbakan
+    saveSessionData();
   }, 1000);
 }
 
-function checkSessionExpiry(){
-  const loginTime = sessionStorage.getItem('bisyo_admin_login_time');
-  const savedDuration = sessionStorage.getItem('bisyo_session_duration_ms');
-  if(savedDuration) SESSION_DURATION_MS = parseInt(savedDuration, 10);
-  if(!loginTime) return false;
-  const elapsed = Date.now() - parseInt(loginTime, 10);
-  if(elapsed > SESSION_DURATION_MS){
-    doLogout();
-    showStatus("⏹️ Lumipas na ang itinakdang oras — kailangang mag-login muli.", "warning");
+// ✅ I-IMBAKAN AT I-LOAD ANG SESSION — WALANG PASSWORD DITO!
+function saveSessionData(){
+  const keepLoggedIn = document.getElementById('keep-logged-in').checked;
+  const storage = keepLoggedIn ? localStorage : sessionStorage;
+
+  const data = {
+    loginTime: Date.now(),
+    durationMs: SESSION_DURATION_MS,
+    keepLoggedIn: keepLoggedIn
+  };
+
+  // ✅ BURAHIN MUNA SA DALAWANG URI NG IMBALAKAN
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+
+  // ✅ ILAGAY SA PINILING LUGAR
+  storage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadSessionData(){
+  // Tingnan muna sa localStorage, tapos sa sessionStorage
+  let data = null;
+  let source = localStorage.getItem(SESSION_STORAGE_KEY);
+  if(source) data = JSON.parse(source);
+  else {
+    source = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if(source) data = JSON.parse(source);
+  }
+  return data;
+}
+
+function clearSessionData(){
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+  sessionStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
+// ✅ AWTO-LOGIN PAG NI-REFRESH — KUNG MAY TANDA PA NG SESSION
+async function tryAutoLogin(){
+  const sessionData = loadSessionData();
+  if(!sessionData) return false;
+
+  // ✅ SURIIN KUNG HINDI PA LUMILIPAS ANG ORAS
+  const elapsed = Date.now() - sessionData.loginTime;
+  if(elapsed >= sessionData.durationMs){
+    clearSessionData();
     return false;
   }
+
+  // ✅ BALIKAN ANG TAGAL NG SESSION
+  SESSION_DURATION_MS = sessionData.durationMs;
+  document.getElementById('session-minutes').value = Math.round(sessionData.durationMs / 60000);
+
+  // ✅ HINDI NA HIHINGI NG PASSWORD — PERO HINDI RIN NAIIMBAK ANG PASSWORD
+  // Kailangan pa ring ibigay ang password kapag kailangan i-decrypt ang token — hihingi kapag kinakailangan
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('admin-panel').classList.remove('hidden');
+  buildPageList(); updatePendingUI(); updateConnUI(); startSessionCountdown();
+
+  showStatus(`✅ NAKA-LOGIN PA RIN — ${Math.round((sessionData.durationMs - elapsed)/60000)} minuto pa ang natitira`, "success");
   return true;
 }
 
 function refreshSession(){
-  sessionStorage.setItem('bisyo_admin_login_time', Date.now().toString());
+  saveSessionData(); // ✅ I-update ang oras
   startSessionCountdown();
   showStatus("✅ Pinalawig ang session — bago magsimula ang pagbibilang.", "success");
 }
@@ -238,8 +294,8 @@ async function doLogin(){
   ADMIN_PASSWORD = p;
 
   const durationMs = setSessionDurationFromInput();
-  sessionStorage.setItem('bisyo_admin_login_time', Date.now().toString());
-  sessionStorage.setItem('bisyo_session_duration_ms', durationMs.toString());
+  SESSION_DURATION_MS = durationMs;
+  saveSessionData(); // ✅ I-imbak ang tanda ng session
 
   if(ENCRYPTED_TOKEN !== "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
     decryptedToken = await decryptToken(ENCRYPTED_TOKEN, p);
@@ -248,6 +304,7 @@ async function doLogin(){
   document.getElementById('login-form').classList.add('hidden');
   document.getElementById('admin-panel').classList.remove('hidden');
   buildPageList(); updatePendingUI(); updateConnUI(); startSessionCountdown();
+
   showStatus(decryptedToken
     ? `✅ Naka-konekta — handa nang i-save! Session: ${Math.round(durationMs/60000)} minuto`
     : `⚠️ Walang Token — naka-imbak LOKAL muna. Session: ${Math.round(durationMs/60000)} minuto`, "info");
@@ -256,8 +313,7 @@ async function doLogin(){
 function showLoginError(m){ document.getElementById('login-error').textContent = m }
 function doLogout(){
   if(sessionCountdownTimer) clearInterval(sessionCountdownTimer);
-  sessionStorage.removeItem('bisyo_admin_login_time');
-  sessionStorage.removeItem('bisyo_session_duration_ms');
+  clearSessionData(); // ✅ Burahin ang tanda ng session
   ADMIN_PASSWORD = decryptedToken = currentPageId = forceSource = null;
   document.getElementById('admin-panel').classList.add('hidden');
   document.getElementById('login-form').classList.remove('hidden');
@@ -283,41 +339,35 @@ function updateLastSaved(){
   document.getElementById('last-saved-info').textContent = d ? `Huling na-imbak: ${new Date(d.t).toLocaleTimeString('tl-PH',{hour:'2-digit',minute:'2-digit'})} (${d.m==='offline'?'Lokal':'GitHub'})` : '';
 }
 
-// 🆕 ===== MGA BAGONG FUNGSIYON PAGLILINIS =====
-
+// ===== MGA BUTTON NG PAGLILINIS =====
 function clearCache(){
-  if(!confirm("🧹 Sigurado ka bang burahin ang lahat ng naka-cache na kopya mula sa GitHub?\nKukunin ulit ang pinakabago mula sa GitHub sa susunod na bukas.")) return;
+  if(!confirm("🧹 Burahin ang lahat ng naka-cache na kopya mula sa GitHub?")) return;
   const keys = Object.keys(localStorage).filter(k => k.startsWith(CACHE_PREFIX));
   keys.forEach(k => localStorage.removeItem(k));
-  showStatus(`✅ Cache na binubura — ${keys.length} pahina`, "success");
-  if(currentPageId) selectPage(currentPageId); // I-reload ang kasalukuyang pahina
-}
-
-function clearLocalChanges(){
-  if(!confirm("🗑️ Sigurado ka bang burahin ang LAHAT ng hindi pa nai-sync na pagbabago?\nHindi na ito mababawi.")) return;
-  localStorage.removeItem(STORAGE_KEY);
-  updatePendingUI();
-  showStatus("✅ Lokal na pagbabago ay binura — babalik sa huling kopya", "success");
+  showStatus(`✅ Cache binura — ${keys.length} pahina`, "success");
   if(currentPageId) selectPage(currentPageId);
 }
-
+function clearLocalChanges(){
+  if(!confirm("🗑️ Burahin lahat ng hindi pa nai-sync na pagbabago?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  updatePendingUI();
+  showStatus("✅ Lokal na pagbabago binura", "success");
+  if(currentPageId) selectPage(currentPageId);
+}
 function refreshFromGitHub(){
   if(!currentPageId) return showStatus("❌ Pumili muna ng pahina", "error");
   forceSource = "github";
-  showStatus("🔄 Pinipilit mula sa GitHub...", "info");
   selectPage(currentPageId);
-  setTimeout(() => { forceSource = null; }, 2000); // Balik sa awtomatiko pagkatapos
+  setTimeout(() => { forceSource = null; }, 3000);
 }
-
 function loadFromLocal(){
   if(!currentPageId) return showStatus("❌ Pumili muna ng pahina", "error");
   forceSource = "local";
-  showStatus("📄 Gamit ang lokal na kopya...", "info");
   selectPage(currentPageId);
-  setTimeout(() => { forceSource = null; }, 2000);
+  setTimeout(() => { forceSource = null; }, 3000);
 }
 
-// ===== PAG-IMBAKAN =====
+// ===== LOKAL NA PAG-IMBAK =====
 function getChanges(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return []} }
 function saveChange(id,content,name){
   const arr = getChanges().filter(c=>c.pageId!==id);
@@ -342,7 +392,7 @@ function discard(id){ if(!confirm("Burahin ang pagbabago?"))return; removeChange
 async function syncAllPending(){ if(!isOnline||!decryptedToken)return showStatus("❌ Kailangan ng Internet at Token","error"); for(const c of getChanges())await upload(c.pageId,c.content) }
 async function syncCurrentPage(){ if(!currentPageId)return; saveContent() }
 async function syncOne(id){ const c=getChanges().find(x=>x.pageId===id); if(c)await upload(id,c.content) }
-function clearAllPending(){ if(!confirm("Burahin lahat ng pagbabago?"))return; localStorage.removeItem(STORAGE_KEY); updatePendingUI(); showStatus("✅ Nabura lahat","info") }
+function clearAllPending(){ if(!confirm("Burahin lahat?"))return; localStorage.removeItem(STORAGE_KEY); updatePendingUI(); showStatus("✅ Nabura lahat","info") }
 
 async function deriveKey(p){
   const encoder = new TextEncoder();
@@ -367,7 +417,6 @@ function buildPageList(){
   });
 }
 
-// ✅ TAMA ANG PAG-DECODE
 function decodeBase64(str) {
   try {
     const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -378,7 +427,6 @@ function decodeBase64(str) {
   }
 }
 
-// ✅ NAAYOS NA: KASAMA ANG PAGPIPILIAN NG PINAGKUKUNAN
 async function selectPage(id){
   currentPageId = id; buildPageList();
   const info = pages.find(p=>p.id===id);
@@ -389,81 +437,74 @@ async function selectPage(id){
   document.getElementById('status').textContent = '';
   updateLastSaved();
 
-  // 1️⃣ Kung pinilit sa LOKAL — gamitin lang ang cache/lokal
   if(forceSource === "local"){
     const cached = getCached(id);
     if(cached && cached.trim()){
       document.getElementById('editor').value = cached;
       setSyncState('pending');
-      return showStatus("📄 Gamit ang lokal na kopya mula sa telepono", "info");
+      return showStatus("📄 Gamit ang lokal na kopya", "info");
     }
-    return showStatus("⚠️ Walang lokal na kopya para sa pahinang ito", "warning");
+    return showStatus("⚠️ Walang lokal na kopya", "warning");
   }
 
-  // 2️⃣ May lokal na pagbabago? → Iyon ang ipakita
   const loc = getChanges().find(c=>c.pageId===id);
   if(loc){
     document.getElementById('editor').value = loc.content;
     setSyncState('pending');
-    return showStatus("📌 Ipinapakita ang iyong naka-imbak na pagbabago", "warning");
+    return showStatus("📌 Ipinapakita ang lokal na pagbabago", "warning");
   }
 
   let gotContent = false;
 
-  // 3️⃣ Kung may internet at Token HINDI "local" ang pinilit → Kumuha sa GitHub
   if((forceSource === "github" || !forceSource) && isOnline && decryptedToken){
     try{
-      if(forceSource === "github") showStatus("🔄 Kinukuha MULA SA GITHUB...", "info");
-      else showStatus("⏰ Kinukuha mula sa GitHub...", "info");
-
+      showStatus("⏰ Kinukuha mula sa GitHub...", "info");
+      const filePath = `${ASSETS_PATH}/${id}.html`;
       const res = await fetch(
-        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html?ref=${BRANCH}`,
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`,
         {headers:{Authorization:`token ${decryptedToken}`}, signal:AbortSignal.timeout(15000)}
       );
 
       if(res.ok){
         const data = await res.json();
         const content = decodeBase64(data.content);
-
         if(content && content.trim()){
           document.getElementById('editor').value = content;
           localStorage.setItem(CACHE_PREFIX+id, content);
           setSyncState('saved');
-          showStatus(`✅ MULA SA GITHUB — ${content.length} letra`, "success");
+          showStatus(`✅ NABASA MULA SA GITHUB — ${content.length} letra`, "success");
           gotContent = true;
         } else {
           document.getElementById('editor').value = '';
           setSyncState('saved');
-          showStatus("⚠️ Umuwi ang pahina — WALANG LAMAN pa rin", "warning");
+          showStatus("⚠️ Walang laman ang pahina", "warning");
           gotContent = true;
         }
       }
       else if(res.status === 404){
         document.getElementById('editor').value = getTemplate('full').replace('[PANGALAN]', info.name);
         setSyncState('saved');
-        showStatus("📌 Bagong pahina — handa nang isulat", "info");
+        showStatus(`📌 WALANG FILE — Bagong pahina: ${filePath}`, "info");
         gotContent = true;
       }
       else throw new Error(`HTTP ${res.status}`);
     }
     catch(err){
       console.warn("GitHub error:", err);
-      showStatus(`⚠️ Hindi makakonekta sa GitHub: ${err.message}`, "warning");
+      showStatus(`⚠️ Hindi makakonekta: ${err.message}`, "warning");
     }
   }
 
-  // 4️⃣ Walang makuha sa GitHub → tingnan ang Cache
   if(!gotContent){
     const cached = getCached(id);
     if(cached && cached.trim()){
       document.getElementById('editor').value = cached;
       setSyncState('pending');
-      showStatus("📄 GAMIT ANG LOKAL NA KOPYA mula sa telepono", "info");
+      showStatus("📄 GAMIT ANG CACHE — walang internet", "info");
       gotContent = true;
     }
   }
 
-  // 5️⃣ Talagang wala — bago talaga
   if(!gotContent){
     document.getElementById('editor').value = getTemplate('full').replace('[PANGALAN]', info.name);
     setSyncState('pending');
@@ -490,7 +531,7 @@ function previewContent(){
 async function saveContent(){
   if(!currentPageId) return showStatus("❌ Pumili muna ng pahina","error");
   const content = document.getElementById('editor').value;
-  if(!content.trim()) return showStatus("❌ Walang nilalaman — hindi ise-save","error");
+  if(!content.trim()) return showStatus("❌ Walang nilalaman","error");
   const info = pages.find(p=>p.id===currentPageId);
 
   saveChange(currentPageId, content, info.name);
@@ -513,8 +554,9 @@ async function saveContent(){
 async function upload(id,content){
   if(!decryptedToken) return false;
   try{
+    const filePath = `${ASSETS_PATH}/${id}.html`;
     let sha = null;
-    const g = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html?ref=${BRANCH}`, {headers:{Authorization:`token ${decryptedToken}`}});
+    const g = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {headers:{Authorization:`token ${decryptedToken}`}});
     if(g.ok) sha = (await g.json()).sha;
     const b = {
       message: `Update ${id}.html — ${new Date().toLocaleString('tl-PH')}`,
@@ -522,7 +564,7 @@ async function upload(id,content){
       branch: BRANCH
     };
     if(sha) b.sha = sha;
-    const p = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html`, {
+    const p = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
       method: 'PUT',
       headers: {Authorization:`token ${decryptedToken}`, 'Content-Type':'application/json'},
       body: JSON.stringify(b)
@@ -549,8 +591,9 @@ function changePassword(){
   closePwModal();
 }
 
+// ✅ PAGBUKAS NG PAHINA — TINGNAN KUNG MAY SESSION PA
 window.addEventListener('load', async () => {
-  // Palaging hihingi ng password — walang awtomatikong pag-login
+  await tryAutoLogin();
 });
 </script>
 
