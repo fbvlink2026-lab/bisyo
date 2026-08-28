@@ -1,5 +1,5 @@
 /* ==========================================
-   LUMANG ESTILO — HINDI BINAGO!
+   LUMANG ESTILO — PARA SA LAHAT NG PAHINA
    ========================================== */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,sans-serif}
 body{background:#f0f2f5;padding-bottom:30px}
@@ -80,8 +80,7 @@ body{background:#f0f2f5;padding-bottom:30px}
 .content ul{padding-left:20px;margin-bottom:10px}
 
 /* ==========================================
-   MGA DAGDAG PARA SA ADMIN PANEL LANG
-   HINDI MAAPEKTUHAN ANG MGA KARANIWANG PAHINA
+   ADMIN PANEL — MGA ESTILO
    ========================================== */
 
 /* ---------- STATUS INDICATORS ---------- */
@@ -90,7 +89,6 @@ body{background:#f0f2f5;padding-bottom:30px}
   gap: 14px;
   align-items: center;
   font-size: 13px;
-  margin-top: 6px;
 }
 .status-dot {
   width: 12px;
@@ -149,7 +147,6 @@ body{background:#f0f2f5;padding-bottom:30px}
 .btn-primary {
   background: #b91c1c;
   color: white;
-  width: 100%;
   border: none;
   font-weight: bold;
 }
@@ -323,13 +320,12 @@ textarea#editor.unsaved {
   padding: 12px;
   border-radius: 8px;
   white-space: pre-wrap;
-  display: none;
   line-height: 1.5;
 }
-.status.success  { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
-.status.error    { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
-.status.info     { background: #dbeafe; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
-.status.warning  { background: #fef3c7; color: #92400e; display: block; border-left: 4px solid #f59e0b; }
+.status.success  { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
+.status.error    { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
+.status.info     { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+.status.warning  { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
 
 /* ---------- MODAL ---------- */
 .modal {
@@ -418,4 +414,38 @@ label {
   border: none;
   cursor: pointer;
   margin-left: 4px;
+}
+
+/* ==========================================
+   SETUP-TOKEN PAGE — MGA DAGDAG NA ESTILO
+   ========================================== */
+.error-text { color: #dc2626; }
+.warning { color: #d97706; }
+.success { color: #16a34a; }
+.info { color: #2563eb; }
+
+pre {
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #b91c1c;
+  overflow-x: auto;
+  margin: 12px 0;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #b91c1c;
 }
