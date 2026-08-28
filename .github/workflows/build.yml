@@ -18,7 +18,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ⚡ KUNG MAYROON NANG gradlew — DERETSO NA LANG
+      # ==========================================
+      # ⬆️ HAKBANG 0 — AWTO TAASIN ANG VERSION
+      # ==========================================
+      - name: ⬆️ Basahin at Taasan ang Bersyon
+        id: version
+        run: |
+          FILE=versionCode.txt
+          if [ ! -f "$FILE" ]; then echo "1" > "$FILE"; fi
+          CURRENT=$(cat "$FILE")
+          NEXT=$((CURRENT + 1))
+          echo "$NEXT" > "$FILE"
+          VERSION_NAME="1.0.$NEXT"
+          echo "VERSION_CODE=$NEXT" >> $GITHUB_OUTPUT
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "✅ Bersyon: $CURRENT → $VERSION_NAME ($NEXT)"
+
+      # ⚡ Check Gradle Wrapper
       - name: ⚡ Check Gradle Wrapper
         id: wrapper-check
         run: |
@@ -81,7 +97,6 @@ jobs:
 
           mkdir -p "$ASSETS_DIR"
 
-          # ✅ BURAHIN MUNA — SIGURADONG MAY PAGBABAGO
           if [ -f "$TARGET_FILE" ]; then
             rm -f "$TARGET_FILE"
             echo "🗑️ BINURA ANG LUMANG errors.md"
@@ -89,18 +104,18 @@ jobs:
 
           if [ -f "$STATUS_FILE" ] && [ "$(cat $STATUS_FILE)" = "SUCCESS" ]; then
             STATUS_DISPLAY="✅ TAGUMPAY"
-            STATUS_DETAIL="Matagumpay na nabuo ang APK"
+            STATUS_DETAIL="Matagumpay na nabuo ang APK — Bersyon v${{ steps.version.outputs.VERSION_NAME }}"
           else
             STATUS_DISPLAY="❌ NABIGO"
             STATUS_DETAIL="Hindi nabuo ang APK — tingnan ang log sa ibaba"
           fi
 
-          # ✅ ISULAT ANG BAGONG FILE
           {
             echo "# 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok"
             echo ""
             echo "---"
             echo "📅 **Petsa:** $DATE"
+            echo "🏷️ **Bersyon:** v${{ steps.version.outputs.VERSION_NAME }} (${{ steps.version.outputs.VERSION_CODE }})"
             echo "🎯 **Katayuan:** $STATUS_DISPLAY"
             echo "📝 **Detalye:** $STATUS_DETAIL"
             echo "---"
@@ -121,37 +136,19 @@ jobs:
           echo "✅ BAGONG errors.md NAISULAT SA: $TARGET_FILE"
 
       # ==========================================
-      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/ ✅ WALANG INILILIKO — LAHAT KASAMA
+      # 📤 HAKBANG 3 — KOPYAHIN BUONG assets/ → docs/
       # ==========================================
-      - name: 📤 Kopyahin BUONG Assets papunta sa /docs — LAHAT KASAMA
+      - name: 📤 Kopyahin BUONG Assets papunta sa /docs
         run: |
           ASSETS_DIR="app/src/main/assets"
           DOCS_DIR="./docs"
-
-          echo "=== 📂 LAMAN NG assets/ BAGO KOPYAHIN ==="
-          ls -la "$ASSETS_DIR"
-          echo ""
-
-          echo "=== ✅ BURAHIN BUONG docs/ ==="
           rm -rf "$DOCS_DIR"
           mkdir -p "$DOCS_DIR"
-
-          echo "=== 📤 KOPYAHIN BUONG assets/ → docs/ — WALANG INILILIKO ==="
           cp -R "$ASSETS_DIR"/. "$DOCS_DIR/"
-
-          echo ""
-          echo "=== ✅ LAMAN NG docs/ ==="
-          ls -la "$DOCS_DIR"
-
-          if [ -f "$DOCS_DIR/errors.md" ]; then
-            echo "✅✅✅ BAGONG errors.md NAKOPYA — SIGURADO!"
-          fi
-          if [ -f "$DOCS_DIR/setup-token.html" ]; then
-            echo "✅✅✅ setup-token.html NAKOPYA — KASAMA PALAGI!"
-          fi
+          echo "✅ NA-KOPYA LAHAT NG assets/ → docs/"
 
       # ==========================================
-      # 📤 HAKBANG 4 — ILAGAY ANG APK SA docs/
+      # 📤 HAKBANG 4 — ILAGAY ANG APK SA docs/ ✅ TAMANG PANGALAN
       # ==========================================
       - name: 📤 Hanapin at Ihanda ang APK
         id: apk-step
@@ -159,16 +156,14 @@ jobs:
           APK_FILE=$(find . -name "app-debug.apk" -path "*/build/*" | head -1)
 
           if [ -n "$APK_FILE" ] && [ -f "$APK_FILE" ]; then
-            APK_SIZE=$(du -h "$APK_FILE" | cut -f1)
-            APK_SIZE_BYTES=$(stat -c%s "$APK_FILE")
-            NEW_NAME="Proyekto-ni-Mark-Jann-Tampok-v1.0.apk"
+            VERSION_NAME="${{ steps.version.outputs.VERSION_NAME }}"
+            VERSION_CODE="${{ steps.version.outputs.VERSION_CODE }}"
+            NEW_NAME="Proyekto-ni-Mark-Jann-Tampok-v${VERSION_NAME}(${VERSION_CODE}).apk"
 
             cp "$APK_FILE" "docs/$NEW_NAME"
 
-            echo "✅ APK MATAGPUAN: docs/$NEW_NAME"
+            echo "✅ APK: docs/$NEW_NAME"
             echo "APK_FOUND=true" >> $GITHUB_ENV
-            echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
-            echo "APK_PATH=docs/$NEW_NAME" >> $GITHUB_ENV
             echo "APK_NAME=$NEW_NAME" >> $GITHUB_ENV
           else
             echo "❌ HINDI MATAGPUAN ANG APK"
@@ -182,12 +177,12 @@ jobs:
         if: env.APK_FOUND == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Bisyo-APK-v1.0
+          name: "Bisyo-APK-v${{ steps.version.outputs.VERSION_NAME }}"
           path: docs/*.apk
           retention-days: 30
 
       # ==========================================
-      # ✅ I-COMMIT — LAGING GAGANA
+      # ✅ I-COMMIT — KASAMA ANG BAGONG VERSION + APK
       # ==========================================
       - name: ✅ I-commit at I-push ang LAHAT
         if: always()
@@ -196,29 +191,28 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add app/src/main/assets/ docs/ 2>/dev/null || true
+          git add versionCode.txt app/src/main/assets/ docs/ 2>/dev/null || true
 
           if git diff --staged --quiet; then
             echo "ℹ️ WALANG PAGBABAGO"
           else
-            git commit -m "📋 Build Result: $(date +%Y-%m-%d %H:%M)"
-            echo "📤 IPINAPADALA..."
-            git push || git push --force
-            echo "✅ MATAGUMPAY — SABAY-SABAY ANG LAHAT!"
+            git commit -m "📋 Bersyon v${{ steps.version.outputs.VERSION_NAME }} — Build: $(date +%Y-%m-%d %H:%M)"
+            git push
+            echo "✅ NA-COMMIT — Bersyon v${{ steps.version.outputs.VERSION_NAME }}"
           fi
 
       # ==========================================
-      # ✅ KONKLUSYON — PULA KUNG WALANG APK
+      # ✅ KONKLUSYON
       # ==========================================
       - name: ✅ Resulta ng Pagbuo
         id: final-result
         if: always()
         run: |
           if [ "${{ env.APK_FOUND }}" = "true" ]; then
-            echo "✅ TAGUMPAY — May APK, nakopya ang lahat ng assets"
+            echo "✅ TAGUMPAY — Bersyon v${{ steps.version.outputs.VERSION_NAME }}"
             echo "STATUS=SUCCESS" >> $GITHUB_OUTPUT
           else
-            echo "❌ NABIGO — WALANG APK DAHIL MAY ERROR SA BUILD"
+            echo "❌ NABIGO — WALANG APK"
             echo "STATUS=FAILED" >> $GITHUB_OUTPUT
             exit 1
           fi
