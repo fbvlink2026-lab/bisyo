@@ -1,9 +1,10 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-28 18:39:47 UTC
+📅 **Petsa:** 2026-08-28 18:45:44 UTC
+🏷️ **Bersyon:** v1.0.2 (2)
 🎯 **Katayuan:** ✅ TAGUMPAY
-📝 **Detalye:** Matagumpay na nabuo ang APK
+📝 **Detalye:** Matagumpay na nabuo ang APK — Bersyon v1.0.2
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -46,14 +47,14 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:mergeDebugJniLibFolders
 > Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugNativeLibs NO-SOURCE
-> Task :app:processDebugManifestForPackage
-> Task :app:mergeLibDexDebug
 > Task :app:stripDebugDebugSymbols NO-SOURCE
-> Task :app:mergeExtDexDebug
-> Task :app:processDebugResources
+> Task :app:mergeLibDexDebug
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeExtDexDebug
+> Task :app:processDebugResources
 > Task :app:compileDebugKotlin
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:dexBuilderDebug
@@ -65,7 +66,7 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 4s
+BUILD SUCCESSFUL in 1m 12s
 33 actionable tasks: 33 executed
 ```
 
