@@ -4,57 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🔧 I-update ang Token — Admin</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#1f2937;color:white;font-family:Arial,sans-serif;padding:20px;max-width:600px;margin:0 auto}
-h1{color:#ef4444;margin-bottom:6px;font-size:20px}
-.desc{color:#9ca3af;margin-bottom:24px;font-size:14px;line-height:1.5}
-.card{background:#374151;padding:20px;border-radius:12px;margin-bottom:16px}
-label{display:block;margin-bottom:6px;font-weight:bold;font-size:14px}
-input{width:100%;padding:12px;border-radius:8px;border:none;background:#4b5563;color:white;font-size:15px;margin-bottom:14px}
-button{padding:12px 20px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-right:8px;margin-bottom:8px}
-.btn-red{background:#dc2626;color:white}
-.btn-green{background:#16a34a;color:white}
-.btn-blue{background:#2563eb;color:white}
-.hidden{display:none !important}
-.success{color:#4ade80;margin:10px 0;line-height:1.5}
-.warning{color:#facc15;margin:10px 0;line-height:1.5}
-.error-text{color:#f87171;margin:10px 0}
-.info{color:#93c5fd;margin:8px 0;font-size:13px;line-height:1.5}
-pre{background:#111827;padding:12px;border-radius:8px;font-size:11px;color:#a5f3fc;overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin:12px 0}
-</style>
-</head>
-<body>
-
-<h1>🔧 I-update ang Encrypted Token</h1>
-<p class="desc">
-  ✅ Gumagana kahit walang internet — hindi napipigilan.<br>
-  ✅ Pagbalik ng internet — kusang magsi-sync ang lahat.
-</p>
-
-<div class="card">
-  <label>🔑 Bagong Token na I-encrypt:</label>
-  <input type="text" id="new-token" placeholder="ghp_xxxxxxxxxxxx">
-
-  <label>🔒 Admin Password (6+ letra):</label>
-  <input type="password" id="admin-pass" placeholder="hal. bisyo2026">
-
-  <button class="btn-red" onclick="processToken()">🔐 Ihanda ang Pagbabago</button>
-  <div id="status"></div>
-</div>
-
-<!-- ✅ KAHIT OFFLINE — LAGING MAY RESULTA -->
-<div class="card hidden" id="result-box">
-  <p class="success">✅ HANDA NA — Ito ang linyang papalitan sa admin.html:</p>
-  <pre id="token-line"></pre>
-
-  <!-- ✅ IMBAKAN LOKAL — KAHIT WALANG INTERNET -->
-  <p class="info">📌 Naka-imbak na ito sa iyong device — kusang ia-upload kapag may internet na.</p>
-
-  <button class="btn-green" onclick="copyLine()">📋 Kopyahin ang Linyang Ito</button>
-  <button class="btn-blue" onclick="syncNow()">🔄 I-upload Ngayon sa GitHub</button>
-</div>
-
+<link rel="stylesheet" href="styles.css">
 <script>
 // ===== KONFIGURASYON =====
 const REPO_OWNER = "fbvlink2026-lab";
