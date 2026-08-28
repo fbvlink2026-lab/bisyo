@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- ✅ INTERNET — para sa pag-download ng APK -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- ✅ PAG-IMBAKAN — hanggang Android 12 (API 32) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <!-- ✅ PAG-INSTALL — KAILANGAN PARA SA ANDROID 8+ -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
@@ -15,6 +20,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
 
+        <!-- ✅ PANGUNAHING PAHINA -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -24,7 +30,7 @@
             </intent-filter>
         </activity>
 
-        <!-- ✅ KAILANGAN PAGBUKAS NG APK -->
+        <!-- ✅ FILEPROVIDER — KAILANGANG-KAILANGAN PARA SA PAGBUKAS NG APK -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
