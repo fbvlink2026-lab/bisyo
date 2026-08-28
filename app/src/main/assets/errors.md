@@ -1,10 +1,10 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-28 19:11:52 UTC
-🏷️ **Bersyon:** v1.0.3 (3)
+📅 **Petsa:** 2026-08-28 19:38:08 UTC
+🏷️ **Bersyon:** v1.0.4 (4)
 🎯 **Katayuan:** ✅ TAGUMPAY
-📝 **Detalye:** Matagumpay na nabuo ang APK — Bersyon v1.0.3
+📝 **Detalye:** Matagumpay na nabuo ang APK — Bersyon v1.0.4
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -37,12 +37,12 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:parseDebugLocalResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
 > Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:mergeDebugAssets
-> Task :app:processDebugManifestForPackage
 > Task :app:desugarDebugFileDependencies
 > Task :app:compressDebugAssets
 > Task :app:processDebugResources
@@ -58,15 +58,15 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:stripDebugDebugSymbols NO-SOURCE
 > Task :app:mergeDebugJavaResource
+> Task :app:mergeExtDexDebug
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:mergeExtDexDebug
 > Task :app:packageDebug
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
 
-BUILD SUCCESSFUL in 1m 18s
+BUILD SUCCESSFUL in 1m 26s
 33 actionable tasks: 33 executed
 ```
 
