@@ -4,77 +4,81 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>🔧 I-update ang Token — Admin</title>
-<style>
-.error-text { color: #dc2626; }
-.warning { color: #d97706; }
-.success { color: #16a34a; }
-.info { color: #2563eb; }
-label { display: block; margin: 12px 0 4px; font-weight: bold; }
-input { width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; margin-bottom: 8px; }
-input:focus { outline: none; border-color: #b91c1c; }
-button { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 15px; margin: 4px; }
-.btn-primary { background: #b91c1c; color: white; }
-.btn-primary:hover { background: #a81818; }
-.btn-secondary { background: #e5e7eb; color: #374151; }
-pre { background: #f3f4f6; padding: 12px; border-radius: 8px; border-left: 4px solid #b91c1c; overflow-x: auto; margin: 12px 0; font-size: 13px; }
-#status { margin-top: 12px; padding: 12px; border-radius: 8px; line-height: 1.8; }
-.hidden { display: none !important; }
-.check-result { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; }
-.check-result.found { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
-.check-result.updated { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; font-weight: bold; }
-.check-result.missing { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
-.debug-box { background: #fef3c7; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 13px; border-left: 4px solid #f59e0b; }
-</style>
+<title>🔧 Setup Token — Admin</title>
+
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <h1>🔧 I-setup ang GitHub Token</h1>
-    <p>I-encrypt at i-imbak ang Token — Proyekto ni Mark Jann Tampok</p>
-  </div>
-</div>
-
-<div class="content">
-  <h2>Ilagay ang Iyong GitHub Personal Access Token</h2>
-  <p>Ang Token ay ise-encrypt gamit ang iyong Admin Password bago ito i-imbak — hindi ito nakikita sa malinaw na anyo.</p>
-
-  <label>GitHub Token:</label>
-  <input type="text" id="new-token" placeholder="ghp_xxxxxxxxxxxx..." style="font-family:monospace;">
-
-  <label>Admin Password:</label>
-  <input type="password" id="admin-pass" placeholder="Ipasok ang password...">
-
-  <div style="margin-top:16px">
-    <button class="btn-primary" onclick="processToken()">🔐 I-encrypt at Ihanda</button>
-    <button class="btn-secondary" onclick="window.location.href='admin.html'">⬅️ Bumalik sa Admin</button>
-  </div>
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h1 style="color:#b91c1c; font-size:22px; margin-bottom:4px;">🔧 Pag-setup ng GitHub Token</h1>
+  <p style="color:#6b7280; margin-bottom:24px;">I-encrypt ang iyong Token gamit ang password mula sa Admin Panel.</p>
 
   <div id="status"></div>
   <div id="debug-info" class="debug-box hidden"></div>
 
-  <div id="result-box" class="hidden">
-    <h3>✅ Handa na — Ito ang linyang ilalagay:</h3>
-    <pre id="token-line"></pre>
-    <button class="btn-primary" onclick="copyLine()">📋 Kopyahin ang Linyang Ito</button>
-    <button class="btn-secondary" onclick="syncNow()">🔄 I-upload Ngayon</button>
+  <label>🔑 GitHub Personal Access Token:</label>
+  <input type="text" id="new-token" placeholder="ghp_xxxxxxxxxxxx..." style="font-family:monospace;">
+
+  <label>🔒 Admin Password:</label>
+  <input type="password" id="admin-pass" placeholder="Awtomatikong kinuha mula sa login..." readonly>
+  <p class="note" id="pass-note">✅ Kinuha mula sa session — hindi na kailangang ilagay muli</p>
+
+  <div style="margin-top: 20px;">
+    <button class="btn-primary" onclick="processToken()">🔐 I-encrypt at Ihanda</button>
+    <button class="btn-secondary" onclick="window.location.href='admin.html'">⬅️ Bumalik sa Admin</button>
   </div>
 
-  <div id="verification-section" class="hidden">
-    <h3>📋 Katayuan ng Pagpapalit sa admin.html</h3>
+  <div id="result-box" class="hidden" style="margin-top:24px;">
+    <h3 style="font-size:17px; margin-bottom:8px;">✅ Handa na — Kopyahin ang linyang ito:</h3>
+    <pre id="token-line"></pre>
+    <p style="font-size:14px; color:#6b7280; margin:8px 0;">I-paste ito sa <code>admin.html</code> kapalit ng lumang <code>PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN</code></p>
+    <button class="btn-primary" onclick="copyLine()">📋 Kopyahin</button>
+  </div>
+
+  <div id="verify-section" class="hidden" style="margin-top:24px;">
+    <h3 style="font-size:17px;">📤 I-upload sa GitHub</h3>
+    <p style="font-size:14px; color:#6b7280;">Pindutin para direktang palitan ang halaga sa admin.html sa GitHub:</p>
+    <button class="btn-primary" onclick="uploadToGitHub()">🔄 I-update ang admin.html</button>
     <div id="verify-status"></div>
   </div>
 </div>
 
 <script>
 const REPO_OWNER = "fbvlink2026-lab";
-const REPO_NAME  = "bisyo";
-const BRANCH     = "main";
-const FILE_PATH   = "app/src/main/assets/admin.html";
-const STORAGE_KEY = "bisyo_pending_token_patch";
+const REPO_NAME = "bisyo";
+const BRANCH = "main";
+const ADMIN_HTML_PATH = "app/src/main/assets/admin.html";
+const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minuto
 
-// ✅ IPAPAKITA ANG ANUMANG ERROR — HINDI NA TAYO MANGHIHULA!
+let encryptedTokenValue = null;
+
+// ========== SESSION CHECK — KUKUNIN ANG PASSWORD MULA SA ADMIN ==========
+function getAdminPassword() {
+  const loginTime = localStorage.getItem('bisyo_admin_login_time');
+  if (!loginTime) return null;
+
+  const elapsed = Date.now() - parseInt(loginTime, 10);
+  if (elapsed > SESSION_DURATION_MS) {
+    localStorage.removeItem('bisyo_admin_password');
+    localStorage.removeItem('bisyo_admin_login_time');
+    return null;
+  }
+  return localStorage.getItem('bisyo_admin_password');
+}
+
+// ========== PAGBUKAS NG PAHINA — AWTO PUPUNAN ANG PASSWORD ==========
+window.addEventListener('DOMContentLoaded', () => {
+  const pass = getAdminPassword();
+  if (pass) {
+    document.getElementById('admin-pass').value = pass;
+    document.getElementById('pass-note').textContent = '✅ Kinuha mula sa session — hindi pa lumilipas ang 30 minuto';
+  } else {
+    document.getElementById('admin-pass').removeAttribute('readonly');
+    document.getElementById('pass-note').textContent = '⚠️ Session ay tapos na — bumalik sa Admin at mag-login muli.';
+    showStatus('❌ Hindi aktibo ang session — mag-login muli sa admin.html', 'error');
+  }
+});
+
 function showDebug(msg) {
   const dbg = document.getElementById('debug-info');
   dbg.classList.remove('hidden');
@@ -82,19 +86,37 @@ function showDebug(msg) {
   console.log('DEBUG:', msg);
 }
 
-// ✅ PAG-ENCRYPT — GUMAGANA SA WEBSITE
+function showStatus(text, type) {
+  const s = document.getElementById('status');
+  s.textContent = text;
+  s.className = 'status ' + type;
+  if (type === 'error') s.style.background = '#fef2f2', s.style.borderLeft = '4px solid #dc2626';
+  if (type === 'success') s.style.background = '#f0fdf4', s.style.borderLeft = '4px solid #16a34a';
+  if (type === 'warning') s.style.background = '#fffbeb', s.style.borderLeft = '4px solid #f59e0b';
+}
+
+// ========== ENCRYPTION — TAMA NA ANG BILANG NG ARGUMENTO ==========
 async function deriveKey(password) {
   try {
-    showDebug("Hinahanda ang susi...");
+    showDebug('Hinahanda ang susi...');
     const encoder = new TextEncoder();
-    const salt = encoder.encode("BisyoSalt2026");
+    const salt = encoder.encode('BisyoSalt2026');
+
     const keyMaterial = await crypto.subtle.importKey(
-      "raw", encoder.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
+      'raw',
+      encoder.encode(password),
+      { name: 'PBKDF2' },
+      false,
+      ['deriveKey']
     );
-    showDebug("Kinuha ang materyal ng susi, naghahanda ng AES...");
+
+    showDebug('Gumagawa ng encryption key...');
     return await crypto.subtle.deriveKey(
-      { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
-      { name: "AES-GCM", length: 256 }, false, ["encrypt"]
+      { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt']
     );
   } catch (e) {
     showDebug(`Error sa susi: ${e.name} — ${e.message}`);
@@ -104,140 +126,115 @@ async function deriveKey(password) {
 
 async function encryptToken(token, password) {
   try {
-    showDebug("Sinisimulan ang pag-encrypt...");
+    showDebug('Sinisimulan ang pag-encrypt...');
     const key = await deriveKey(password);
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const encoder = new TextEncoder();
     const encrypted = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv }, key, encoder.encode(token)
+      { name: 'AES-GCM', iv: iv },
+      key,
+      encoder.encode(token)
     );
     const combined = new Uint8Array(iv.length + encrypted.byteLength);
     combined.set(iv);
     combined.set(new Uint8Array(encrypted), iv.length);
-    showDebug("✅ Tapos na ang pag-encrypt!");
+    showDebug('✅ Tapos na ang pag-encrypt!');
     return btoa(String.fromCharCode(...combined));
   } catch (e) {
-    showDebug(`Error sa pag-encrypt: ${e.name} — ${e.message}`);
+    showDebug(`Encrypt Error: ${e.name} — ${e.message}`);
     throw e;
   }
 }
 
-// ✅ PANGUNAHING PROSESO — MAY TRAP SA LAHAT NG ERROR
+// ========== PANGUNAHING PROSESO ==========
 async function processToken() {
-  const newToken = document.getElementById('new-token').value.trim();
+  const token = document.getElementById('new-token').value.trim();
   const password = document.getElementById('admin-pass').value;
-  const status = document.getElementById('status');
-  const resultBox = document.getElementById('result-box');
   document.getElementById('debug-info').classList.add('hidden');
+  document.getElementById('result-box').classList.add('hidden');
+  document.getElementById('verify-section').classList.add('hidden');
 
-  if (!newToken)
-    return status.innerHTML = '<span class="error-text">❌ Ilagay ang Token</span>';
-  if (!password || password.length < 6)
-    return status.innerHTML = '<span class="error-text">❌ Hindi bababa sa 6 letra ang password</span>';
+  if (!token) return showStatus('❌ Ilagay muna ang Token', 'error');
+  if (!password || password.length < 6) return showStatus('❌ Hindi makita ang password — bumalik sa Admin at mag-login muli.', 'error');
 
-  status.innerHTML = '<span class="warning">⏰ Ini-encrypt ang Token...</span>';
+  showStatus('⏰ Ini-encrypt ang Token...', 'warning');
 
   try {
-    const encrypted = await encryptToken(newToken, password);
-    const newLine = `const ENCRYPTED_TOKEN = "${encrypted}";`;
+    encryptedTokenValue = await encryptToken(token, password);
+    const line = `const ENCRYPTED_TOKEN = "${encryptedTokenValue}";`;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      line: newLine,
-      timestamp: Date.now()
-    }));
+    document.getElementById('token-line').textContent = line;
+    document.getElementById('result-box').classList.remove('hidden');
+    document.getElementById('verify-section').classList.remove('hidden');
 
-    document.getElementById('token-line').textContent = newLine;
-    resultBox.classList.remove('hidden');
-
-    if (!navigator.onLine) {
-      status.innerHTML = `<span class="warning">⚠️ Walang internet — naka-imbak lokal.</span>`;
-    } else {
-      status.innerHTML = `<span class="success">✅ Handa na — handa nang i-sync!</span>`;
-    }
+    showStatus('✅ Matagumpay na na-encrypt!', 'success');
   } catch (err) {
-    status.innerHTML = `<span class="error-text">❌ Nabigo: ${err.message || err}</span>`;
+    showStatus(`❌ Nabigo: ${err.message || err}`, 'error');
   }
 }
 
-async function syncNow() {
-  if (!navigator.onLine) {
-    alert("⚠️ Wala pang internet.");
-    return;
-  }
-  const pendingRaw = localStorage.getItem(STORAGE_KEY);
-  if (!pendingRaw) { alert("✅ Walang pagbabago."); return; }
-  const pending = JSON.parse(pendingRaw);
-  const newLine = pending.line;
-  const writeToken = prompt("🔑 GitHub Token para sa pag-upload:");
-  if (!writeToken) return;
-
-  const status = document.getElementById('status');
-  const verifySection = document.getElementById('verification-section');
-  const verifyStatus = document.getElementById('verify-status');
-  status.innerHTML = `<span class="warning">⏰ Ina-upload...</span>`;
-  verifySection.classList.add('hidden');
-
-  try {
-    const getRes = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}?ref=${BRANCH}`,
-      { headers: { "Authorization": `token ${writeToken}` } }
-    );
-    if (!getRes.ok) throw new Error(`File hindi makita: ${getRes.status}`);
-    const data = await getRes.json();
-    let content = atob(data.content.replace(/-/g,'+').replace(/_/g,'/'));
-
-    const pattern = /const\s+ENCRYPTED_TOKEN\s*=\s*["'][^"']*["']\s*;/;
-    const oldMatch = content.match(pattern);
-    if (!oldMatch) {
-      verifySection.classList.remove('hidden');
-      verifyStatus.innerHTML = `<div class="check-result missing">❌ Hindi nakita ang ENCRYPTED_TOKEN sa admin.html — kailangan muna itong ilagay!</div>`;
-      throw new Error("Hindi nakita ang ENCRYPTED_TOKEN");
-    }
-    const oldValue = oldMatch[0];
-    content = content.replace(pattern, newLine);
-
-    if (!content.includes(newLine)) {
-      verifySection.classList.remove('hidden');
-      verifyStatus.innerHTML = `<div class="check-result missing">❌ Hindi nailagay ang bagong halaga.</div>`;
-      throw new Error("Hindi nailagay ang halaga");
-    }
-
-    const putRes = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
-      {
-        method: "PUT",
-        headers: { "Authorization": `token ${writeToken}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: "🔐 Update: Encrypted Token",
-          content: btoa(unescape(encodeURIComponent(content))),
-          sha: data.sha,
-          branch: BRANCH
-        })
-      }
-    );
-    if (!putRes.ok) throw new Error(`Nabigo: ${putRes.status}`);
-    localStorage.removeItem(STORAGE_KEY);
-
-    status.innerHTML = `<span class="success">✅ NAI-UPLOAD AT NAPALITAN NA!</span>`;
-    verifySection.classList.remove('hidden');
-    verifyStatus.innerHTML = `
-      <div class="check-result found">✅ Nakita ang ENCRYPTED_TOKEN</div>
-      <div class="check-result updated">
-        ✅ MATAGUMPAY NA NAPALITAN!<br>
-        Lumang halaga: <code>${oldValue.substring(0,65)}...</code><br>
-        Bagong halaga: <code>${newLine.substring(0,65)}...</code><br>
-        Oras: ${new Date().toLocaleString('tl-PH')}
-      </div>
-    `;
-  } catch (err) {
-    status.innerHTML = `<span class="error-text">❌ Nabigo: ${err.message}</span>`;
-  }
-}
-
+// ========== KOPYA NG RESULTA ==========
 function copyLine() {
   const line = document.getElementById('token-line').textContent;
-  navigator.clipboard.writeText(line);
-  alert("✅ Kinopya na!");
+  navigator.clipboard.writeText(line).then(() => {
+    alert('✅ Nakopya na! I-paste sa admin.html');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = line;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ Nakopya na! I-paste sa admin.html');
+  });
+}
+
+// ========== I-UPLOAD DIRETSO SA GITHUB ==========
+async function uploadToGitHub() {
+  const password = document.getElementById('admin-pass').value;
+  const token = localStorage.getItem('bisyo_admin_password') ? null : null; // Gumamit ng bagong token
+  const GITHUB_TOKEN = prompt('🔑 Ipasok ang iyong GitHub Token para sa pag-upload:');
+  if (!GITHUB_TOKEN) return;
+
+  const statusBox = document.getElementById('verify-status');
+  statusBox.innerHTML = '<p>⏰ Kinukuha ang kasalukuyang admin.html...</p>';
+
+  try {
+    // Kunin ang kasalukuyang file
+    const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ADMIN_HTML_PATH}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+    });
+    if (!getRes.ok) throw new Error(`Hindi makuha ang file: ${getRes.status}`);
+    const fileData = await getRes.json();
+    let content = atob(fileData.content.replace(/-/g, '+').replace(/_/g, '/'));
+
+    // Palitan ang linyang ENCRYPTED_TOKEN
+    const newLine = `const ENCRYPTED_TOKEN = "${encryptedTokenValue}";`;
+    content = content.replace(/const ENCRYPTED_TOKEN = ".+?";/, newLine);
+
+    // I-upload pabalik
+    const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ADMIN_HTML_PATH}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: '🔐 Update: Nakatakip na ang GitHub Token',
+        content: btoa(unescape(encodeURIComponent(content))),
+        sha: fileData.sha,
+        branch: BRANCH
+      })
+    });
+
+    if (putRes.ok) {
+      statusBox.innerHTML = `<div class="check-result updated">✅ Matagumpay na na-update sa GitHub!<br>Handa na ang Token — hindi na kailangang baguhin muli hangga't hindi napapalitan ang password o Token.</div>`;
+    } else {
+      throw new Error(`HTTP ${putRes.status}`);
+    }
+  } catch (err) {
+    statusBox.innerHTML = `<div class="check-result missing">❌ Nabigo: ${err.message}<br>💡 Gamitin na lang ang "Kopyahin" at i-paste nang manu-mano.</div>`;
+  }
 }
 </script>
 
