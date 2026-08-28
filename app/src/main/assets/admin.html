@@ -4,31 +4,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>Admin Panel — Mga Ilegal na Bisyo</title>
+<title>Admin Panel â Mga Ilegal na Bisyo</title>
 
 </head>
 <body>
 
 <div id="login-form" class="login-container">
-  <div class="login-title">🔑 Pag-login</div>
+  <div class="login-title">ð Pag-login</div>
   <div class="error" id="login-error"></div>
 
   <label>Password ng Admin:</label>
   <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
 
-  <!-- ✅ DAGDAG: PAGPILI NG SARILING ORAS NG SESSION -->
+  <!-- â DAGDAG: PAGPILI NG SARILING ORAS NG SESSION -->
   <div class="session-setting">
-    <label>⏰ Tagal ng Session:</label>
+    <label>â° Tagal ng Session:</label>
     <div style="display:flex;align-items:center;gap:8px">
       <input type="number" id="session-minutes" value="30" min="1" max="480">
       <span>minuto</span>
     </div>
-    <small style="color:#6b7280">Ilagay ang gusto mong oras bago kusa mag-logout (1–480 minuto)</small>
+    <small style="color:#6b7280">Ilagay ang gusto mong oras bago kusa mag-logout (1â480 minuto)</small>
   </div>
 
-  <button class="btn btn-primary" style="width:100%" onclick="doLogin()">🔑 Mag-login</button>
+  <button class="btn btn-primary" style="width:100%" onclick="doLogin()">ð Mag-login</button>
   <p style="text-align:center;margin-top:12px;font-size:13px;color:#6b7280">
-    💡 Pagkatapos ng itinakdang oras — kusa kang magla-logout para sa kaligtasan.
+    ð¡ Pagkatapos ng itinakdang oras â kusa kang magla-logout para sa kaligtasan.
   </p>
 </div>
 
@@ -36,34 +36,34 @@
   <div class="panel-card">
     <div class="top-bar">
       <div>
-        <span><strong>🔐 Naka-login na</strong></span>
+        <span><strong>ð Naka-login na</strong></span>
         <span id="session-countdown" style="margin-left:12px;font-size:14px;color:#6b7280"></span>
       </div>
       <div class="status-bar">
-        <span><span id="conn-dot" class="status-dot"></span><span id="conn-label">—</span></span>
+        <span><span id="conn-dot" class="status-dot"></span><span id="conn-label">â</span></span>
         <span><span id="sync-dot" class="status-dot dot-saved"></span><span id="sync-label">Naka-sync</span></span>
       </div>
     </div>
     <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-sm btn-secondary" onclick="window.open('setup-token.html','_self')">⚙️ Setup Token</button>
-      <button class="btn btn-sm btn-secondary" onclick="refreshSession()">🔄 Palawakin ang Session</button>
-      <button class="btn btn-sm btn-warning" onclick="openChangePasswordModal()">🔁 Palitan ang Password</button>
-      <button class="btn btn-sm btn-secondary" onclick="doLogout()">🚪 Mag-logout</button>
+      <button class="btn btn-sm btn-secondary" onclick="window.open('setup-token.html','_self')">âï¸ Setup Token</button>
+      <button class="btn btn-sm btn-secondary" onclick="refreshSession()">ð Palawakin ang Session</button>
+      <button class="btn btn-sm btn-warning" onclick="openChangePasswordModal()">ð Palitan ang Password</button>
+      <button class="btn btn-sm btn-secondary" onclick="doLogout()">ðª Mag-logout</button>
     </div>
   </div>
 
   <div id="pending-section" class="pending-section hidden">
-    <div style="font-weight:bold;margin-bottom:8px">⏳ Hindi pa nai-sync sa GitHub</div>
+    <div style="font-weight:bold;margin-bottom:8px">â³ Hindi pa nai-sync sa GitHub</div>
     <div id="pending-list"></div>
     <div style="margin-top:8px">
-      <button class="btn btn-sm btn-success" onclick="syncAllPending()">🔄 I-sync Lahat</button>
-      <button class="btn btn-sm btn-secondary" onclick="clearAllPending()">🗑️ Burahin Lahat</button>
+      <button class="btn btn-sm btn-success" onclick="syncAllPending()">ð I-sync Lahat</button>
+      <button class="btn btn-sm btn-secondary" onclick="clearAllPending()">ðï¸ Burahin Lahat</button>
     </div>
   </div>
 
   <div class="panel-card">
     <div style="font-weight:bold;margin-bottom:8px">
-      📄 Mga Pahina — Pumili para I-edit
+      ð Mga Pahina â Pumili para I-edit
       <span id="last-saved-info" class="last-saved"></span>
     </div>
     <div class="page-list" id="page-list"></div>
@@ -72,19 +72,19 @@
   <div class="panel-card">
     <div style="font-weight:bold;margin-bottom:8px" id="editor-title">I-edit ang Nilalaman</div>
     <div class="editor-toolbar">
-      <button onclick="insertTag('h2')">📌 Pamagat 2</button>
-      <button onclick="insertTag('h3')">📎 Pamagat 3</button>
-      <button onclick="insertTag('p')">📝 Talata</button>
-      <button onclick="insertTag('b')">🗝️ Matapang</button>
-      <button onclick="insertTag('i')">🔤 Italiko</button>
-      <button onclick="insertTag('ul')">• Listahan</button>
-      <button onclick="insertTag('hr')">➖ Guhit</button>
+      <button onclick="insertTag('h2')">ð Pamagat 2</button>
+      <button onclick="insertTag('h3')">ð Pamagat 3</button>
+      <button onclick="insertTag('p')">ð Talata</button>
+      <button onclick="insertTag('b')">ðï¸ Matapang</button>
+      <button onclick="insertTag('i')">ð¤ Italiko</button>
+      <button onclick="insertTag('ul')">â¢ Listahan</button>
+      <button onclick="insertTag('hr')">â Guhit</button>
     </div>
     <textarea id="editor" placeholder="Pumili muna ng pahina sa itaas..." oninput="markUnsaved()"></textarea>
     <div class="action-bar">
-      <button class="btn btn-success" onclick="saveContent()">💾 I-save</button>
-      <button class="btn btn-secondary" onclick="previewContent()">👁️ Tingnan</button>
-      <button class="btn btn-secondary" onclick="syncCurrentPage()">🔄 I-sync Ngayon</button>
+      <button class="btn btn-success" onclick="saveContent()">ð¾ I-save</button>
+      <button class="btn btn-secondary" onclick="previewContent()">ðï¸ Tingnan</button>
+      <button class="btn btn-secondary" onclick="syncCurrentPage()">ð I-sync Ngayon</button>
     </div>
     <div id="status" class="status"></div>
   </div>
@@ -92,8 +92,8 @@
 
 <div id="pw-modal" class="modal hidden">
   <div class="modal-box">
-    <div style="font-weight:bold;font-size:18px;margin-bottom:12px">🔁 Palitan ang Password</div>
-    <p style="color:#78350f;margin-bottom:12px;font-size:14px">⚠️ Pagkatapos palitan — kailangan mong buuin ulit ang admin.html gamit ang bagong password.</p>
+    <div style="font-weight:bold;font-size:18px;margin-bottom:12px">ð Palitan ang Password</div>
+    <p style="color:#78350f;margin-bottom:12px;font-size:14px">â ï¸ Pagkatapos palitan â kailangan mong buuin ulit ang admin.html gamit ang bagong password.</p>
     <div class="error" id="pw-error"></div>
     <label>Lumang Password:</label>
     <input type="password" id="old-pw" class="input">
@@ -102,14 +102,14 @@
     <label>Ulitin Bagong Password:</label>
     <input type="password" id="confirm-pw" class="input">
     <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn btn-secondary" style="flex:1" onclick="closePwModal()">✖️ Isara</button>
-      <button class="btn btn-primary" style="flex:1" onclick="changePassword()">✅ Palitan</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="closePwModal()">âï¸ Isara</button>
+      <button class="btn btn-primary" style="flex:1" onclick="changePassword()">â Palitan</button>
     </div>
   </div>
 </div>
 
 <script>
-const ENCRYPTED_TOKEN = "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN";
+const ENCRYPTED_TOKEN = "ofh4h1R4+juy/tfcN2F+f0gep5TrUsA9QLuR/grLaVTN8GAfCgbL9UjOI8SNRpoRWKrMlpIsgv5oJb+UH8bwbofDRvw=";
 const ADMIN_PASSWORD = "bisyo2026";
 
 const REPO_OWNER = "fbvlink2026-lab";
@@ -127,33 +127,33 @@ let SESSION_DURATION_MS = 30 * 60 * 1000; // Default: 30 minuto
 let sessionCountdownTimer = null;
 
 const pages = [
-  {id:"index", name:"🏠 Panimulang Pahina"},
-  {id:"main", name:"📄 Pangunahing Nilalaman"},
-  {id:"alak", name:"🍺 Alak"},
-  {id:"sigarilyo", name:"🚬 Sigarilyo"},
-  {id:"shabu", name:"💊 Shabu"},
-  {id:"heroin", name:"💉 Heroin"},
-  {id:"marijuana", name:"🌿 Marijuana"},
-  {id:"ecstasy", name:"💜 Ecstasy"},
-  {id:"cocaine", name:"❄️ Cocaine"},
-  {id:"tinuturok-gamot", name:"💉 Tinuturok na Gamot"},
-  {id:"tuklaw", name:"⚠️ Tuklaw / Pagkalulong"},
-  {id:"sugal", name:"🎰 Sugal"},
-  {id:"inhalants", name:"🫁 Inhalants"},
-  {id:"pag-aabuso-gamot", name:"💊 Pag-aabuso sa Gamot"},
-  {id:"lsd", name:"✨ LSD"},
-  {id:"ketamine", name:"🧪 Ketamine"},
-  {id:"ibang-sugal", name:"🎲 Ibang Uri ng Sugal"},
-  {id:"internet-laro", name:"🎮 Internet / Laro"},
-  {id:"labis-pagkain", name:"🍔 Labis na Pagkain"},
-  {id:"vaping", name:"💨 Vaping"}
+  {id:"index", name:"ð  Panimulang Pahina"},
+  {id:"main", name:"ð Pangunahing Nilalaman"},
+  {id:"alak", name:"ðº Alak"},
+  {id:"sigarilyo", name:"ð¬ Sigarilyo"},
+  {id:"shabu", name:"ð Shabu"},
+  {id:"heroin", name:"ð Heroin"},
+  {id:"marijuana", name:"ð¿ Marijuana"},
+  {id:"ecstasy", name:"ð Ecstasy"},
+  {id:"cocaine", name:"âï¸ Cocaine"},
+  {id:"tinuturok-gamot", name:"ð Tinuturok na Gamot"},
+  {id:"tuklaw", name:"â ï¸ Tuklaw / Pagkalulong"},
+  {id:"sugal", name:"ð° Sugal"},
+  {id:"inhalants", name:"ð« Inhalants"},
+  {id:"pag-aabuso-gamot", name:"ð Pag-aabuso sa Gamot"},
+  {id:"lsd", name:"â¨ LSD"},
+  {id:"ketamine", name:"ð§ª Ketamine"},
+  {id:"ibang-sugal", name:"ð² Ibang Uri ng Sugal"},
+  {id:"internet-laro", name:"ð® Internet / Laro"},
+  {id:"labis-pagkain", name:"ð Labis na Pagkain"},
+  {id:"vaping", name:"ð¨ Vaping"}
 ];
 
 // ========== TEMPLATES ==========
 function getTemplate(type){
   const t = {
     full: `<h2>Pamagat ng Paksa</h2>
-<p>Ito ay panimula — ipaliwanag kung ano ang paksa at bakit mahalagang malaman ito.</p>
+<p>Ito ay panimula â ipaliwanag kung ano ang paksa at bakit mahalagang malaman ito.</p>
 <h3>Ang Kalikasan Nito</h3>
 <p>Detalyadong paliwanag tungkol sa paksa...</p>
 <h3>Mga Epekto</h3>
@@ -165,12 +165,12 @@ function getTemplate(type){
 <h3>Paano Maiiwasan</h3>
 <p>Ang pag-iwas ay nagsisimula sa tamang kaalaman at pagpili ng tamang landas.</p>
 <hr>
-<p><em>✅ Huling na-update: ${new Date().toLocaleDateString('tl-PH')}</em></p>`
+<p><em>â Huling na-update: ${new Date().toLocaleDateString('tl-PH')}</em></p>`
   };
   return t[type] || t.full;
 }
 
-// ========== SESSION — ✅ SARILING ORAS ==========
+// ========== SESSION â â SARILING ORAS ==========
 function setSessionDurationFromInput(){
   const minutes = parseInt(document.getElementById('session-minutes').value, 10);
   const validMinutes = Math.max(1, Math.min(480, isNaN(minutes) ? 30 : minutes));
@@ -189,14 +189,14 @@ function startSessionCountdown(){
 
     if(remaining <= 0){
       doLogout();
-      showStatus("⏹️ Lumipas na ang itinakdang oras — kusa kang nag-logout.", "warning");
+      showStatus("â¹ï¸ Lumipas na ang itinakdang oras â kusa kang nag-logout.", "warning");
       return;
     }
 
     const m = Math.floor(remaining / 60000);
     const s = Math.floor((remaining % 60000) / 1000);
     document.getElementById('session-countdown').textContent =
-      `⏳ Natitira: ${m}m ${s}s`;
+      `â³ Natitira: ${m}m ${s}s`;
   }, 1000);
 }
 
@@ -209,7 +209,7 @@ function checkSessionExpiry(){
   const elapsed = Date.now() - parseInt(loginTime, 10);
   if(elapsed > SESSION_DURATION_MS){
     doLogout();
-    showStatus("⏹️ Lumipas na ang itinakdang oras — kailangang mag-login muli.", "warning");
+    showStatus("â¹ï¸ Lumipas na ang itinakdang oras â kailangang mag-login muli.", "warning");
     return false;
   }
   return true;
@@ -218,13 +218,13 @@ function checkSessionExpiry(){
 function refreshSession(){
   localStorage.setItem('bisyo_admin_login_time', Date.now().toString());
   startSessionCountdown();
-  showStatus("✅ Pinalawig ang session — bago magsimula ang pagbibilang.", "success");
+  showStatus("â Pinalawig ang session â bago magsimula ang pagbibilang.", "success");
 }
 
 // ========== LOGIN ==========
 async function doLogin(){
   const p=document.getElementById('admin-pass').value;
-  if(p!==ADMIN_PASSWORD)return showLoginError("❌ Maling Password");
+  if(p!==ADMIN_PASSWORD)return showLoginError("â Maling Password");
 
   const durationMs = setSessionDurationFromInput();
   ADMIN_PASSWORD_ENTERED = p;
@@ -244,8 +244,8 @@ async function doLogin(){
   startSessionCountdown();
 
   showStatus(decryptedToken
-    ?`✅ Naka-konekta — handa nang i-save! Session: ${Math.round(durationMs/60000)} minuto`
-    :`⚠️ Walang Token — naka-imbak LOKAL muna. Session: ${Math.round(durationMs/60000)} minuto`, "info");
+    ?`â Naka-konekta â handa nang i-save! Session: ${Math.round(durationMs/60000)} minuto`
+    :`â ï¸ Walang Token â naka-imbak LOKAL muna. Session: ${Math.round(durationMs/60000)} minuto`, "info");
 }
 
 function showLoginError(m){document.getElementById('login-error').textContent=m}
@@ -299,13 +299,13 @@ function getCached(id){ return localStorage.getItem(CACHE_PREFIX+id) }
 function updatePendingUI(){
   const sec=document.getElementById('pending-section'), list=document.getElementById('pending-list'), arr=getChanges();
   sec.classList.toggle('hidden', !arr.length);
-  list.innerHTML=arr.map(c=>`<div class="pending-item"><span><strong>${c.pageName}</strong><br><small style="opacity:.7">${new Date(c.timestamp).toLocaleString('tl-PH')}</small></span><div style="display:flex;gap:4px"><button class="btn btn-sm btn-success" onclick="syncOne('${c.pageId}')">🔄 Sync</button><button class="btn btn-sm btn-secondary" onclick="discard('${c.pageId}')">✖️</button></div></div>`).join('');
+  list.innerHTML=arr.map(c=>`<div class="pending-item"><span><strong>${c.pageName}</strong><br><small style="opacity:.7">${new Date(c.timestamp).toLocaleString('tl-PH')}</small></span><div style="display:flex;gap:4px"><button class="btn btn-sm btn-success" onclick="syncOne('${c.pageId}')">ð Sync</button><button class="btn btn-sm btn-secondary" onclick="discard('${c.pageId}')">âï¸</button></div></div>`).join('');
 }
-function discard(id){ if(!confirm("Burahin ang pagbabago?"))return; removeChange(id); if(currentPageId===id)setSyncState('saved'); showStatus("✅ Nabura","info") }
-async function syncAllPending(){ if(!isOnline||!decryptedToken)return showStatus("❌ Kailangan ng Internet at Token","error"); for(const c of getChanges())await upload(c.pageId,c.content) }
+function discard(id){ if(!confirm("Burahin ang pagbabago?"))return; removeChange(id); if(currentPageId===id)setSyncState('saved'); showStatus("â Nabura","info") }
+async function syncAllPending(){ if(!isOnline||!decryptedToken)return showStatus("â Kailangan ng Internet at Token","error"); for(const c of getChanges())await upload(c.pageId,c.content) }
 async function syncCurrentPage(){ if(!currentPageId)return; saveContent() }
 async function syncOne(id){ const c=getChanges().find(x=>x.pageId===id); if(c)await upload(id,c.content) }
-function clearAllPending(){ if(!confirm("Burahin lahat ng pagbabago?"))return; localStorage.removeItem(STORAGE_KEY); updatePendingUI(); showStatus("✅ Nabura lahat","info") }
+function clearAllPending(){ if(!confirm("Burahin lahat ng pagbabago?"))return; localStorage.removeItem(STORAGE_KEY); updatePendingUI(); showStatus("â Nabura lahat","info") }
 
 // ========== ENCRYPTION ==========
 async function deriveKey(p){
@@ -332,7 +332,7 @@ function buildPageList(){
   });
 }
 
-// ✅ TAMANG PAGKASUNOD: GitHub → Cache → Template
+// â TAMANG PAGKASUNOD: GitHub â Cache â Template
 async function selectPage(id){
   currentPageId=id; buildPageList();
   const info=pages.find(p=>p.id===id);
@@ -343,20 +343,20 @@ async function selectPage(id){
   document.getElementById('status').textContent='';
   updateLastSaved();
 
-  // 1️⃣ May lokal na pagbabago? → Iyon ang ipakita
+  // 1ï¸â£ May lokal na pagbabago? â Iyon ang ipakita
   const loc=getChanges().find(c=>c.pageId===id);
   if(loc){
     document.getElementById('editor').value=loc.content;
     setSyncState('pending');
-    return showStatus("📌 Ipinapakita ang iyong naka-imbak na pagbabago","warning");
+    return showStatus("ð Ipinapakita ang iyong naka-imbak na pagbabago","warning");
   }
 
   let gotGitHub=false;
 
-  // 2️⃣ Kung may internet at Token → Kuhain sa GitHub
+  // 2ï¸â£ Kung may internet at Token â Kuhain sa GitHub
   if(isOnline && decryptedToken){
     try{
-      showStatus("⏰ Kinukuha mula sa GitHub...","info");
+      showStatus("â° Kinukuha mula sa GitHub...","info");
       const res=await fetch(
         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html?ref=${BRANCH}`,
         {headers:{Authorization:`token ${decryptedToken}`},signal:AbortSignal.timeout(15000)}
@@ -367,12 +367,12 @@ async function selectPage(id){
         document.getElementById('editor').value=content;
         localStorage.setItem(CACHE_PREFIX+id,content);
         setSyncState('saved');
-        showStatus("✅ Na-loading mula sa GitHub","success");
+        showStatus("â Na-loading mula sa GitHub","success");
         gotGitHub=true;
       }else if(res.status===404){
         document.getElementById('editor').value=getTemplate('full').replace('[PANGALAN]',info.name);
         setSyncState('saved');
-        showStatus("📌 Bagong pahina — handa nang isulat","info");
+        showStatus("ð Bagong pahina â handa nang isulat","info");
         gotGitHub=true;
       }else throw new Error(`HTTP ${res.status}`);
     }catch(err){
@@ -380,18 +380,18 @@ async function selectPage(id){
     }
   }
 
-  // 3️⃣ Kung hindi sa GitHub → tingnan ang Cache
+  // 3ï¸â£ Kung hindi sa GitHub â tingnan ang Cache
   if(!gotGitHub){
     const cached=getCached(id);
     if(cached){
       document.getElementById('editor').value=cached;
       setSyncState('pending');
-      showStatus("⚠️ Hindi makakonekta — ipinapakita ang huling nakitang laman","warning");
+      showStatus("â ï¸ Hindi makakonekta â ipinapakita ang huling nakitang laman","warning");
     }else{
-      // 4️⃣ Wala talaga → bagong template
+      // 4ï¸â£ Wala talaga â bagong template
       document.getElementById('editor').value=getTemplate('full').replace('[PANGALAN]',info.name);
       setSyncState('pending');
-      showStatus("📌 Bagong pahina — handa nang isulat","info");
+      showStatus("ð Bagong pahina â handa nang isulat","info");
     }
   }
 }
@@ -412,9 +412,9 @@ function previewContent(){
 
 // ========== SAVE ==========
 async function saveContent(){
-  if(!currentPageId)return showStatus("❌ Pumili muna ng pahina","error");
+  if(!currentPageId)return showStatus("â Pumili muna ng pahina","error");
   const content=document.getElementById('editor').value.trim();
-  if(!content)return showStatus("❌ Walang nilalaman","error");
+  if(!content)return showStatus("â Walang nilalaman","error");
   const info=pages.find(p=>p.id===currentPageId);
 
   saveChange(currentPageId,content,info.name);
@@ -424,13 +424,13 @@ async function saveContent(){
     setSyncState('syncing');
     if(await upload(currentPageId,content)){
       removeChange(currentPageId); markSaved('github'); buildPageList();
-      showStatus("✅ NAI-SAVE SA GITHUB! ⚡","success");
+      showStatus("â NAI-SAVE SA GITHUB! â¡","success");
     }else{
       setSyncState('pending');
-      showStatus("✅ Naka-imbak LOKAL — kusang ia-upload mamaya","warning");
+      showStatus("â Naka-imbak LOKAL â kusang ia-upload mamaya","warning");
     }
   }else{
-    showStatus("✅ Naka-imbak LOKAL — ia-upload kapag may internet na","warning");
+    showStatus("â Naka-imbak LOKAL â ia-upload kapag may internet na","warning");
   }
 }
 
@@ -459,15 +459,15 @@ function openChangePasswordModal(){ document.getElementById('pw-modal').classLis
 function closePwModal(){ document.getElementById('pw-modal').classList.add('hidden') }
 function changePassword(){
   const o=document.getElementById('old-pw').value,n=document.getElementById('new-pw').value,c=document.getElementById('confirm-pw').value,e=document.getElementById('pw-error');
-  if(o!==ADMIN_PASSWORD)return e.textContent="❌ Maling lumang password";
-  if(n.length<6)return e.textContent="❌ Hindi bababa sa 6 letra";
-  if(n!==c)return e.textContent="❌ Hindi tugma";
+  if(o!==ADMIN_PASSWORD)return e.textContent="â Maling lumang password";
+  if(n.length<6)return e.textContent="â Hindi bababa sa 6 letra";
+  if(n!==c)return e.textContent="â Hindi tugma";
   window.ADMIN_PASSWORD=n;
-  alert("✅ Napalitan na! Kailangan mong buuin ulit ang admin.html gamit ang bagong password.");
+  alert("â Napalitan na! Kailangan mong buuin ulit ang admin.html gamit ang bagong password.");
   closePwModal();
 }
 
-// ========== INIT — AWTOMATIKONG IBABALIK SA LOOB ==========
+// ========== INIT â AWTOMATIKONG IBABALIK SA LOOB ==========
 window.addEventListener('load', async () => {
   const savedPassword = localStorage.getItem('bisyo_admin_password');
   if(savedPassword && checkSessionExpiry()){
@@ -477,7 +477,7 @@ window.addEventListener('load', async () => {
     document.getElementById('admin-panel').classList.remove('hidden');
     buildPageList(); updatePendingUI(); updateConnUI();
     startSessionCountdown();
-    showStatus("✅ Session naibalik — handa nang gamitin!","info");
+    showStatus("â Session naibalik â handa nang gamitin!","info");
   }
 });
 </script>
