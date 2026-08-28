@@ -13,15 +13,16 @@ h2{font-size:16px;margin:20px 0 8px;color:#f59e0b}
 .card{background:#374151;padding:20px;border-radius:12px;margin-bottom:16px}
 label{display:block;margin-bottom:6px;font-weight:bold;font-size:14px}
 input,textarea{width:100%;padding:12px;border-radius:8px;border:none;background:#4b5563;color:white;font-size:15px;margin-bottom:14px}
-textarea{min-height:180px;font-family:monospace;font-size:12px;line-height:1.5}
+textarea{min-height:180px;font-family:monospace;font-size:11px;line-height:1.4;resize:vertical}
 button{padding:12px 20px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;margin-right:8px;margin-bottom:8px}
 .btn-red{background:#dc2626;color:white}
 .btn-green{background:#16a34a;color:white}
 .btn-blue{background:#2563eb;color:white}
-pre{background:#111827;padding:12px;border-radius:8px;overflow-x:auto;font-size:12px;color:#a5f3fc;max-height:250px;overflow-y:auto}
-.hidden{display:none}
+pre{background:#111827;padding:12px;border-radius:8px;overflow-x:auto;font-size:11px;color:#a5f3fc;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.hidden{display:none !important}
 .success{color:#4ade80;margin:10px 0}
 .warning{color:#fbbf24;margin:10px 0}
+.error-text{color:#f87171;margin:10px 0}
 </style>
 </head>
 <body>
@@ -35,8 +36,8 @@ pre{background:#111827;padding:12px;border-radius:8px;overflow-x:auto;font-size:
   <label>GitHub Token:</label>
   <input type="text" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
   
-  <label>Admin Password (susi):</label>
-  <input type="password" id="admin-pass" placeholder="hal. bisyo2026" value="bisyo2026">
+  <label>Admin Password (susi — hindi bababa sa 6 letra):</label>
+  <input type="password" id="admin-pass" placeholder="hal. bisyo2026">
   
   <button class="btn-red" onclick="buildAdmin()">🔒 I-encrypt at Buuin Admin.html</button>
   <div id="step1-status"></div>
@@ -49,7 +50,7 @@ pre{background:#111827;padding:12px;border-radius:8px;overflow-x:auto;font-size:
   <p class="warning">⚠️ Kopyahin ang LAHAT ng nasa ibaba → I-save bilang <code>admin.html</code> → I-upload sa GitHub</p>
   
   <label>Buong admin.html — Kopyahin LAHAT:</label>
-  <textarea id="admin-output" readonly></textarea>
+  <textarea id="admin-output" readonly spellcheck="false"></textarea>
   
   <button class="btn-green" onclick="copyAll()">📋 Kopyahin LAHAT</button>
   <button class="btn-blue" onclick="downloadFile()">💾 I-download Bilang File</button>
@@ -57,7 +58,7 @@ pre{background:#111827;padding:12px;border-radius:8px;overflow-x:auto;font-size:
 
 <script>
 // =====================================================
-// 🔐 PAREHONG PAMAMARAAN NG ENCRYPTION — GUMAGANA SA ADMIN.HTML
+// 🔐 PAREHONG PAMAMARAAN NG ENCRYPTION
 // =====================================================
 async function deriveKey(password) {
   const encoder = new TextEncoder();
@@ -99,17 +100,17 @@ return `<!DOCTYPE html>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#f3f4f6;font-family:Arial,sans-serif}
 .header{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;padding:16px 20px;position:sticky;top:0;z-index:100}
-.header h1{font-size:20px}
-.header p{font-size:14px;opacity:0.9}
+.header h1{font-size:20px;margin:0 0 4px 0}
+.header p{font-size:14px;opacity:0.9;margin:0}
 .login-container{max-width:420px;margin:40px auto;padding:24px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
 .login-title{font-size:22px;font-weight:bold;color:#b91c1c;margin-bottom:20px;text-align:center}
 .input{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:16px}
 .input:focus{outline:none;border-color:#b91c1c}
 .btn{padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer}
 .btn-sm{padding:6px 12px;font-size:14px;border-radius:6px}
-.btn-primary{background:#b91c1c;color:white}
+.btn-primary{background:#b91c1c;color:white;width:100%}
 .btn-primary:hover{background:#a81818}
-.btn-secondary{background:#e5e7eb;color:#374151;margin-top:10px}
+.btn-secondary{background:#e5e7eb;color:#374151;margin-top:10px;width:100%}
 .btn-success{background:#16a34a;color:white}
 .btn-success:hover{background:#15803d}
 .btn-warning{background:#f59e0b;color:white}
@@ -123,11 +124,11 @@ body{background:#f3f4f6;font-family:Arial,sans-serif}
 .page-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
 .page-item{padding:12px 14px;background:#f9fafb;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all 0.2s}
 .page-item:hover{border-color:#b91c1c;background:#fef2f2}
-.page-item.active{background:#b91c1c;color:white}
+.page-item.active{background:#b91c1c;color:white;border-color:#b91c1c}
 .editor-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .editor-toolbar button{padding:6px 12px;border-radius:6px;border:none;background:#e5e7eb;cursor:pointer}
 .editor-toolbar button:hover{background:#d1d5db}
-textarea{width:100%;min-height:320px;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:15px;line-height:1.6}
+textarea#content-editor{width:100%;min-height:320px;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:15px;line-height:1.6;font-family:inherit}
 textarea:focus{outline:none;border-color:#b91c1c}
 .action-bar{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .status{margin-top:12px;padding:10px;border-radius:8px;display:none;white-space:pre-wrap}
@@ -135,15 +136,16 @@ textarea:focus{outline:none;border-color:#b91c1c}
 .status.error{background:#fee2e2;color:#991b1b;display:block}
 .status.info{background:#dbeafe;color:#1e40af;display:block}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999}
+.modal.show{display:flex}
 .modal-box{background:white;padding:24px;border-radius:16px;max-width:420px;width:90%}
 .modal-title{font-size:18px;font-weight:bold;color:#b91c1c;margin-bottom:16px}
+label{display:block;margin-bottom:6px;font-weight:bold;font-size:14px}
+.top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.token-status{font-size:13px}
 </style>
 </head>
 <body>
 
-<!-- =====================================================
-     🔒 NAKA-ENCRYPT NA TOKEN — HINDI MAKIKITA ANG TOTOO
-     ===================================================== -->
 <script>
 const ENCRYPTED_TOKEN = "${encryptedToken}";
 const REPO_OWNER = "fbvlink2026-lab";
@@ -156,25 +158,24 @@ const ASSETS_PATH = "assets/pages";
   <p>Proyekto ni Mark Jann Tampok — Pag-edit ng Nilalaman</p>
 </div>
 
-<!-- === LOGIN === -->
 <div id="login-form" class="login-container">
-  <div class="login-title">🔐 Pag-login</div>
+  <div class="login-title">🔑 Pag-login</div>
   <p style="text-align:center;margin-bottom:16px;color:#6b7280">Ilagay ang password para makapag-edit</p>
   <div class="error" id="login-error"></div>
   <input type="password" id="pass-input" class="input" placeholder="Ipasok ang password...">
-  <button class="btn btn-primary" style="width:100%" onclick="doLogin()">🔑 Mag-login</button>
-  <button class="btn btn-secondary" style="width:100%" onclick="window.history.back()">← Bumalik</button>
+  <button class="btn btn-primary" onclick="doLogin()">🔑 Mag-login</button>
+  <button class="btn btn-secondary" onclick="window.history.back()">← Bumalik</button>
 </div>
 
-<!-- === ADMIN PANEL === -->
-<div id="admin-panel">
+<div id="admin-panel" class="panel">
   <div class="panel-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div class="top-bar">
       <div>
-        <div class="session-info" id="session-timer">⏰ Session: —</div>
-        <div id="token-status" style="font-size:13px;color:#6b7280">☁️ GitHub Token: —</div>
+        <span class="session-info">✅ Naka-login na</span>
+        <span class="token-status" id="token-indicator"></span>
       </div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-secondary" onclick="window.open('setup-token.html','_self')">⚙️ Setup Token</button>
         <button class="btn btn-sm btn-warning" onclick="openChangePasswordModal()">🔁 Palitan ang Password</button>
         <button class="btn btn-sm btn-secondary" onclick="doLogout()">🚪 Mag-logout</button>
       </div>
@@ -183,116 +184,250 @@ const ASSETS_PATH = "assets/pages";
 
   <div class="panel-card">
     <div class="panel-title">📄 Mga Pahina — Pumili para I-edit</div>
-    <div style="margin-bottom:10px;color:#6b7280;font-size:14px">Kabuuang: <span id="page-count">0</span> pahina</div>
     <div class="page-list" id="page-list"></div>
   </div>
 
   <div class="panel-card">
-    <div class="panel-title" id="editor-title">Pumili muna ng pahina sa itaas</div>
+    <div class="panel-title" id="editor-title">I-edit ang Nilalaman</div>
     <div class="editor-toolbar">
-      <button onclick="insertTag('<h2>','</h2>')">📌 Pamagat 2</button>
-      <button onclick="insertTag('<h3>','</h3>')">📎 Pamagat 3</button>
-      <button onclick="insertTag('<p>','</p>')">📝 Talata</button>
-      <button onclick="insertTag('<ul><li>','</li></ul>')">• Listahan</button>
-      <button onclick="insertTag('<strong>','</strong>')">🗝️ Matapang</button>
-      <button onclick="insertTag('<em>','</em>')">🔤 Italiko</button>
+      <button onclick="insertTag('h2')">📌 Pamagat 2</button>
+      <button onclick="insertTag('h3')">📎 Pamagat 3</button>
+      <button onclick="insertTag('p')">📝 Talata</button>
+      <button onclick="insertTag('b')">🗝️ Matapang</button>
+      <button onclick="insertTag('i')">🔤 Italiko</button>
+      <button onclick="insertTag('ul')">• Listahan</button>
     </div>
-    <textarea id="content-editor" placeholder="✅ Pumili ka muna ng pahina sa itaas..."></textarea>
+    <textarea id="content-editor" placeholder="Simulan ang pagsusulat dito..."></textarea>
     <div class="action-bar">
-      <button class="btn btn-success" onclick="saveContent()">💾 I-save Lokal</button>
-      <button class="btn btn-primary" onclick="saveToGitHub()">☁️ I-save sa GitHub</button>
-      <button class="btn btn-info" onclick="previewContent()">👁️ Tingnan</button>
+      <button class="btn btn-success" onclick="saveContent()">💾 I-save sa GitHub</button>
+      <button class="btn btn-secondary" onclick="previewContent()">👁️ Tingnan</button>
       <button class="btn btn-secondary" onclick="newPage()">➕ Bagong Pahina</button>
     </div>
-    <div id="save-status" class="status"></div>
+    <div id="status" class="status"></div>
   </div>
 </div>
 
-<!-- === PALITAN ANG PASSWORD === -->
-<div id="change-password-modal" class="modal">
+<div id="pw-modal" class="modal">
   <div class="modal-box">
     <div class="modal-title">🔁 Palitan ang Password</div>
-    <p style="margin-bottom:12px;color:#4b5563;font-size:14px">⚠️ Kailangan mong BUUIN ULIT ang admin.html gamit ang <b>setup-token.html</b> pagkatapos palitan ang password.</p>
+    <p style="color:#78350f;margin-bottom:12px;font-size:14px">⚠️ Pagkatapos palitan — kailangan mong buuin ulit ang admin.html gamit ang setup-token.html gamit ang bagong password.</p>
     <div class="error" id="pw-error"></div>
-    <input type="password" id="old-password" class="input" placeholder="Lumang Password">
-    <input type="password" id="new-password" class="input" placeholder="Bagong Password (min. 6 letra)">
-    <input type="password" id="confirm-password" class="input" placeholder="I-ulit ang Bagong Password">
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeChangePasswordModal()">✖ Kanselahin</button>
-      <button class="btn btn-primary" style="flex:1" onclick="verifyChangePassword()">✅ Palitan</button>
-    </div>
-    <div id="new-password-info" class="hidden" style="margin-top:16px;padding:12px;background:#fef3c7;border-radius:8px">
-      <p style="font-weight:bold;color:#92400e">⚠️ GAWIN ITO:</p>
-      <p style="font-size:14px;margin:8px 0">1. Buksan ang <b>setup-token.html</b></p>
-      <p style="font-size:14px;margin:8px 0">2. Ipasok ulit ang Token at ang <b>BAGONG PASSWORD</b></p>
-      <p style="font-size:14px;margin:8px 0">3. Kopyahin ang bagong admin.html at palitan sa GitHub</p>
-      <button class="btn btn-warning btn-sm" onclick="closeChangePasswordModal()">✖ Naiintindihan</button>
+    <label>Lumang Password:</label>
+    <input type="password" id="old-pw" class="input">
+    <label>Bagong Password (min. 6 letra):</label>
+    <input type="password" id="new-pw" class="input">
+    <label>Ulitin Bagong Password:</label>
+    <input type="password" id="confirm-pw" class="input">
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closePwModal()">✖️ Isara</button>
+      <button class="btn btn-primary" style="flex:1" onclick="changePassword()">✅ Palitan</button>
     </div>
   </div>
 </div>
 
 <script>
-let ADMIN_PASSWORD = "${password}";
-const SESSION_DURATION_MINUTES = 30;
-const SESSION_KEY = "bisyo_admin_session";
-
-let PAGES = [];
-let currentPageId = null;
-let pageContents = {};
+let ADMIN_PASSWORD = null;
 let decryptedToken = null;
+let currentPageId = null;
+let pages = [
+  {id:"index", name:"🏠 Panimulang Pahina"},
+  {id:"main", name:"📄 Pangunahing Nilalaman"},
+  {id:"alak", name:"🍺 Alak"},
+  {id:"sigarilyo", name:"🚬 Sigarilyo"},
+  {id:"shabu", name:"💊 Shabu"},
+  {id:"heroin", name:"💉 Heroin"},
+  {id:"marijuana", name:"🌿 Marijuana"},
+  {id:"ecstasy", name:"💜 Ecstasy"},
+  {id:"cocaine", name:"❄️ Cocaine"},
+  {id:"tinuturok-gamot", name:"💉 Tinuturok na Gamot"},
+  {id:"tuklaw", name:"⚠️ Tuklaw / Pagkalulong"},
+  {id:"sugal", name:"🎰 Sugal"},
+  {id:"inhalants", name:"🫁 Inhalants"},
+  {id:"pag-aabuso-gamot", name:"💊 Pag-aabuso sa Gamot"},
+  {id:"lsd", name:"✨ LSD"},
+  {id:"ketamine", name:"🧪 Ketamine"},
+  {id:"ibang-sugal", name:"🎲 Ibang Uri ng Sugal"},
+  {id:"internet-laro", name:"🎮 Internet / Laro"},
+  {id:"labis-pagkain", name:"🍔 Labis na Pagkain"},
+  {id:"vaping", name:"💨 Vaping"}
+];
 
 async function deriveKey(password) {
   const encoder = new TextEncoder();
   const salt = encoder.encode("BisyoSalt2026");
-  const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(password), { name: "PBKDF2" }, false, [{ name: "SHA-256" }]);
-  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(password), {name:"PBKDF2"}, false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", salt: salt, iterations:100000, hash:"SHA-256"}, keyMaterial, {name:"AES-GCM", length:256}, false, ["decrypt"]);
 }
+
 async function decryptToken(encryptedBase64, password) {
   try {
     const key = await deriveKey(password);
-    const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
-    const iv = combined.slice(0,12);
-    const data = combined.slice(12);
-    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
+    const data = Uint8Array.from(atob(encryptedBase64), c=>c.charCodeAt(0));
+    const iv = data.slice(0,12);
+    const body = data.slice(12);
+    const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv:iv}, key, body);
     return new TextDecoder().decode(decrypted);
   } catch { return null; }
 }
-function checkExistingSession() {
-  const d = localStorage.getItem(SESSION_KEY); if(!d) return false;
-  try { const {loggedInAt,pw} = JSON.parse(d); if(pw) ADMIN_PASSWORD=pw; return Date.now()-loggedInAt < 1800000 } catch {}
-  localStorage.removeItem(SESSION_KEY); return false;
-}
+
 async function doLogin() {
-  const p=document.getElementById('pass-input').value;
-  if(p!==ADMIN_PASSWORD) return document.getElementById('login-error').textContent="❌ Maling Password";
-  showStatus("🔐 Binubuksan ang token...","info");
-  decryptedToken=await decryptToken(ENCRYPTED_TOKEN,p);
-  localStorage.setItem(SESSION_KEY,JSON.stringify({loggedInAt:Date.now(),pw:p}));
-  document.getElementById('login-form').classList.add('hidden'); enterPanel();
+  const pass = document.getElementById("pass-input").value;
+  if(!pass){ showError("Ipasok ang password"); return; }
+
+  if(ENCRYPTED_TOKEN === "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
+    ADMIN_PASSWORD = pass;
+    finishLogin();
+    return;
+  }
+
+  decryptedToken = await decryptToken(ENCRYPTED_TOKEN, pass);
+  if(!decryptedToken){ showError("❌ Maling Password"); return; }
+  ADMIN_PASSWORD = pass;
+  finishLogin();
 }
-async function enterPanel() {
-  document.getElementById('admin-panel').style.display='block'; loadSavedContents(); resetPages(); buildList();
-  if(decryptedToken){document.getElementById('token-status').innerHTML="☁️ GitHub: ✅ Nakakonekta"; verifyToken(decryptedToken);}
-  else document.getElementById('token-status').innerHTML="☁️ GitHub: ❌ Hindi mabuksan — mali ang password o token";
+
+function showError(msg){
+  document.getElementById("login-error").textContent = msg;
 }
-async function verifyToken(t){try{const r=await fetch(\`https://api.github.com/repos/\${REPO_OWNER}/\${REPO_NAME}\`,{headers:{Authorization:\`token \${t}\`}});return r.ok}catch{return false}}
-function resetPages(){PAGES=[{id:"alak",name:"1. Alak"},{id:"sigarilyo",name:"2. Sigarilyo"},{id:"shabu",name:"3. Shabu"},{id:"heroin",name:"4. Heroin"},{id:"marijuana",name:"5. Marijuana"},{id:"ecstasy",name:"6. Ecstasy"},{id:"cocaine",name:"7. Cocaine"},{id:"tinuturok-gamot",name:"8. Tinuturok na Gamot"},{id:"tuklaw",name:"9. Tuklaw / Pagkalulong"},{id:"sugal",name:"10. Sugal"},{id:"inhalants",name:"11. Inhalants"},{id:"pag-aabuso-gamot",name:"12. Pag-aabuso sa Gamot"},{id:"lsd",name:"13. LSD"},{id:"ketamine",name:"14. Ketamine"},{id:"ibang-sugal",name:"15. Ibang Uri ng Sugal"},{id:"internet-laro",name:"16. Internet / Paglalaro"},{id:"labis-pagkain",name:"17. Labis na Pagkain"},{id:"vaping",name:"18. Vaping"}]}
-function buildList(){const c=document.getElementById('page-list');c.innerHTML='';document.getElementById('page-count').textContent=PAGES.length;PAGES.forEach(p=>{const e=document.createElement('div');e.className='page-item'+(currentPageId===p.id?' active':'');e.textContent=p.name;e.onclick=()=>selectPage(p.id);c.appendChild(e)})}
-function selectPage(id){currentPageId=id;buildList();const p=PAGES.find(x=>x.id===id);document.getElementById('editor-title').textContent=\`I-edit: \${p.name}\`;document.getElementById('content-editor').value=pageContents[id]||'';hideStatus()}
-function saveContent(){if(!currentPageId)return showStatus("❌ Pumili muna ng pahina","error");pageContents[currentPageId]=document.getElementById('content-editor').value;localStorage.setItem('bisyo_'+currentPageId,pageContents[currentPageId]);showStatus("✅ Nai-save sa lokal","success")}
-async function saveToGitHub(){if(!currentPageId)return showStatus("❌ Pumili muna","error");if(!decryptedToken)return showStatus("❌ Walang token","error");const c=document.getElementById('content-editor').value;const f=\`\${ASSETS_PATH}/\${currentPageId}.html\`;const html=wrap(c,PAGES.find(p=>p.id===currentPageId).name);showStatus("⏰ Nag-a-upload...","info");try{let sha=null;const g=await fetch(\`https://api.github.com/repos/\${REPO_OWNER}/\${REPO_NAME}/contents/\${f}\`,{headers:{Authorization:\`token \${decryptedToken}\`}});if(g.ok){const d=await g.json();sha=d.sha}const b64=btoa(unescape(encodeURIComponent(html)));const r=await fetch(\`https://api.github.com/repos/\${REPO_OWNER}/\${REPO_NAME}/contents/\${f}\`,{method:"PUT",headers:{Authorization:\`token \${decryptedToken}\`,"Content-Type":"application/json"},body:JSON.stringify({message:\`📝 Update: \${currentPageId}.html\`,content:b64,sha:sha})});if(r.ok){pageContents[currentPageId]=c;localStorage.setItem('bisyo_'+currentPageId,c);showStatus("✅ NAI-SAVE SA GITHUB! 🎉","success")}else{const e=await r.json();showStatus(\`❌ \${e.message||r.status}\`,"error")}}catch(e){showStatus(\`❌ \${e.message}\`,"error")}}
-function wrap(b,t){return \`<!DOCTYPE html><html lang="tl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../style.css"><title>\${t}</title></head><body><div style="padding:20px;max-width:800px;margin:0 auto;line-height:1.8">\${b}</div></body></html>\`}
-function insertTag(o,c){const t=document.getElementById('content-editor');const s=t.selectionStart,e=t.selectionEnd;t.value=t.value.slice(0,s)+o+t.value.slice(s,e)+c+t.value.slice(e);t.focus()}
-function previewContent(){if(!currentPageId)return;const p=PAGES.find(x=>x.id===currentPageId);const w=window.open('');w.document.write(wrap(pageContents[currentPageId]||'',p.name))}
-function newPage(){const n=prompt("Pangalan:");if(!n)return;const i=n.toLowerCase().replace(/\\s+/g,'-').replace(/[^a-z0-9-]/g,'');PAGES.push({id:i,name:n});buildList();selectPage(i)}
-function loadSavedContents(){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('bisyo_'))pageContents[k.replace('bisyo_','')]=localStorage.getItem(k)}}
-function showStatus(m,t){const s=document.getElementById('save-status');s.textContent=m;s.className='status '+t;setTimeout(()=>s.className='status',10000)}
-function hideStatus(){document.getElementById('save-status').className='status'}
-function openChangePasswordModal(){document.getElementById('change-password-modal').style.display='flex';document.getElementById('pw-error').textContent='';document.getElementById('new-password-info').classList.add('hidden')}
-function closeChangePasswordModal(){document.getElementById('change-password-modal').style.display='none'}
-function verifyChangePassword(){const o=document.getElementById('old-password').value,n=document.getElementById('new-password').value,c=document.getElementById('confirm-password').value,e=document.getElementById('pw-error');if(o!==ADMIN_PASSWORD)return e.textContent="❌ Maling lumang password";if(n.length<6)return e.textContent="❌ Hindi bababa sa 6 letra";if(n!==c)return e.textContent="❌ Hindi tugma ang bagong password";if(n===ADMIN_PASSWORD)return e.textContent="❌ Katulad ng luma";document.getElementById('new-password-info').classList.remove('hidden')}
-function doLogout(){if(confirm("Sigurado ka bang mag-logout?")){localStorage.removeItem(SESSION_KEY);decryptedToken=null;document.getElementById('pass-input').value='';document.getElementById('admin-panel').style.display='none';document.getElementById('login-form').classList.remove('hidden');currentPageId=null}}
-window.onload=()=>{if(checkExistingSession()){document.getElementById('login-form').classList.add('hidden');enterPanel()}};
+
+function finishLogin(){
+  document.getElementById("login-form").classList.add("hidden");
+  document.getElementById("admin-panel").style.display = "block";
+  buildPageList();
+  updateTokenStatus();
+}
+
+function updateTokenStatus(){
+  const el = document.getElementById("token-indicator");
+  if(decryptedToken){
+    el.textContent = "🔑 Token: Naka-connect";
+    el.style.color = "#16a34a";
+  } else {
+    el.textContent = "⚠️ Walang Token — gagamit ng Workflow";
+    el.style.color = "#f59e0b";
+  }
+}
+
+function doLogout(){
+  ADMIN_PASSWORD = null;
+  decryptedToken = null;
+  document.getElementById("admin-panel").style.display = "none";
+  document.getElementById("login-form").classList.remove("hidden");
+  document.getElementById("pass-input").value = "";
+  document.getElementById("content-editor").value = "";
+  currentPageId = null;
+}
+
+function buildPageList(){
+  const container = document.getElementById("page-list");
+  container.innerHTML = "";
+  pages.forEach(p=>{
+    const div = document.createElement("div");
+    div.className = "page-item" + (currentPageId===p.id?" active":"");
+    div.textContent = p.name;
+    div.onclick = ()=>selectPage(p.id);
+    container.appendChild(div);
+  });
+}
+
+async function selectPage(id){
+  currentPageId = id;
+  buildPageList();
+  document.getElementById("editor-title").textContent = "I-edit: " + pages.find(p=>p.id===id)?.name;
+  document.getElementById("status").className = "status";
+  document.getElementById("status").textContent = "";
+  document.getElementById("content-editor").value = "<p>Nilalaman ng pahinang " + id + "</p>";
+}
+
+function newPage(){
+  const name = prompt("Pangalan ng Bagong Pahina:");
+  if(!name) return;
+  const id = name.toLowerCase().replace(/\\s+/g,"-").replace(/[^a-z0-9-]/g,"");
+  pages.push({id:id, name:name});
+  buildPageList();
+  selectPage(id);
+}
+
+function insertTag(tag){
+  const ta = document.getElementById("content-editor");
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const sel = ta.value.substring(start,end) || "Nilalaman";
+  let wrap = "<"+tag+">"+sel+"</"+tag+">";
+  if(tag==="ul") wrap = "<ul>\\n  <li>"+sel+"</li>\\n</ul>";
+  ta.value = ta.value.substring(0,start) + wrap + ta.value.substring(end);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = start + wrap.length;
+}
+
+function previewContent(){
+  const content = document.getElementById("content-editor").value;
+  const w = window.open("","_blank");
+  w.document.write("<html><body style='max-width:800px;margin:0 auto;padding:20px;font-family:Arial'>"+content+"</body></html>");
+}
+
+async function saveContent(){
+  if(!currentPageId){ showStatus("❌ Pumili muna ng pahina", "error"); return; }
+  const content = document.getElementById("content-editor").value;
+  if(!content){ showStatus("❌ Walang nilalaman", "error"); return; }
+
+  showStatus("⏰ Ipinapadala...", "info");
+
+  const response = await fetch("https://api.github.com/repos/"+REPO_OWNER+"/"+REPO_NAME+"/dispatches", {
+    method: "POST",
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": decryptedToken ? "token "+decryptedToken : ""
+    },
+    body: JSON.stringify({
+      event_type: "content-update",
+      client_payload: {
+        password: ADMIN_PASSWORD,
+        file: "docs/"+currentPageId+".html",
+        content: content
+      }
+    })
+  });
+
+  if(response.ok){
+    showStatus("✅ Nai-save! Awtomatikong kopyahin papuntang assets/ at bubuuin ang APK...", "success");
+  }else{
+    const err = await response.json();
+    showStatus("❌ Nabigo: "+(err.message || response.status), "error");
+  }
+}
+
+function showStatus(text, type){
+  const s = document.getElementById("status");
+  s.textContent = text;
+  s.className = "status " + type;
+}
+
+function openChangePasswordModal(){
+  document.getElementById("pw-modal").classList.add("show");
+  document.getElementById("pw-error").textContent = "";
+  document.getElementById("old-pw").value = "";
+  document.getElementById("new-pw").value = "";
+  document.getElementById("confirm-pw").value = "";
+}
+
+function closePwModal(){
+  document.getElementById("pw-modal").classList.remove("show");
+}
+
+function changePassword(){
+  const oldPw = document.getElementById("old-pw").value;
+  const newPw = document.getElementById("new-pw").value;
+  const confirmPw = document.getElementById("confirm-pw").value;
+  const err = document.getElementById("pw-error");
+
+  if(oldPw !== ADMIN_PASSWORD){ err.textContent = "❌ Maling lumang password"; return; }
+  if(newPw.length < 6){ err.textContent = "❌ Hindi bababa sa 6 letra"; return; }
+  if(newPw !== confirmPw){ err.textContent = "❌ Hindi tugma ang bagong password"; return; }
+
+  alert("✅ Tinatanggap!\\n\\n⚠️ Buksan ang setup-token.html at buuin ulit ang admin.html gamit ang bagong password.");
+  closePwModal();
+}
 </script>
 </body>
 </html>`;
@@ -306,27 +441,23 @@ async function buildAdmin() {
   const pass = document.getElementById('admin-pass').value;
   const status = document.getElementById('step1-status');
 
-  if (!token) return status.innerHTML = '<span style="color:#f87171">❌ Ilagay ang GitHub Token</span>';
-  if (!pass || pass.length < 6) return status.innerHTML = '<span style="color:#f87171">❌ Hindi bababa sa 6 letra ang password</span>';
+  if (!token) return status.innerHTML = '<span class="error-text">❌ Ilagay ang GitHub Token</span>';
+  if (!pass || pass.length < 6) return status.innerHTML = '<span class="error-text">❌ Hindi bababa sa 6 letra ang password</span>';
 
-  status.innerHTML = '<span style="color:#fbbf24">⏰ Ini-encrypt ang token... Maghintay...</span>';
+  status.innerHTML = '<span class="warning">⏰ Ini-encrypt ang token... Maghintay...</span>';
   
-  // ✅ I-encrypt ang token gamit ang password
   const encrypted = await encryptToken(token, pass);
-  
-  // ✅ Buuin ang buong admin.html
   const fullAdminHtml = getAdminHtmlTemplate(encrypted, pass);
   
-  // ✅ Ipakita ang resulta
   document.getElementById('admin-output').value = fullAdminHtml;
   document.getElementById('step2').classList.remove('hidden');
-  status.innerHTML = '<span style="color:#4ade80">✅ Matagumpay na na-encrypt at nabuo!</span>';
+  status.innerHTML = '<span class="success">✅ Matagumpay na na-encrypt at nabuo!</span>';
 }
 
 function copyAll() {
   const code = document.getElementById('admin-output').value;
   navigator.clipboard.writeText(code);
-  alert("✅ Kinopya na ang buong admin.html!\n\nI-paste ito sa GitHub bilang admin.html — tapos na!");
+  alert("✅ Kinopya na ang buong admin.html!\\n\\nI-paste ito sa GitHub bilang admin.html — tapos na!");
 }
 
 function downloadFile() {
