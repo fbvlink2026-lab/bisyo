@@ -3,89 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#f3f4f6;font-family:Arial,sans-serif}
-.header{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;padding:16px 20px;position:sticky;top:0;z-index:100;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.header-left{flex:1;min-width:200px}
-.header h1{font-size:20px;margin:0 0 4px 0}
-.header p{font-size:14px;opacity:0.9;margin:0}
-
-.status-bar{display:flex;gap:14px;align-items:center;font-size:13px}
-.status-dot{width:12px;height:12px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:4px}
-.dot-online{background:#4ade80;box-shadow:0 0 6px #4ade80}
-.dot-offline{background:#f87171;box-shadow:0 0 6px #f87171}
-.dot-saved{background:#4ade80}
-.dot-pending{background:#fbbf24;animation:pulse 1s infinite}
-.dot-syncing{background:#60a5fa;animation:pulse 1s infinite}
-@keyframes pulse{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
-
-.login-container{max-width:420px;margin:60px auto;padding:24px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
-.login-title{font-size:22px;font-weight:bold;color:#b91c1c;margin-bottom:20px;text-align:center}
-.input{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:16px}
-.input:focus{outline:none;border-color:#b91c1c}
-.btn{padding:12px 20px;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer}
-.btn-sm{padding:6px 12px;font-size:14px;border-radius:6px}
-.btn-primary{background:#b91c1c;color:white;width:100%}
-.btn-primary:hover{background:#a81818}
-.btn-secondary{background:#e5e7eb;color:#374151;margin-right:8px;margin-bottom:8px}
-.btn-success{background:#16a34a;color:white;margin-right:8px;margin-bottom:8px}
-.btn-warning{background:#f59e0b;color:#1f2937;margin-right:8px;margin-bottom:8px}
-.error{color:#dc2626;margin-bottom:12px;min-height:20px}
-.hidden{display:none !important}
-.panel{max-width:960px;margin:0 auto;padding:16px}
-.panel-card{background:white;border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-.panel-title{font-size:18px;font-weight:bold;color:#b91c1c;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.page-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
-.page-item{padding:12px 14px;background:#f9fafb;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all 0.2s;display:flex;justify-content:space-between;align-items:center}
-.page-item:hover{border-color:#b91c1c;background:#fef2f2}
-.page-item.active{background:#b91c1c;color:white;border-color:#b91c1c}
-.page-item .offline-badge{font-size:10px;background:#fbbf24;color:#000;padding:1px 6px;border-radius:10px}
-.editor-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.editor-toolbar button{padding:6px 12px;border-radius:6px;border:none;background:#e5e7eb;cursor:pointer}
-.editor-toolbar button:hover{background:#d1d5db}
-textarea#editor{width:100%;min-height:320px;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:15px;line-height:1.6;font-family:monospace;transition:border-color 0.2s}
-textarea#editor:focus{outline:none;border-color:#b91c1c}
-textarea#editor.unsaved{border-color:#f59e0b}
-.action-bar{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.status{margin-top:12px;padding:12px;border-radius:8px;white-space:pre-wrap;display:none;line-height:1.5}
-.status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
-.status.error{background:#fee2e2;color:#991b1b;display:block;border-left:4px solid #dc2626}
-.status.info{background:#dbeafe;color:#1e40af;display:block;border-left:4px solid #3b82f6}
-.status.warning{background:#fef3c7;color:#92400e;display:block;border-left:4px solid #f59e0b}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999}
-.modal.show{display:flex}
-.modal-box{background:white;padding:24px;border-radius:16px;max-width:420px;width:90%}
-.modal-title{font-size:18px;font-weight:bold;color:#b91c1c;margin-bottom:16px}
-label{display:block;margin-bottom:6px;font-weight:bold;font-size:14px}
-.top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
-.session-info{font-size:13px;color:#16a34a}
-.token-status{font-size:13px;margin-left:8px}
-.last-saved{font-size:13px;font-weight:normal;color:#6b7280}
-
-.pending-section{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:16px}
-.pending-title{font-weight:bold;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.pending-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#fef3c7;border-radius:6px;margin-bottom:6px;font-size:14px}
-.pending-sync-btn{padding:4px 10px;font-size:12px;background:#f59e0b;color:#000;border-radius:4px;border:none;cursor:pointer}
-.pending-clear-btn{padding:4px 10px;font-size:12px;background:#e5e7eb;color:#333;border-radius:4px;border:none;cursor:pointer;margin-left:4px}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <script>
-// ⚠️ HUWAG BAGUHIN ITO — PAPALITAN NG setup-token.html KAPAG BUIN MO NA
 const ENCRYPTED_TOKEN = "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN";
-
-// ✅ ITO ANG PASSWORD NA GAGAMITIN MO — TANDAAN MO ITO!
-const ADMIN_PASSWORD = "bisyo2026";  // 🔑 PALITAN MO ITO KUNG GUSTO MO!
+const ADMIN_PASSWORD = "bisyo2026";
 
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 const ASSETS_PATH = "app/src/main/assets";
 const STORAGE_KEY = "bisyo_offline_changes";
-const LAST_SAVE_KEY = "bisyo_last_saved";
+const CACHE_PREFIX = "bisyo_cache_";
 </script>
 
 <div class="header">
@@ -94,18 +25,11 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
     <p>Proyekto ni Mark Jann Tampok</p>
   </div>
   <div class="status-bar">
-    <span>
-      <span id="conn-dot" class="status-dot dot-online"></span>
-      <span id="conn-label">Online</span>
-    </span>
-    <span>
-      <span id="sync-dot" class="status-dot dot-saved"></span>
-      <span id="sync-label">Naka-sync</span>
-    </span>
+    <span><span id="conn-dot" class="status-dot dot-online"></span><span id="conn-label">Online</span></span>
+    <span><span id="sync-dot" class="status-dot dot-saved"></span><span id="sync-label">Naka-sync</span></span>
   </div>
 </div>
 
-<!-- === LOGIN === -->
 <div id="login-form" class="login-container">
   <div class="login-title">🔑 Pag-login</div>
   <div class="error" id="login-error"></div>
@@ -113,11 +37,10 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
   <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
   <button class="btn btn-primary" onclick="doLogin()">🔑 Mag-login</button>
   <p style="text-align:center;margin-top:12px;font-size:13px;color:#6b7280">
-    💡 Tandaan: Ito rin ang password na gagamitin mo kapag magse-setup ka na ng Token.
+    💡 Tandaan: Ito rin ang gagamitin sa pag-setup ng Token.
   </p>
 </div>
 
-<!-- === ADMIN PANEL === -->
 <div id="admin-panel" class="panel hidden">
 
   <div class="panel-card">
@@ -151,6 +74,18 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
     <div class="page-list" id="page-list"></div>
   </div>
 
+  <div class="template-section">
+    <div class="template-title">📋 Mga Template — Ipasok Agad</div>
+    <div class="template-buttons">
+      <button class="template-btn" onclick="insertTemplate('full')">📄 Buong Pahina</button>
+      <button class="template-btn" onclick="insertTemplate('intro')">📌 Panimula</button>
+      <button class="template-btn" onclick="insertTemplate('effects')">⚠️ Epekto</button>
+      <button class="template-btn" onclick="insertTemplate('signs')">👀 Palatandaan</button>
+      <button class="template-btn" onclick="insertTemplate('help')">🆘 Tulong</button>
+      <button class="template-btn" onclick="insertTemplate('warning')">🔴 Babala</button>
+    </div>
+  </div>
+
   <div class="panel-card">
     <div class="panel-title" id="editor-title">I-edit ang Nilalaman</div>
     <div class="editor-toolbar">
@@ -160,23 +95,23 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
       <button onclick="insertTag('b')">🗝️ Matapang</button>
       <button onclick="insertTag('i')">🔤 Italiko</button>
       <button onclick="insertTag('ul')">• Listahan</button>
+      <button onclick="insertTag('hr')">➖ Guhit</button>
     </div>
-    <textarea id="editor" placeholder="Simulan ang pagsusulat dito..." oninput="markUnsaved()"></textarea>
+    <textarea id="editor" placeholder="Pumili muna ng pahina sa itaas..." oninput="markUnsaved()"></textarea>
     <div class="action-bar">
-      <button class="btn btn-success" id="save-btn" onclick="saveContent()">💾 I-save</button>
+      <button class="btn btn-success" onclick="saveContent()">💾 I-save</button>
       <button class="btn btn-secondary" onclick="previewContent()">👁️ Tingnan</button>
-      <button class="btn btn-secondary" id="sync-page-btn" onclick="syncCurrentPage()">🔄 I-sync Ngayon</button>
+      <button class="btn btn-secondary" onclick="syncCurrentPage()">🔄 I-sync Ngayon</button>
     </div>
     <div id="status" class="status"></div>
   </div>
 
 </div>
 
-<!-- === MODAL === -->
 <div id="pw-modal" class="modal">
   <div class="modal-box">
     <div class="modal-title">🔁 Palitan ang Password</div>
-    <p style="color:#78350f;margin-bottom:12px;font-size:14px">⚠️ Pagkatapos palitan — kailangan mong buuin ulit ang admin.html gamit ang setup-token.html gamit ang bagong password.</p>
+    <p style="color:#78350f;margin-bottom:12px;font-size:14px">⚠️ Pagkatapos palitan — kailangan mong buuin ulit ang admin.html gamit ang bagong password.</p>
     <div class="error" id="pw-error"></div>
     <label>Lumang Password:</label>
     <input type="password" id="old-pw" class="input">
@@ -197,7 +132,7 @@ let decryptedToken = null;
 let currentPageId = null;
 let isOnline = navigator.onLine;
 
-let pages = [
+const pages = [
   {id:"index", name:"🏠 Panimulang Pahina"},
   {id:"main", name:"📄 Pangunahing Nilalaman"},
   {id:"alak", name:"🍺 Alak"},
@@ -220,342 +155,296 @@ let pages = [
   {id:"vaping", name:"💨 Vaping"}
 ];
 
-// =====================================================
-// 💾 OFFLINE STORAGE
-// =====================================================
-function getOfflineChanges(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return []} }
-function saveOfflineChange(pageId, content, pageName){
-  const changes = getOfflineChanges().filter(c=>c.pageId!==pageId);
-  changes.unshift({pageId, pageName, content, timestamp: Date.now()});
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(changes));
+// ========== TEMPLATES ==========
+function getTemplate(type){
+  const t = {
+    full: `<h2>Pamagat ng Paksa</h2>
+<p>Ito ay panimula — ipaliwanag kung ano ang paksa at bakit mahalagang malaman ito.</p>
+<h3>Ang Kalikasan Nito</h3>
+<p>Detalyadong paliwanag tungkol sa paksa...</p>
+<h3>Mga Epekto</h3>
+<ul>
+  <li>Epekto sa katawan</li>
+  <li>Epekto sa isipan</li>
+  <li>Epekto sa pamilya at lipunan</li>
+</ul>
+<h3>Paano Maiiwasan</h3>
+<p>Ang pag-iwas ay nagsisimula sa tamang kaalaman at pagpili ng tamang landas.</p>
+<hr>
+<p><em>✅ Huling na-update: ${new Date().toLocaleDateString('tl-PH')}</em></p>`,
+
+    intro: `<h2>Panimula</h2>
+<p>Ang <strong>[PANGALAN]</strong> ay isa sa mga bagay na kailangang maintindihan upang makaiwas sa masamang epekto nito sa buhay.</p>`,
+
+    effects: `<h3>⚠️ Mga Masamang Epekto</h3>
+<ul>
+  <li><strong>Sa Katawan:</strong> ilagay dito</li>
+  <li><strong>Sa Isipan:</strong> ilagay dito</li>
+  <li><strong>Sa Pamilya:</strong> ilagay dito</li>
+  <li><strong>Sa Kinabukasan:</strong> ilagay dito</li>
+</ul>`,
+
+    signs: `<h3>👀 Mga Palatandaan</h3>
+<ul>
+  <li>Pagbabago sa ugali at pakikisama</li>
+  <li>Pagbabago sa oras ng pagtulog at pagkain</li>
+  <li>Pagbaba ng interes sa pag-aaral o trabaho</li>
+  <li>Pagkawala ng pera o mga gamit sa bahay</li>
+</ul>`,
+
+    help: `<h3>🆘 Saan Makahihingi ng Tulong?</h3>
+<p>Hindi ka nag-iisa. Mayroong tulong na handang dumating:</p>
+<ul>
+  <li>👨‍👩‍👧 Pamilya at mga kaibigan — huwag mahiyang magsabi</li>
+  <li>🏥 Doktor o propesyonal sa kalusugan</li>
+  <li>📞 Mga hotline at sentro ng rehabilitasyon</li>
+</ul>
+<p style="color:#b91c1c;font-weight:bold;">💡 Ang paghingi ng tulong ay tanda ng katapangan, hindi kahinaan.</p>`,
+
+    warning: `<div style="background:#fef2f2;border-left:4px solid #dc2626;padding:14px;border-radius:8px;margin:12px 0;">
+<strong>🔴 BABALA:</strong> Ang paggamit nito ay ilegal at mapanganib sa kalusugan at kinabukasan. Huwag subukan kahit minsan.
+</div>`
+  };
+  return t[type] || '';
+}
+
+function insertTemplate(type){
+  const ta = document.getElementById('editor');
+  const val = getTemplate(type);
+  if(!val) return;
+  const pos = ta.selectionStart;
+  ta.value = ta.value.slice(0,pos) + val + '\n' + ta.value.slice(pos);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = pos + val.length;
+  markUnsaved();
+}
+
+// ========== OFFLINE STORAGE ==========
+function getChanges(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return []} }
+function saveChange(id,content,name){
+  const arr = getChanges().filter(c=>c.pageId!==id);
+  arr.unshift({pageId:id,pageName:name,content,timestamp:Date.now()});
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  localStorage.setItem(CACHE_PREFIX+id, content);
   updatePendingUI();
 }
-function removeOfflineChange(pageId){
-  const changes = getOfflineChanges().filter(c=>c.pageId!==pageId);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(changes));
+function removeChange(id){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(getChanges().filter(c=>c.pageId!==id)));
   updatePendingUI();
 }
-function hasOfflineChange(pageId){ return !!getOfflineChanges().find(c=>c.pageId===pageId) }
-function setLastSaved(pageId, method){
-  localStorage.setItem(LAST_SAVE_KEY+'_'+pageId, JSON.stringify({time:Date.now(), method}));
-  updateLastSavedDisplay(pageId);
-}
-function getLastSaved(pageId){ try{return JSON.parse(localStorage.getItem(LAST_SAVE_KEY+'_'+pageId)||'null')}catch{return null} }
+function hasChange(id){ return !!getChanges().find(c=>c.pageId===id) }
+function getCached(id){ return localStorage.getItem(CACHE_PREFIX+id) }
 
-// =====================================================
-// 📡 KATAYUAN NG KONEKSYON
-// =====================================================
-window.addEventListener('online', ()=>{
-  isOnline = true; updateConnectionUI();
-  setTimeout(()=>syncAllPending(), 1500);
-});
-window.addEventListener('offline', ()=>{ isOnline = false; updateConnectionUI() });
+// ========== CONNECTION ==========
+window.addEventListener('online',()=>{isOnline=true;updateConnUI();setTimeout(syncAllPending,1500)});
+window.addEventListener('offline',()=>{isOnline=false;updateConnUI()});
 
-function updateConnectionUI(){
-  const dot = document.getElementById('conn-dot');
-  const label = document.getElementById('conn-label');
-  dot.className = 'status-dot ' + (isOnline ? 'dot-online' : 'dot-offline');
-  label.textContent = isOnline ? 'Online' : 'Walang Internet';
+function updateConnUI(){
+  document.getElementById('conn-dot').className='status-dot dot-'+(isOnline?'online':'offline');
+  document.getElementById('conn-label').textContent=isOnline?'Online':'Walang Internet';
 }
-function updateSyncState(state){
-  const dot = document.getElementById('sync-dot');
-  const label = document.getElementById('sync-label');
-  dot.className = 'status-dot dot-' + state;
-  label.textContent = state==='saved' ? 'Naka-sync' : state==='pending' ? 'Naka-imbak Lokal' : state==='syncing' ? 'Nagse-sync...' : 'May Problema';
+function setSyncState(s){
+  document.getElementById('sync-dot').className='status-dot dot-'+s;
+  document.getElementById('sync-label').textContent=s==='saved'?'Naka-sync':s==='pending'?'Naka-imbak Lokal':'Nagse-sync...';
 }
-function markUnsaved(){ document.getElementById('editor').classList.add('unsaved'); updateSyncState('pending') }
-function markSaved(method){ document.getElementById('editor').classList.remove('unsaved'); setLastSaved(currentPageId, method) }
-function updateLastSavedDisplay(pageId){
-  const info = document.getElementById('last-saved-info');
-  const ls = getLastSaved(pageId);
-  info.textContent = ls ? `Huling na-imbak: ${new Date(ls.time).toLocaleTimeString('tl-PH',{hour:'2-digit',minute:'2-digit'})} (${ls.method==='offline'?'Lokal':'GitHub'})` : '';
+function markUnsaved(){ document.getElementById('editor').classList.add('unsaved'); setSyncState('pending') }
+function markSaved(m){ document.getElementById('editor').classList.remove('unsaved'); localStorage.setItem('lastSaved_'+currentPageId,JSON.stringify({t:Date.now(),m})); updateLastSaved() }
+function updateLastSaved(){
+  const d=JSON.parse(localStorage.getItem('lastSaved_'+currentPageId)||'null');
+  document.getElementById('last-saved-info').textContent=d?`Huling na-imbak: ${new Date(d.t).toLocaleTimeString('tl-PH',{hour:'2-digit',minute:'2-digit'})} (${d.m==='offline'?'Lokal':'GitHub'})`:'';
 }
 
-// =====================================================
-// ⏳ PENDING UI
-// =====================================================
+// ========== PENDING ==========
 function updatePendingUI(){
-  const section = document.getElementById('pending-section');
-  const list = document.getElementById('pending-list');
-  const changes = getOfflineChanges();
-  if(changes.length===0){ section.classList.add('hidden'); return }
-  section.classList.remove('hidden');
-  list.innerHTML = changes.map(c=>`<div class="pending-item"><span><strong>${c.pageName}</strong><br><small style="opacity:0.7">${new Date(c.timestamp).toLocaleString('tl-PH')}</small></span><div><button class="pending-sync-btn" onclick="syncOnePage('${c.pageId}')">🔄 Sync</button><button class="pending-clear-btn" onclick="discardOffline('${c.pageId}')">✖️</button></div></div>`).join('');
+  const sec=document.getElementById('pending-section'), list=document.getElementById('pending-list'), arr=getChanges();
+  if(!arr.length) return sec.classList.add('hidden');
+  sec.classList.remove('hidden');
+  list.innerHTML=arr.map(c=>`<div class="pending-item"><span><strong>${c.pageName}</strong><br><small style="opacity:.7">${new Date(c.timestamp).toLocaleString('tl-PH')}</small></span><div><button class="pending-sync-btn" onclick="syncOne('${c.pageId}')">🔄 Sync</button><button class="pending-clear-btn" onclick="discard('${c.pageId}')">✖️</button></div></div>`).join('');
 }
-async function syncAllPending(){
-  if(!isOnline || !decryptedToken){ showStatus("❌ Kailangan ng Internet at Token para mag-sync", "error"); return }
-  const changes = [...getOfflineChanges()];
-  for(const c of changes) await uploadToGitHub(c.pageId, c.content, true);
-}
-async function syncCurrentPage(){
-  if(!currentPageId){ showStatus("❌ Walang napiling pahina", "error"); return }
-  const content = document.getElementById('editor').value;
-  if(!content){ showStatus("❌ Walang nilalaman", "error"); return }
-  if(hasOfflineChange(currentPageId)) saveContent();
-  else showStatus("✅ Wala nang kailangang i-sync", "success");
-}
-function clearAllPending(){
-  if(!confirm("Burahin ang lahat ng naka-imbak na pagbabago?")) return;
-  localStorage.removeItem(STORAGE_KEY); updatePendingUI(); showStatus("✅ Nabura na ang lahat", "info");
-}
-function discardOffline(pageId){
-  if(!confirm("Burahin ang naka-imbak na pagbabago?")) return;
-  removeOfflineChange(pageId); if(currentPageId===pageId) updateSyncState('saved'); showStatus("✅ Nabura na", "info");
-}
-async function syncOnePage(pageId){ const c=getOfflineChange(pageId); if(c) await uploadToGitHub(pageId, c.content, true) }
+async function syncAllPending(){ if(!isOnline||!decryptedToken)return showStatus("❌ Kailangan ng Internet at Token","error"); for(const c of getChanges())await upload(c.pageId,c.content,true) }
+function discard(id){ if(!confirm("Burahin?"))return; removeChange(id); if(currentPageId===id)setSyncState('saved'); showStatus("✅ Nabura","info") }
+async function syncCurrentPage(){ if(!currentPageId)return; saveContent() }
+async function syncOne(id){ const c=getChanges().find(x=>x.pageId===id); if(c)await upload(id,c.content,true) }
+function clearAllPending(){ if(!confirm("Burahin lahat?"))return; localStorage.removeItem(STORAGE_KEY); updatePendingUI(); showStatus("✅ Nabura lahat","info") }
 
-// =====================================================
-// 🔐 DECRYPTION — GAMIT ANG PASSWORD
-// =====================================================
-async function deriveKey(password) {
-  const encoder = new TextEncoder();
-  const salt = encoder.encode("BisyoSalt2026");
-  const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(password), {name:"PBKDF2"}, false, ["deriveKey"]);
-  return crypto.subtle.deriveKey({name:"PBKDF2", salt: salt, iterations:100000, hash:"SHA-256"}, keyMaterial, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+// ========== ENCRYPTION ==========
+async function deriveKey(p){
+  const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),{name:"PBKDF2"},false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:new TextEncoder().encode("BisyoSalt2026"),iterations:100000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["decrypt"]);
 }
-async function decryptToken(encryptedBase64, password) {
-  try {
-    const key = await deriveKey(password);
-    const data = Uint8Array.from(atob(encryptedBase64), c=>c.charCodeAt(0));
-    const iv = data.slice(0,12);
-    const body = data.slice(12);
-    const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv:iv}, key, body);
-    return new TextDecoder().decode(decrypted);
-  } catch { return null }
+async function decryptToken(enc,p){
+  try{
+    const d=Uint8Array.from(atob(enc),c=>c.charCodeAt(0));
+    const k=await deriveKey(p);
+    return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:d.slice(0,12)},k,d.slice(12)));
+  }catch{return null}
 }
 
-// =====================================================
-// 🔑 LOGIN — GAMIT LANG ANG PASSWORD!
-// =====================================================
-async function doLogin() {
-  const pass = document.getElementById("admin-pass").value;
-  if(!pass){ showError("Ipasok ang password"); return; }
-
-  // ✅ TAMA ANG PASSWORD? — TUMANGGAP AGAD!
-  if(pass !== ADMIN_PASSWORD){
-    showError("❌ Maling Password");
-    return;
-  }
-
-  // ✅ TAMA — TUMANGGAP AGAD! HINDI NA HINIHINTAY ANG TOKEN!
-  ADMIN_PASSWORD_ENTERED = pass;
-
-  // ✅ KUNG MAY TOKEN NA — I-DECRYPT
-  if(ENCRYPTED_TOKEN !== "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
-    decryptedToken = await decryptToken(ENCRYPTED_TOKEN, pass);
-  }
-
-  finishLogin();
-
-  // ✅ KUNG WALA PANG TOKEN — BABALA LANG, GUMAGANA PA RIN!
-  if(!decryptedToken){
-    showStatus("⚠️ Walang GitHub Token pa — pagbabago ay naka-imbak LOKAL muna.\nBuksan ang setup-token.html gamit ang parehong password para makapag-save sa GitHub.", "warning");
-  } else {
-    showStatus("✅ Naka-konekta sa GitHub — handa nang i-save!", "success");
-  }
+// ========== LOGIN ==========
+async function doLogin(){
+  const p=document.getElementById('admin-pass').value;
+  if(p!==ADMIN_PASSWORD)return showError("❌ Maling Password");
+  ADMIN_PASSWORD_ENTERED=p;
+  if(ENCRYPTED_TOKEN!=="PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN")decryptedToken=await decryptToken(ENCRYPTED_TOKEN,p);
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('admin-panel').classList.remove('hidden');
+  buildPageList(); updatePendingUI();
+  showStatus(decryptedToken?"✅ Naka-konekta — handa nang i-save!":"⚠️ Walang Token — naka-imbak LOKAL muna","info");
 }
-
-function showError(msg){ document.getElementById("login-error").textContent = msg }
-function finishLogin(){
-  document.getElementById("login-form").classList.add("hidden");
-  document.getElementById("admin-panel").classList.remove("hidden");
-  buildPageList(); updateTokenStatus(); updatePendingUI();
-}
-function updateTokenStatus(){
-  const el = document.getElementById("token-indicator");
-  if(decryptedToken){ el.textContent = "🔑 Naka-konekta sa GitHub"; el.style.color = "#16a34a" }
-  else { el.textContent = "⚠️ Walang Token — Lokal lamang"; el.style.color = "#f59e0b" }
-}
+function showError(m){document.getElementById('login-error').textContent=m}
 function doLogout(){
-  ADMIN_PASSWORD_ENTERED = null; decryptedToken = null; currentPageId = null;
-  document.getElementById("admin-panel").classList.add("hidden");
-  document.getElementById("login-form").classList.remove("hidden");
-  document.getElementById("admin-pass").value = "";
-  document.getElementById("editor").value = "";
+  ADMIN_PASSWORD_ENTERED=decryptedToken=currentPageId=null;
+  document.getElementById('admin-panel').classList.add('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
+  document.getElementById('admin-pass').value=document.getElementById('editor').value='';
 }
 
-// =====================================================
-// 📄 MGA PAHINA
-// =====================================================
+// ========== PAGES ==========
 function buildPageList(){
-  const c = document.getElementById("page-list"); c.innerHTML = "";
+  const c=document.getElementById('page-list'); c.innerHTML='';
   pages.forEach(p=>{
-    const div = document.createElement("div");
-    div.className = "page-item" + (currentPageId===p.id?" active":"");
-    div.innerHTML = `<span>${p.name}</span>${hasOfflineChange(p.id)?'<span class="offline-badge">Lokal</span>':''}`;
-    div.onclick = ()=>selectPage(p.id); c.appendChild(div);
+    const d=Object.assign(document.createElement('div'),{className:'page-item'+(currentPageId===p.id?' active':'')});
+    d.innerHTML=`<span>${p.name}</span>${hasChange(p.id)?'<span class="offline-badge">Lokal</span>':''}`;
+    d.onclick=()=>selectPage(p.id); c.appendChild(d);
   });
 }
 
 async function selectPage(id){
-  currentPageId = id; buildPageList();
-  document.getElementById("editor-title").textContent = "I-edit: " + pages.find(p=>p.id===id)?.name;
-  document.getElementById("status").className = "status"; document.getElementById("status").textContent = "";
-  document.getElementById("editor").value = ""; document.getElementById("editor").classList.remove('unsaved');
-  updateLastSavedDisplay(id);
+  currentPageId=id; buildPageList();
+  const info=pages.find(p=>p.id===id);
+  document.getElementById('editor-title').textContent="I-edit: "+info.name;
+  document.getElementById('editor').value=''; document.getElementById('editor').classList.remove('unsaved');
+  document.getElementById('status').className='status'; document.getElementById('status').textContent='';
+  updateLastSaved();
 
-  const offlineVer = getOfflineChange(id);
-  if(offlineVer){
-    document.getElementById("editor").value = offlineVer.content;
-    updateSyncState('pending');
-    showStatus("⏳ Ipinapakita ang naka-imbak na pagbabago — i-sync kapag may internet na", "warning");
-    return;
+  // 1. May lokal na pagbabago? — Ipakita
+  const loc=getChanges().find(c=>c.pageId===id);
+  if(loc){
+    document.getElementById('editor').value=loc.content;
+    setSyncState('pending');
+    return showStatus("📌 Ipinapakita ang iyong naka-imbak na pagbabago","warning");
   }
 
+  // 2. Online + Token? — Kunin sa GitHub
   if(isOnline && decryptedToken){
-    try {
-      const filePath = `${ASSETS_PATH}/${id}.html`;
-      const fileRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
-        headers: { "Authorization": `token ${decryptedToken}` }
+    try{
+      const res=await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html?ref=${BRANCH}`,{
+        headers:{Authorization:`token ${decryptedToken}`}
       });
-      if(fileRes.ok){
-        const data = await fileRes.json();
-        document.getElementById("editor").value = atob(data.content.replace(/-/g,'+').replace(/_/g,'/'));
-        updateSyncState('saved');
-      } else {
-        document.getElementById("editor").value = `<p>Nilalaman ng pahinang: ${id}</p>`;
-        updateSyncState('saved');
+      if(res.ok){
+        const d=await res.json(),c=atob(d.content.replace(/-/g,'+').replace(/_/g,'/'));
+        document.getElementById('editor').value=c;
+        localStorage.setItem(CACHE_PREFIX+id,c);
+        setSyncState('saved');
+        showStatus("✅ Na-loading mula sa GitHub","success");
+      }else if(res.status===404){
+        document.getElementById('editor').value=getTemplate('full').replace('[PANGALAN]',info.name);
+        setSyncState('saved');
+        showStatus("📌 Bagong pahina — handa nang isulat","info");
+      }else throw new Error(`HTTP ${res.status}`);
+    }catch{
+      const cached=getCached(id);
+      if(cached){
+        document.getElementById('editor').value=cached;
+        setSyncState('pending');
+        showStatus("⚠️ Hindi makakonekta — ipinapakita ang huling nakitang laman","warning");
+      }else{
+        document.getElementById('editor').value=getTemplate('full').replace('[PANGALAN]',info.name);
+        setSyncState('pending');
+        showStatus("⚠️ Walang koneksyon — nagsisimula sa bagong pahina","warning");
       }
-    } catch {
-      document.getElementById("editor").value = `<p>Nilalaman ng pahinang: ${id}</p>`;
-      updateSyncState('saved');
     }
-  } else {
-    document.getElementById("editor").value = `<p>Nilalaman ng pahinang: ${id}</p>`;
-    updateSyncState('saved');
+  }else{
+    // 3. Walang internet — Gamitin ang cache
+    const cached=getCached(id);
+    if(cached){
+      document.getElementById('editor').value=cached;
+      setSyncState('pending');
+      showStatus("📌 Walang internet — ipinapakita ang huling nakitang laman","warning");
+    }else{
+      document.getElementById('editor').value=getTemplate('full').replace('[PANGALAN]',info.name);
+      setSyncState('pending');
+      showStatus("⚠️ Walang internet — nagsisimula sa bagong pahina","warning");
+    }
   }
 }
 
-function newPage(){
-  const name = prompt("Pangalan ng Bagong Pahina:");
-  if(!name) return;
-  const id = name.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"");
-  pages.push({id:id, name:name}); buildPageList(); selectPage(id);
-}
-
-// =====================================================
-// ✍️ EDITOR
-// =====================================================
+// ========== EDITOR ==========
 function insertTag(tag){
-  const ta = document.getElementById("editor");
-  const s = ta.selectionStart, e = ta.selectionEnd;
-  const sel = ta.value.substring(s,e) || "Nilalaman";
-  let wrap = `<${tag}>${sel}</${tag}>`;
-  if(tag==="ul") wrap = `<ul>\n  <li>${sel}</li>\n</ul>`;
-  ta.value = ta.value.substring(0,s) + wrap + ta.value.substring(e);
+  const ta=document.getElementById('editor'),s=ta.selectionStart,e=ta.selectionEnd;
+  let sel=ta.value.slice(s,e)||'Nilalaman',wrap=`<${tag}>${sel}</${tag}>`;
+  if(tag==='ul')wrap=`<ul>\n  <li>${sel}</li>\n</ul>`;
+  if(tag==='hr')wrap='<hr>';
+  ta.value=ta.value.slice(0,s)+wrap+ta.value.slice(e);
   ta.focus(); markUnsaved();
 }
 function previewContent(){
-  const w = window.open("","_blank");
-  w.document.write(`<html><body style="max-width:800px;margin:0 auto;padding:20px;font-family:Arial">${document.getElementById('editor').value}</body></html>`);
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{max-width:800px;margin:0 auto;padding:20px;font-family:Arial;line-height:1.7}h2{color:#b91c1c}h3{color:#dc2626}</style></head><body>${document.getElementById('editor').value}</body></html>`);
 }
 
-// =====================================================
-// 💾 I-SAVE
-// =====================================================
+// ========== SAVE ==========
 async function saveContent(){
-  if(!currentPageId){ showStatus("❌ Pumili muna ng pahina", "error"); return }
-  const content = document.getElementById("editor").value;
-  if(!content){ showStatus("❌ Walang nilalaman", "error"); return }
-  const pageName = pages.find(p=>p.id===currentPageId).name;
+  if(!currentPageId)return showStatus("❌ Pumili muna ng pahina","error");
+  const content=document.getElementById('editor').value.trim();
+  if(!content)return showStatus("❌ Walang nilalaman","error");
+  const info=pages.find(p=>p.id===currentPageId);
 
-  saveOfflineChange(currentPageId, content, pageName);
+  saveChange(currentPageId,content,info.name);
   markSaved('offline'); buildPageList();
 
   if(isOnline && decryptedToken){
-    updateSyncState('syncing');
-    const ok = await uploadToGitHub(currentPageId, content, false);
-    if(ok){
-      removeOfflineChange(currentPageId); markSaved('github'); buildPageList();
-      showStatus("✅ NAI-SAVE AGAD SA GITHUB! ⚡", "success");
-    } else {
-      updateSyncState('pending');
-      showStatus("✅ Naka-imbak LOKAL — kusang mag-sync mamaya", "warning");
+    setSyncState('syncing');
+    if(await upload(currentPageId,content,false)){
+      removeChange(currentPageId); markSaved('github'); buildPageList();
+      showStatus("✅ NAI-SAVE SA GITHUB! ⚡","success");
+    }else{
+      setSyncState('pending');
+      showStatus("✅ Naka-imbak LOKAL — kusang ia-upload mamaya","warning");
     }
-  } else {
-    updateSyncState('pending');
-    showStatus("✅ Naka-imbak LOKAL — kailangan ng Token + Internet para maipadala sa GitHub", "warning");
+  }else{
+    showStatus("✅ Naka-imbak LOKAL — ia-upload kapag may internet na","warning");
   }
 }
 
-// =====================================================
-// ☁️ I-UPLOAD SA GITHUB
-// =====================================================
-async function uploadToGitHub(pageId, content, isBackgroundSync){
-  if(!decryptedToken) return false;
-  const filePath = `${ASSETS_PATH}/${pageId}.html`;
-
-  try {
-    let sha = null;
-    const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
-      headers: { "Authorization": `token ${decryptedToken}` }
+// ========== UPLOAD ==========
+async function upload(id,content,bg){
+  if(!decryptedToken)return false;
+  try{
+    let sha=null;
+    const g=await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html?ref=${BRANCH}`,{
+      headers:{Authorization:`token ${decryptedToken}`}
     });
-    if(getRes.ok){ const d = await getRes.json(); sha = d.sha; }
-
-    const encoded = btoa(unescape(encodeURIComponent(content)));
-    const body = {
-      message: `Update: ${pages.find(p=>p.id===pageId)?.name||pageId}`,
-      content: encoded,
-      branch: BRANCH
-    };
-    if(sha) body.sha = sha;
-
-    const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `token ${decryptedToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
+    if(g.ok)sha=(await g.json()).sha;
+    const b={message:`Update: ${id}`,content:btoa(unescape(encodeURIComponent(content))),branch:BRANCH};
+    if(sha)b.sha=sha;
+    const p=await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_PATH}/${id}.html`,{
+      method:'PUT',headers:{Authorization:`token ${decryptedToken}`,'Content-Type':'application/json'},body:JSON.stringify(b)
     });
-
-    if(putRes.ok){
-      removeOfflineChange(pageId); markSaved('github'); buildPageList();
-      if(isBackgroundSync) showStatus("✅ NAI-SYNC NA SA GITHUB!", "success");
-      return true;
-    } else {
-      const err = await putRes.json();
-      if(isBackgroundSync) showStatus(`⚠️ Nabigo i-sync: ${err.message}`, "error");
-      return false;
-    }
-  } catch(err){
-    if(isBackgroundSync) showStatus(`⚠️ Nabigo: ${err.message}`, "error");
+    if(p.ok){ localStorage.setItem(CACHE_PREFIX+id,content); return true; }
     return false;
-  }
+  }catch{return false}
 }
 
-function showStatus(text, type){
-  const s = document.getElementById("status");
-  s.textContent = text; s.className = `status ${type}`;
+function showStatus(t,type){
+  const s=document.getElementById('status');
+  s.textContent=t; s.className=`status ${type}`;
 }
 
-// =====================================================
-// 🔁 PALITAN ANG PASSWORD
-// =====================================================
-function openChangePasswordModal(){
-  document.getElementById("pw-modal").classList.add("show");
-  document.getElementById("old-pw").value = "";
-  document.getElementById("new-pw").value = "";
-  document.getElementById("confirm-pw").value = "";
-}
-function closePwModal(){ document.getElementById("pw-modal").classList.remove("show") }
+// ========== PASSWORD MODAL ==========
+function openChangePasswordModal(){ document.getElementById('pw-modal').classList.add('show') }
+function closePwModal(){ document.getElementById('pw-modal').classList.remove('show') }
 function changePassword(){
-  const oldPw = document.getElementById("old-pw").value;
-  const newPw = document.getElementById("new-pw").value;
-  const confirmPw = document.getElementById("confirm-pw").value;
-  const err = document.getElementById("pw-error");
-  if(oldPw !== ADMIN_PASSWORD){ err.textContent = "❌ Maling lumang password"; return }
-  if(newPw.length < 6){ err.textContent = "❌ Hindi bababa sa 6 letra"; return }
-  if(newPw !== confirmPw){ err.textContent = "❌ Hindi tugma ang bagong password"; return }
-
-  // ✅ I-update ang password sa pahina
-  ADMIN_PASSWORD = newPw;
-
-  alert("✅ Napalitan na ang password!\n\n⚠️ TANDAAN MO ANG BAGONG PASSWORD — ito rin ang gagamitin mo sa setup-token.html kapag buuin mo na ang admin.html.\n\nBagong Password: " + newPw);
+  const o=document.getElementById('old-pw').value,n=document.getElementById('new-pw').value,c=document.getElementById('confirm-pw').value,e=document.getElementById('pw-error');
+  if(o!==ADMIN_PASSWORD)return e.textContent="❌ Maling lumang password";
+  if(n.length<6)return e.textContent="❌ Hindi bababa sa 6 letra";
+  if(n!==c)return e.textContent="❌ Hindi tugma";
+  window.ADMIN_PASSWORD=n;
+  alert("✅ Napalitan na! Kailangan mong buuin ulit ang admin.html gamit ang bagong password.");
   closePwModal();
 }
 
-window.addEventListener('load', ()=>{ updateConnectionUI(); updatePendingUI() });
+window.addEventListener('load',()=>{updateConnUI();updatePendingUI()});
 </script>
 </body>
 </html>
