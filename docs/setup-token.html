@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🔧 Setup — Buuin ang Admin.html</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1f2937;color:white;font-family:Arial,sans-serif;padding:20px;max-width:700px;margin:0 auto}
+h1{color:#ef4444;margin-bottom:6px;font-size:22px}
+h2{font-size:16px;margin:20px 0 8px;color:#f59e0b}
+.desc{color:#9ca3af;margin-bottom:24px;font-size:14px}
+.card{background:#374151;padding:20px;border-radius:12px;margin-bottom:16px}
+label{display:block;margin-bottom:6px;font-weight:bold;font-size:14px}
+input,textarea{width:100%;padding:12px;border-radius:8px;border:none;background:#4b5563;color:white;font-size:15px;margin-bottom:14px}
+textarea{min-height:180px;font-family:monospace;font-size:12px;line-height:1.5}
+button{padding:12px 20px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;margin-right:8px;margin-bottom:8px}
+.btn-red{background:#dc2626;color:white}
+.btn-green{background:#16a34a;color:white}
+.btn-blue{background:#2563eb;color:white}
+pre{background:#111827;padding:12px;border-radius:8px;overflow-x:auto;font-size:12px;color:#a5f3fc;max-height:250px;overflow-y:auto}
+.hidden{display:none}
+.success{color:#4ade80;margin:10px 0}
+.warning{color:#fbbf24;margin:10px 0}
+</style>
+</head>
+<body>
+
+<h1>🔧 Buuin ang Admin.html — Tagapag-encrypt</h1>
+<p class="desc">⚠️ ITO AY HINDI IA-UPLOAD SA GITHUB — nasa kompyuter mo lang ito. Dito bubuuin ang handang-handa nang admin.html</p>
+
+<!-- === HAKBANG 1: ILAGAY ANG TOKEN AT PASSWORD === -->
+<div class="card">
+  <h2>1️⃣ Ipasok ang GitHub Token at Password</h2>
+  <label>GitHub Token:</label>
+  <input type="text" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+  
+  <label>Admin Password (susi):</label>
+  <input type="password" id="admin-pass" placeholder="hal. bisyo2026" value="bisyo2026">
+  
+  <button class="btn-red" onclick="buildAdmin()">🔒 I-encrypt at Buuin Admin.html</button>
+  <div id="step1-status"></div>
+</div>
+
+<!-- === HAKBANG 2: LUMABAS ANG BUONG ADMIN.HTML === -->
+<div class="card hidden" id="step2">
+  <h2>2️⃣ ✅ Handang-handa na ang admin.html!</h2>
+  <p class="success">✅ Naka-encrypt na ang token gamit ang iyong password — hindi makikita ng sinuman ang orihinal na token</p>
+  <p class="warning">⚠️ Kopyahin ang LAHAT ng nasa ibaba → I-save bilang <code>admin.html</code> → I-upload sa GitHub</p>
+  
+  <label>Buong admin.html — Kopyahin LAHAT:</label>
+  <textarea id="admin-output" readonly></textarea>
+  
+  <button class="btn-green" onclick="copyAll()">📋 Kopyahin LAHAT</button>
+  <button class="btn-blue" onclick="downloadFile()">💾 I-download Bilang File</button>
+</div>
+
+<script>
+// =====================================================
+// 🔐 PAREHONG PAMAMARAAN NG ENCRYPTION — GUMAGANA SA ADMIN.HTML
+// =====================================================
+async function deriveKey(password) {
+  const encoder = new TextEncoder();
+  const salt = encoder.encode("BisyoSalt2026");
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw", encoder.encode(password), { name: "PBKDF2" },
+    false, [{ name: "SHA-256" }]
+  );
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+  );
+}
+
+async function encryptToken(plainText, password) {
+  const key = await deriveKey(password);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoder = new TextEncoder();
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: iv }, key, encoder.encode(plainText)
+  );
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  return btoa(String.fromCharCode(...combined));
+}
+
+// =====================================================
+// 📄 ANG BUONG ADMIN.HTML — TEMPLATE
+// =====================================================
+function getAdminHtmlTemplate(encryptedToken, password) {
+return `<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f3f4f6;font-family:Arial,sans-serif}
+.header{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;padding:16px 20px;position:sticky;top:0;z-index:100}
+.header h1{font-size:20px}
+.header p{font-size:14px;opacity:0.9}
+.login-container{max-width:420px;margin:40px auto;padding:24px;background:white;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1)}
+.login-title{font-size:22px;font-weight:bold;color:#b91c1c;margin-bottom:20px;text-align:center}
+.input{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:16px;margin-bottom:16px}
+.input:focus{outline:none;border-color:#b91c1c}
+.btn{padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer}
+.btn-sm{padding:6px 12px;font-size:14px;border-radius:6px}
+.btn-primary{background:#b91c1c;color:white}
+.btn-primary:hover{background:#a81818}
+.btn-secondary{background:#e5e7eb;color:#374151;margin-top:10px}
+.btn-success{background:#16a34a;color:white}
+.btn-success:hover{background:#15803d}
+.btn-warning{background:#f59e0b;color:white}
+.btn-warning:hover{background:#d97706}
+.error{color:#dc2626;margin-bottom:12px;min-height:20px}
+.session-info{font-size:13px;color:#16a34a;margin-bottom:12px}
+.hidden{display:none !important}
+#admin-panel{display:none;padding:16px;max-width:960px;margin:0 auto}
+.panel-card{background:white;border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.panel-title{font-size:18px;font-weight:bold;color:#b91c1c;margin-bottom:14px}
+.page-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+.page-item{padding:12px 14px;background:#f9fafb;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all 0.2s}
+.page-item:hover{border-color:#b91c1c;background:#fef2f2}
+.page-item.active{background:#b91c1c;color:white}
+.editor-toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.editor-toolbar button{padding:6px 12px;border-radius:6px;border:none;background:#e5e7eb;cursor:pointer}
+.editor-toolbar button:hover{background:#d1d5db}
+textarea{width:100%;min-height:320px;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-size:15px;line-height:1.6}
+textarea:focus{outline:none;border-color:#b91c1c}
+.action-bar{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.status{margin-top:12px;padding:10px;border-radius:8px;display:none;white-space:pre-wrap}
+.status.success{background:#dcfce7;color:#166534;display:block}
+.status.error{background:#fee2e2;color:#991b1b;display:block}
+.status.info{background:#dbeafe;color:#1e40af;display:block}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999}
+.modal-box{background:white;padding:24px;border-radius:16px;max-width:420px;width:90%}
+.modal-title{font-size:18px;font-weight:bold;color:#b91c1c;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- =====================================================
+     🔒 NAKA-ENCRYPT NA TOKEN — HINDI MAKIKITA ANG TOTOO
+     ===================================================== -->
+<script>
+const ENCRYPTED_TOKEN = "${encryptedToken}";
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME = "bisyo";
+const ASSETS_PATH = "assets/pages";
+</script>
+
+<div class="header">
+  <h1>🔐 Admin Panel — Mga Ilegal na Bisyo</h1>
+  <p>Proyekto ni Mark Jann Tampok — Pag-edit ng Nilalaman</p>
+</div>
+
+<!-- === LOGIN === -->
+<div id="login-form" class="login-container">
+  <div class="login-title">🔐 Pag-login</div>
+  <p style="text-align:center;margin-bottom:16px;color:#6b7280">Ilagay ang password para makapag-edit</p>
+  <div class="error" id="login-error"></div>
+  <input type="password" id="pass-input" class="input" placeholder="Ipasok ang password...">
+  <button class="btn btn-primary" style="width:100%" onclick="doLogin()">🔑 Mag-login</button>
+  <button class="btn btn-secondary" style="width:100%" onclick="window.history.back()">← Bumalik</button>
+</div>
+
+<!-- === ADMIN PANEL === -->
+<div id="admin-panel">
+  <div class="panel-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="session-info" id="session-timer">⏰ Session: —</div>
+        <div id="token-status" style="font-size:13px;color:#6b7280">☁️ GitHub Token: —</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-warning" onclick="openChangePasswordModal()">🔁 Palitan ang Password</button>
+        <button class="btn btn-sm btn-secondary" onclick="doLogout()">🚪 Mag-logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-title">📄 Mga Pahina — Pumili para I-edit</div>
+    <div style="margin-bottom:10px;color:#6b7280;font-size:14px">Kabuuang: <span id="page-count">0</span> pahina</div>
+    <div class="page-list" id="page-list"></div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-title" id="editor-title">Pumili muna ng pahina sa itaas</div>
+    <div class="editor-toolbar">
+      <button onclick="insertTag('<h2>','</h2>')">📌 Pamagat 2</button>
+      <button onclick="insertTag('<h3>','</h3>')">📎 Pamagat 3</button>
+      <button onclick="insertTag('<p>','</p>')">📝 Talata</button>
+      <button onclick="insertTag('<ul><li>','</li></ul>')">• Listahan</button>
+      <button onclick="insertTag('<strong>','</strong>')">🗝️ Matapang</button>
+      <button onclick="insertTag('<em>','</em>')">🔤 Italiko</button>
+    </div>
+    <textarea id="content-editor" placeholder="✅ Pumili ka muna ng pahina sa itaas..."></textarea>
+    <div class="action-bar">
+      <button class="btn btn-success" onclick="saveContent()">💾 I-save Lokal</button>
+      <button class="btn btn-primary" onclick="saveToGitHub()">☁️ I-save sa GitHub</button>
+      <button class="btn btn-info" onclick="previewContent()">👁️ Tingnan</button>
+      <button class="btn btn-secondary" onclick="newPage()">➕ Bagong Pahina</button>
+    </div>
+    <div id="save-status" class="status"></div>
+  </div>
+</div>
+
+<!-- === PALITAN ANG PASSWORD === -->
+<div id="change-password-modal" class="modal">
+  <div class="modal-box">
+    <div class="modal-title">🔁 Palitan ang Password</div>
+    <p style="margin-bottom:12px;color:#4b5563;font-size:14px">⚠️ Kailangan mong BUUIN ULIT ang admin.html gamit ang <b>setup-token.html</b> pagkatapos palitan ang password.</p>
+    <div class="error" id="pw-error"></div>
+    <input type="password" id="old-password" class="input" placeholder="Lumang Password">
+    <input type="password" id="new-password" class="input" placeholder="Bagong Password (min. 6 letra)">
+    <input type="password" id="confirm-password" class="input" placeholder="I-ulit ang Bagong Password">
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeChangePasswordModal()">✖ Kanselahin</button>
+      <button class="btn btn-primary" style="flex:1" onclick="verifyChangePassword()">✅ Palitan</button>
+    </div>
+    <div id="new-password-info" class="hidden" style="margin-top:16px;padding:12px;background:#fef3c7;border-radius:8px">
+      <p style="font-weight:bold;color:#92400e">⚠️ GAWIN ITO:</p>
+      <p style="font-size:14px;margin:8px 0">1. Buksan ang <b>setup-token.html</b></p>
+      <p style="font-size:14px;margin:8px 0">2. Ipasok ulit ang Token at ang <b>BAGONG PASSWORD</b></p>
+      <p style="font-size:14px;margin:8px 0">3. Kopyahin ang bagong admin.html at palitan sa GitHub</p>
+      <button class="btn btn-warning btn-sm" onclick="closeChangePasswordModal()">✖ Naiintindihan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let ADMIN_PASSWORD = "${password}";
+const SESSION_DURATION_MINUTES = 30;
+const SESSION_KEY = "bisyo_admin_session";
+
+let PAGES = [];
+let currentPageId = null;
+let pageContents = {};
+let decryptedToken = null;
+
+async function deriveKey(password) {
+  const encoder = new TextEncoder();
+  const salt = encoder.encode("BisyoSalt2026");
+  const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(password), { name: "PBKDF2" }, false, [{ name: "SHA-256" }]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+async function decryptToken(encryptedBase64, password) {
+  try {
+    const key = await deriveKey(password);
+    const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+    const iv = combined.slice(0,12);
+    const data = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data);
+    return new TextDecoder().decode(decrypted);
+  } catch { return null; }
+}
+function checkExistingSession() {
+  const d = localStorage.getItem(SESSION_KEY); if(!d) return false;
+  try { const {loggedInAt,pw} = JSON.parse(d); if(pw) ADMIN_PASSWORD=pw; return Date.now()-loggedInAt < 1800000 } catch {}
+  localStorage.removeItem(SESSION_KEY); return false;
+}
+async function doLogin() {
+  const p=document.getElementById('pass-input').value;
+  if(p!==ADMIN_PASSWORD) return document.getElementById('login-error').textContent="❌ Maling Password";
+  showStatus("🔐 Binubuksan ang token...","info");
+  decryptedToken=await decryptToken(ENCRYPTED_TOKEN,p);
+  localStorage.setItem(SESSION_KEY,JSON.stringify({loggedInAt:Date.now(),pw:p}));
+  document.getElementById('login-form').classList.add('hidden'); enterPanel();
+}
+async function enterPanel() {
+  document.getElementById('admin-panel').style.display='block'; loadSavedContents(); resetPages(); buildList();
+  if(decryptedToken){document.getElementById('token-status').innerHTML="☁️ GitHub: ✅ Nakakonekta"; verifyToken(decryptedToken);}
+  else document.getElementById('token-status').innerHTML="☁️ GitHub: ❌ Hindi mabuksan — mali ang password o token";
+}
+async function verifyToken(t){try{const r=await fetch(\`https://api.github.com/repos/\${REPO_OWNER}/\${REPO_NAME}\`,{headers:{Authorization:\`token \${t}\`}});return r.ok}catch{return false}}
+function resetPages(){PAGES=[{id:"alak",name:"1. Alak"},{id:"sigarilyo",name:"2. Sigarilyo"},{id:"shabu",name:"3. Shabu"},{id:"heroin",name:"4. Heroin"},{id:"marijuana",name:"5. Marijuana"},{id:"ecstasy",name:"6. Ecstasy"},{id:"cocaine",name:"7. Cocaine"},{id:"tinuturok-gamot",name:"8. Tinuturok na Gamot"},{id:"tuklaw",name:"9. Tuklaw / Pagkalulong"},{id:"sugal",name:"10. Sugal"},{id:"inhalants",name:"11. Inhalants"},{id:"pag-aabuso-gamot",name:"12. Pag-aabuso sa Gamot"},{id:"lsd",name:"13. LSD"},{id:"ketamine",name:"14. Ketamine"},{id:"ibang-sugal",name:"15. Ibang Uri ng Sugal"},{id:"internet-laro",name:"16. Internet / Paglalaro"},{id:"labis-pagkain",name:"17. Labis na Pagkain"},{id:"vaping",name:"18. Vaping"}]}
+function buildList(){const c=document.getElementById('page-list');c.innerHTML='';document.getElementById('page-count').textContent=PAGES.length;PAGES.forEach(p=>{const e=document.createElement('div');e.className='page-item'+(currentPageId===p.id?' active':'');e.textContent=p.name;e.onclick=()=>selectPage(p.id);c.appendChild(e)})}
+function selectPage(id){currentPageId=id;buildList();const p=PAGES.find(x=>x.id===id);document.getElementById('editor-title').textContent=\`I-edit: \${p.name}\`;document.getElementById('content-editor').value=pageContents[id]||'';hideStatus()}
+function saveContent(){if(!currentPageId)return showStatus("❌ Pumili muna ng pahina","error");pageContents[currentPageId]=document.getElementById('content-editor').value;localStorage.setItem('bisyo_'+currentPageId,pageContents[currentPageId]);showStatus("✅ Nai-save sa lokal","success")}
+async function saveToGitHub(){if(!currentPageId)return showStatus("❌ Pumili muna","error");if(!decryptedToken)return showStatus("❌ Walang token","error");const c=document.getElementById('content-editor').value;const f=\`\${ASSETS_PATH}/\${currentPageId}.html\`;const html=wrap(c,PAGES.find(p=>p.id===currentPageId).name);showStatus("⏰ Nag-a-upload...","info");try{let sha=null;const g=await fetch(\`https://api.github.com/repos/\${REPO_OWNER}/\${REPO_NAME}/contents/\${f}\`,{headers:{Authorization:\`token \${decryptedToken}\`}});if(g.ok){const d=await g.json();sha=d.sha}const b64=btoa(unescape(encodeURIComponent(html)));const r=await fetch(\`https://api.github.com/repos/\${REPO_OWNER}/\${REPO_NAME}/contents/\${f}\`,{method:"PUT",headers:{Authorization:\`token \${decryptedToken}\`,"Content-Type":"application/json"},body:JSON.stringify({message:\`📝 Update: \${currentPageId}.html\`,content:b64,sha:sha})});if(r.ok){pageContents[currentPageId]=c;localStorage.setItem('bisyo_'+currentPageId,c);showStatus("✅ NAI-SAVE SA GITHUB! 🎉","success")}else{const e=await r.json();showStatus(\`❌ \${e.message||r.status}\`,"error")}}catch(e){showStatus(\`❌ \${e.message}\`,"error")}}
+function wrap(b,t){return \`<!DOCTYPE html><html lang="tl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../style.css"><title>\${t}</title></head><body><div style="padding:20px;max-width:800px;margin:0 auto;line-height:1.8">\${b}</div></body></html>\`}
+function insertTag(o,c){const t=document.getElementById('content-editor');const s=t.selectionStart,e=t.selectionEnd;t.value=t.value.slice(0,s)+o+t.value.slice(s,e)+c+t.value.slice(e);t.focus()}
+function previewContent(){if(!currentPageId)return;const p=PAGES.find(x=>x.id===currentPageId);const w=window.open('');w.document.write(wrap(pageContents[currentPageId]||'',p.name))}
+function newPage(){const n=prompt("Pangalan:");if(!n)return;const i=n.toLowerCase().replace(/\\s+/g,'-').replace(/[^a-z0-9-]/g,'');PAGES.push({id:i,name:n});buildList();selectPage(i)}
+function loadSavedContents(){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('bisyo_'))pageContents[k.replace('bisyo_','')]=localStorage.getItem(k)}}
+function showStatus(m,t){const s=document.getElementById('save-status');s.textContent=m;s.className='status '+t;setTimeout(()=>s.className='status',10000)}
+function hideStatus(){document.getElementById('save-status').className='status'}
+function openChangePasswordModal(){document.getElementById('change-password-modal').style.display='flex';document.getElementById('pw-error').textContent='';document.getElementById('new-password-info').classList.add('hidden')}
+function closeChangePasswordModal(){document.getElementById('change-password-modal').style.display='none'}
+function verifyChangePassword(){const o=document.getElementById('old-password').value,n=document.getElementById('new-password').value,c=document.getElementById('confirm-password').value,e=document.getElementById('pw-error');if(o!==ADMIN_PASSWORD)return e.textContent="❌ Maling lumang password";if(n.length<6)return e.textContent="❌ Hindi bababa sa 6 letra";if(n!==c)return e.textContent="❌ Hindi tugma ang bagong password";if(n===ADMIN_PASSWORD)return e.textContent="❌ Katulad ng luma";document.getElementById('new-password-info').classList.remove('hidden')}
+function doLogout(){if(confirm("Sigurado ka bang mag-logout?")){localStorage.removeItem(SESSION_KEY);decryptedToken=null;document.getElementById('pass-input').value='';document.getElementById('admin-panel').style.display='none';document.getElementById('login-form').classList.remove('hidden');currentPageId=null}}
+window.onload=()=>{if(checkExistingSession()){document.getElementById('login-form').classList.add('hidden');enterPanel()}};
+</script>
+</body>
+</html>`;
+}
+
+// =====================================================
+// 🚀 GUMAGANA NA ANG PAGBUO
+// =====================================================
+async function buildAdmin() {
+  const token = document.getElementById('gh-token').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  const status = document.getElementById('step1-status');
+
+  if (!token) return status.innerHTML = '<span style="color:#f87171">❌ Ilagay ang GitHub Token</span>';
+  if (!pass || pass.length < 6) return status.innerHTML = '<span style="color:#f87171">❌ Hindi bababa sa 6 letra ang password</span>';
+
+  status.innerHTML = '<span style="color:#fbbf24">⏰ Ini-encrypt ang token... Maghintay...</span>';
+  
+  // ✅ I-encrypt ang token gamit ang password
+  const encrypted = await encryptToken(token, pass);
+  
+  // ✅ Buuin ang buong admin.html
+  const fullAdminHtml = getAdminHtmlTemplate(encrypted, pass);
+  
+  // ✅ Ipakita ang resulta
+  document.getElementById('admin-output').value = fullAdminHtml;
+  document.getElementById('step2').classList.remove('hidden');
+  status.innerHTML = '<span style="color:#4ade80">✅ Matagumpay na na-encrypt at nabuo!</span>';
+}
+
+function copyAll() {
+  const code = document.getElementById('admin-output').value;
+  navigator.clipboard.writeText(code);
+  alert("✅ Kinopya na ang buong admin.html!\n\nI-paste ito sa GitHub bilang admin.html — tapos na!");
+}
+
+function downloadFile() {
+  const code = document.getElementById('admin-output').value;
+  const blob = new Blob([code], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'admin.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
