@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- ✅ TAMA — DIRETSONG TAWAG SA styles.css, WALANG NAKA-STYLE! -->
+<!-- ✅ TAMA NA — MAY "S" SA styles.css -->
 <link rel="stylesheet" href="style.css">
 <title>🔧 I-update ang Token — Admin</title>
 <style>
-/* ✅ DAGDAG LANG NA KAILANGAN DITO — HINDI SA BUONG SITE */
 .error-text { color: #dc2626; }
 .warning { color: #d97706; }
 .success { color: #16a34a; }
@@ -20,8 +19,13 @@ button { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold
 .btn-primary:hover { background: #a81818; }
 .btn-secondary { background: #e5e7eb; color: #374151; }
 pre { background: #f3f4f6; padding: 12px; border-radius: 8px; border-left: 4px solid #b91c1c; overflow-x: auto; margin: 12px 0; font-size: 13px; }
-#status { margin-top: 12px; padding: 10px; border-radius: 8px; line-height: 1.6; }
+#status { margin-top: 12px; padding: 12px; border-radius: 8px; line-height: 1.8; }
 .hidden { display: none !important; }
+/* ✅ BAGONG ESTILO — PARA SA KUMPIRMA NG PAGPAPALIT */
+.check-result { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; }
+.check-result.found { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
+.check-result.updated { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; font-weight: bold; }
+.check-result.missing { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
 </style>
 </head>
 <body>
@@ -51,10 +55,16 @@ pre { background: #f3f4f6; padding: 12px; border-radius: 8px; border-left: 4px s
   <div id="status"></div>
 
   <div id="result-box" class="hidden">
-    <h3>✅ Handa na — Ito ang ilalagay sa admin.html:</h3>
+    <h3>✅ Handa na — Ito ang linyang ilalagay:</h3>
     <pre id="token-line"></pre>
     <button class="btn-primary" onclick="copyLine()">📋 Kopyahin ang Linyang Ito</button>
     <button class="btn-secondary" onclick="syncNow()">🔄 I-upload Ngayon</button>
+  </div>
+
+  <!-- ✅ BAGONG BAHAGI — LALABAS PAGKATAPOS NG PAG-UPLOAD -->
+  <div id="verification-section" class="hidden">
+    <h3>📋 Pagsusuri sa admin.html</h3>
+    <div id="verify-status"></div>
   </div>
 </div>
 
@@ -66,7 +76,7 @@ const BRANCH     = "main";
 const FILE_PATH   = "app/src/main/assets/admin.html";
 const STORAGE_KEY = "bisyo_pending_token_patch";
 
-// ===== ENCRYPTION — PAREHO SA ADMIN.HTML =====
+// ===== ENCRYPTION =====
 async function deriveKey(password) {
   const encoder = new TextEncoder();
   const salt = encoder.encode("BisyoSalt2026");
@@ -124,7 +134,7 @@ async function processToken() {
   }
 }
 
-// ===== I-UPLOAD SA GITHUB =====
+// ===== I-UPLOAD SA GITHUB + ✅ PAGSUSURI KUNG TALAGANG NAPALITAN =====
 async function syncNow() {
   if (!navigator.onLine) {
     alert("⚠️ Wala pang internet — mananatiling naka-imbak lokal.");
@@ -140,9 +150,14 @@ async function syncNow() {
   if (!writeToken) return;
 
   const status = document.getElementById('status');
+  const verifySection = document.getElementById('verification-section');
+  const verifyStatus = document.getElementById('verify-status');
+
   status.innerHTML = `<span class="warning">⏰ Ina-upload sa GitHub...</span>`;
+  verifySection.classList.add('hidden');
 
   try {
+    // 1. Kunin mula sa GitHub — KASAMA ANG PAGSUSURI BAGO PALITAN
     const getRes = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}?ref=${BRANCH}`,
       { headers: { "Authorization": `token ${writeToken}` } }
@@ -151,10 +166,29 @@ async function syncNow() {
     const data = await getRes.json();
     let content = atob(data.content.replace(/-/g,'+').replace(/_/g,'/'));
 
+    // ✅ SURIIN: MAYROON BANG PALALITAN?
     const pattern = /const\s+ENCRYPTED_TOKEN\s*=\s*["'][^"']*["']\s*;/;
-    if (!pattern.test(content)) throw new Error("Hindi nakita ang ENCRYPTED_TOKEN");
+    if (!pattern.test(content)) {
+      verifySection.classList.remove('hidden');
+      verifyStatus.innerHTML = `<div class="check-result missing">❌ <strong>Hindi nakita</strong> ang linyang ENCRYPTED_TOKEN sa admin.html — hindi napalitan!</div>`;
+      throw new Error("Hindi nakita ang ENCRYPTED_TOKEN — hindi napalitan");
+    }
+
+    // ✅ I-LOG ANG LUMANG HALAGA
+    const oldMatch = content.match(pattern);
+    const oldValue = oldMatch ? oldMatch[0] : "(hindi nakita)";
+
+    // ✅ PALITAN
     content = content.replace(pattern, newLine);
 
+    // ✅ SURIIN ULIT — MATAGUMPAY BA ANG PAGPAPALIT?
+    if (!content.includes(newLine)) {
+      verifySection.classList.remove('hidden');
+      verifyStatus.innerHTML = `<div class="check-result missing">❌ Nabigo ang pagpapalit — hindi nailagay ang bagong halaga.</div>`;
+      throw new Error("Hindi nailagay ang bagong halaga");
+    }
+
+    // ✅ I-COMMIT PABALIK
     const putRes = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
       {
@@ -174,7 +208,19 @@ async function syncNow() {
     if (!putRes.ok) throw new Error(`Nabigo: ${putRes.status}`);
 
     localStorage.removeItem(STORAGE_KEY);
-    status.innerHTML = `<span class="success">✅ NAI-UPLOAD NA! Agad na magagamit sa website at app.</span>`;
+
+    // ✅ LUMABAS ANG MALINAW NA KUMPIRMA — ITO ANG HINDI MO NAKIKITA DATI!
+    status.innerHTML = `<span class="success">✅ <strong>NAI-UPLOAD AT NAPALITAN NA!</strong> Tapos na ang proseso.</span>`;
+
+    // ✅ IPAPAKITA ANG DETALYE NG PAGPAPALIT — KUMPIRMADONG NABAGO
+    verifySection.classList.remove('hidden');
+    verifyStatus.innerHTML = `
+      <div class="check-result found">✅ Nakita ang ENCRYPTED_TOKEN sa file — handa nang palitan</div>
+      <div class="check-result updated">✅ <strong>MATAGUMPAY NA NAPALITAN!</strong><br>
+      Lumang linyang nakita: <code style="background:#e5e7eb;padding:2px 6px;border-radius:4px;font-size:13px">${oldValue.substring(0,70)}...</code><br>
+      Bagong linyang nailagay: <code style="background:#e5e7eb;padding:2px 6px;border-radius:4px;font-size:13px">${newLine.substring(0,70)}...</code><br>
+      ⏰ Oras: ${new Date().toLocaleString('tl-PH')}</div>
+    `;
 
   } catch (err) {
     status.innerHTML = `<span class="error-text">❌ Nabigo: ${err.message} — mananatiling naka-imbak, susubukan ulit.</span>`;
