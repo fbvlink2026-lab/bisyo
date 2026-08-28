@@ -12,7 +12,6 @@ body{background:#f3f4f6;font-family:Arial,sans-serif}
 .header h1{font-size:20px;margin:0 0 4px 0}
 .header p{font-size:14px;opacity:0.9;margin:0}
 
-/* === KATAYUAN NG KONEKSYON === */
 .status-bar{display:flex;gap:14px;align-items:center;font-size:13px}
 .status-dot{width:12px;height:12px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:4px}
 .dot-online{background:#4ade80;box-shadow:0 0 6px #4ade80}
@@ -65,7 +64,6 @@ label{display:block;margin-bottom:6px;font-weight:bold;font-size:14px}
 .token-status{font-size:13px;margin-left:8px}
 .last-saved{font-size:13px;font-weight:normal;color:#6b7280}
 
-/* === NAKABAKANTING I-SYNC === */
 .pending-section{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:16px}
 .pending-title{font-weight:bold;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .pending-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#fef3c7;border-radius:6px;margin-bottom:6px;font-size:14px}
@@ -75,15 +73,16 @@ label{display:block;margin-bottom:6px;font-weight:bold;font-size:14px}
 </head>
 <body>
 
-<!-- =====================================================
-     🔒 NAKA-ENCRYPT NA TOKEN — PALITAN PAGKATAPUS BUUIN
-     ===================================================== -->
 <script>
+// ⚠️ HUWAG BAGUHIN ITO — PAPALITAN NG setup-token.html KAPAG BUIN MO NA
 const ENCRYPTED_TOKEN = "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN";
+
+// ✅ ITO ANG PASSWORD NA GAGAMITIN MO — TANDAAN MO ITO!
+const ADMIN_PASSWORD = "bisyo2026";  // 🔑 PALITAN MO ITO KUNG GUSTO MO!
+
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
-// ✅ TAMA NA ANG DAANAN — TUGMA SA IYONG PROYEKTO!
 const ASSETS_PATH = "app/src/main/assets";
 const STORAGE_KEY = "bisyo_offline_changes";
 const LAST_SAVE_KEY = "bisyo_last_saved";
@@ -113,6 +112,9 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
   <label>Password ng Admin:</label>
   <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
   <button class="btn btn-primary" onclick="doLogin()">🔑 Mag-login</button>
+  <p style="text-align:center;margin-top:12px;font-size:13px;color:#6b7280">
+    💡 Tandaan: Ito rin ang password na gagamitin mo kapag magse-setup ka na ng Token.
+  </p>
 </div>
 
 <!-- === ADMIN PANEL === -->
@@ -132,7 +134,6 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
     </div>
   </div>
 
-  <!-- ⏳ NAKABAKANTING I-SYNC -->
   <div id="pending-section" class="pending-section hidden">
     <div class="pending-title">⏳ Hindi pa nai-sync sa GitHub</div>
     <div id="pending-list"></div>
@@ -142,7 +143,6 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
     </div>
   </div>
 
-  <!-- 📄 PAGPILI NG PAHINA -->
   <div class="panel-card">
     <div class="panel-title">
       📄 Mga Pahina — Pumili para I-edit
@@ -151,7 +151,6 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
     <div class="page-list" id="page-list"></div>
   </div>
 
-  <!-- ✍️ EDITOR -->
   <div class="panel-card">
     <div class="panel-title" id="editor-title">I-edit ang Nilalaman</div>
     <div class="editor-toolbar">
@@ -173,7 +172,7 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
 
 </div>
 
-<!-- === MODAL: PALITAN ANG PASSWORD === -->
+<!-- === MODAL === -->
 <div id="pw-modal" class="modal">
   <div class="modal-box">
     <div class="modal-title">🔁 Palitan ang Password</div>
@@ -193,7 +192,7 @@ const LAST_SAVE_KEY = "bisyo_last_saved";
 </div>
 
 <script>
-let ADMIN_PASSWORD = null;
+let ADMIN_PASSWORD_ENTERED = null;
 let decryptedToken = null;
 let currentPageId = null;
 let isOnline = navigator.onLine;
@@ -222,7 +221,7 @@ let pages = [
 ];
 
 // =====================================================
-// 💾 OFFLINE STORAGE — Lokal na Pag-imbak
+// 💾 OFFLINE STORAGE
 // =====================================================
 function getOfflineChanges(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return []} }
 function saveOfflineChange(pageId, content, pageName){
@@ -236,8 +235,7 @@ function removeOfflineChange(pageId){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(changes));
   updatePendingUI();
 }
-function getOfflineChange(pageId){ return getOfflineChanges().find(c=>c.pageId===pageId) }
-function hasOfflineChange(pageId){ return !!getOfflineChange(pageId) }
+function hasOfflineChange(pageId){ return !!getOfflineChanges().find(c=>c.pageId===pageId) }
 function setLastSaved(pageId, method){
   localStorage.setItem(LAST_SAVE_KEY+'_'+pageId, JSON.stringify({time:Date.now(), method}));
   updateLastSavedDisplay(pageId);
@@ -249,7 +247,7 @@ function getLastSaved(pageId){ try{return JSON.parse(localStorage.getItem(LAST_S
 // =====================================================
 window.addEventListener('online', ()=>{
   isOnline = true; updateConnectionUI();
-  setTimeout(()=>syncAllPending(), 1500); // Kusang mag-sync pagbalik ng internet
+  setTimeout(()=>syncAllPending(), 1500);
 });
 window.addEventListener('offline', ()=>{ isOnline = false; updateConnectionUI() });
 
@@ -307,7 +305,7 @@ function discardOffline(pageId){
 async function syncOnePage(pageId){ const c=getOfflineChange(pageId); if(c) await uploadToGitHub(pageId, c.content, true) }
 
 // =====================================================
-// 🔐 ENCRYPTION / DECRYPTION
+// 🔐 DECRYPTION — GAMIT ANG PASSWORD
 // =====================================================
 async function deriveKey(password) {
   const encoder = new TextEncoder();
@@ -327,22 +325,36 @@ async function decryptToken(encryptedBase64, password) {
 }
 
 // =====================================================
-// 🔑 LOGIN
+// 🔑 LOGIN — GAMIT LANG ANG PASSWORD!
 // =====================================================
 async function doLogin() {
   const pass = document.getElementById("admin-pass").value;
-  if(!pass){ showError("Ipasok ang password"); return }
+  if(!pass){ showError("Ipasok ang password"); return; }
 
-  if(ENCRYPTED_TOKEN === "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
-    ADMIN_PASSWORD = pass; finishLogin();
-    showStatus("⚠️ Walang Token pa — buuin ulit gamit ang setup-token.html para makapag-save sa GitHub", "warning");
+  // ✅ TAMA ANG PASSWORD? — TUMANGGAP AGAD!
+  if(pass !== ADMIN_PASSWORD){
+    showError("❌ Maling Password");
     return;
   }
 
-  decryptedToken = await decryptToken(ENCRYPTED_TOKEN, pass);
-  if(!decryptedToken){ showError("❌ Maling Password"); return }
-  ADMIN_PASSWORD = pass; finishLogin();
+  // ✅ TAMA — TUMANGGAP AGAD! HINDI NA HINIHINTAY ANG TOKEN!
+  ADMIN_PASSWORD_ENTERED = pass;
+
+  // ✅ KUNG MAY TOKEN NA — I-DECRYPT
+  if(ENCRYPTED_TOKEN !== "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
+    decryptedToken = await decryptToken(ENCRYPTED_TOKEN, pass);
+  }
+
+  finishLogin();
+
+  // ✅ KUNG WALA PANG TOKEN — BABALA LANG, GUMAGANA PA RIN!
+  if(!decryptedToken){
+    showStatus("⚠️ Walang GitHub Token pa — pagbabago ay naka-imbak LOKAL muna.\nBuksan ang setup-token.html gamit ang parehong password para makapag-save sa GitHub.", "warning");
+  } else {
+    showStatus("✅ Naka-konekta sa GitHub — handa nang i-save!", "success");
+  }
 }
+
 function showError(msg){ document.getElementById("login-error").textContent = msg }
 function finishLogin(){
   document.getElementById("login-form").classList.add("hidden");
@@ -352,10 +364,10 @@ function finishLogin(){
 function updateTokenStatus(){
   const el = document.getElementById("token-indicator");
   if(decryptedToken){ el.textContent = "🔑 Naka-konekta sa GitHub"; el.style.color = "#16a34a" }
-  else { el.textContent = "⚠️ Lokal na mode lamang"; el.style.color = "#f59e0b" }
+  else { el.textContent = "⚠️ Walang Token — Lokal lamang"; el.style.color = "#f59e0b" }
 }
 function doLogout(){
-  ADMIN_PASSWORD = null; decryptedToken = null; currentPageId = null;
+  ADMIN_PASSWORD_ENTERED = null; decryptedToken = null; currentPageId = null;
   document.getElementById("admin-panel").classList.add("hidden");
   document.getElementById("login-form").classList.remove("hidden");
   document.getElementById("admin-pass").value = "";
@@ -382,7 +394,6 @@ async function selectPage(id){
   document.getElementById("editor").value = ""; document.getElementById("editor").classList.remove('unsaved');
   updateLastSavedDisplay(id);
 
-  // Una: Tingnan kung may lokal na pagbabago
   const offlineVer = getOfflineChange(id);
   if(offlineVer){
     document.getElementById("editor").value = offlineVer.content;
@@ -391,7 +402,6 @@ async function selectPage(id){
     return;
   }
 
-  // Kunin mula GitHub kung online
   if(isOnline && decryptedToken){
     try {
       const filePath = `${ASSETS_PATH}/${id}.html`;
@@ -441,7 +451,7 @@ function previewContent(){
 }
 
 // =====================================================
-// 💾 I-SAVE — Offline Muna, Sync Pagbalik ng Net
+// 💾 I-SAVE
 // =====================================================
 async function saveContent(){
   if(!currentPageId){ showStatus("❌ Pumili muna ng pahina", "error"); return }
@@ -449,24 +459,22 @@ async function saveContent(){
   if(!content){ showStatus("❌ Walang nilalaman", "error"); return }
   const pageName = pages.find(p=>p.id===currentPageId).name;
 
-  // ✅ LAGAY MUNA LOKAL — palaging gumagana
   saveOfflineChange(currentPageId, content, pageName);
   markSaved('offline'); buildPageList();
 
-  // ✅ KUNG MAY INTERNET AT TOKEN — I-AGAD SA GITHUB
   if(isOnline && decryptedToken){
     updateSyncState('syncing');
     const ok = await uploadToGitHub(currentPageId, content, false);
     if(ok){
       removeOfflineChange(currentPageId); markSaved('github'); buildPageList();
-      showStatus("✅ NAI-SAVE AGAD SA GITHUB! ⚡ Makikita na agad sa Website at App.", "success");
+      showStatus("✅ NAI-SAVE AGAD SA GITHUB! ⚡", "success");
     } else {
       updateSyncState('pending');
-      showStatus("✅ Naka-imbak LOKAL — kusang mag-sync kapag bumalik ang internet", "warning");
+      showStatus("✅ Naka-imbak LOKAL — kusang mag-sync mamaya", "warning");
     }
   } else {
     updateSyncState('pending');
-    showStatus("✅ Naka-imbak LOKAL lamang — kusang mag-sync kapag may internet na", "warning");
+    showStatus("✅ Naka-imbak LOKAL — kailangan ng Token + Internet para maipadala sa GitHub", "warning");
   }
 }
 
@@ -478,14 +486,12 @@ async function uploadToGitHub(pageId, content, isBackgroundSync){
   const filePath = `${ASSETS_PATH}/${pageId}.html`;
 
   try {
-    // Kunin SHA kung umiiral na
     let sha = null;
     const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
       headers: { "Authorization": `token ${decryptedToken}` }
     });
     if(getRes.ok){ const d = await getRes.json(); sha = d.sha; }
 
-    // Ihanda at ipadala
     const encoded = btoa(unescape(encodeURIComponent(content)));
     const body = {
       message: `Update: ${pages.find(p=>p.id===pageId)?.name||pageId}`,
@@ -501,7 +507,7 @@ async function uploadToGitHub(pageId, content, isBackgroundSync){
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
-    };
+    });
 
     if(putRes.ok){
       removeOfflineChange(pageId); markSaved('github'); buildPageList();
@@ -541,7 +547,11 @@ function changePassword(){
   if(oldPw !== ADMIN_PASSWORD){ err.textContent = "❌ Maling lumang password"; return }
   if(newPw.length < 6){ err.textContent = "❌ Hindi bababa sa 6 letra"; return }
   if(newPw !== confirmPw){ err.textContent = "❌ Hindi tugma ang bagong password"; return }
-  alert("✅ Tinatanggap!\n\n⚠️ Buksan ang setup-token.html at buuin ulit ang admin.html gamit ang bagong password.");
+
+  // ✅ I-update ang password sa pahina
+  ADMIN_PASSWORD = newPw;
+
+  alert("✅ Napalitan na ang password!\n\n⚠️ TANDAAN MO ANG BAGONG PASSWORD — ito rin ang gagamitin mo sa setup-token.html kapag buuin mo na ang admin.html.\n\nBagong Password: " + newPw);
   closePwModal();
 }
 
