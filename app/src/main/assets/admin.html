@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>Admin — Dashboard</title>
+</head>
+<body>
+
+<div id="login-view">
+  <div class="login-container">
+    <div class="login-title">🔑 Pag-login — Admin</div>
+    <div id="login-error" class="error"></div>
+    <label>Password:</label>
+    <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
+    <label>Tagal ng Session (minuto):</label>
+    <input type="number" id="session-min" class="input" value="30" min="5" max="480">
+    <button class="btn btn-primary" onclick="doLogin()">🔓 Mag-login</button>
+  </div>
+</div>
+
+<div id="dashboard-view" class="hidden">
+  <div class="nav-bar">
+    <a href="admin.html" class="active">🏠 Dashboard</a>
+    <a href="admin-order.html">🔢 Ayusin Ayos</a>
+    <a href="admin-edit.html">✏️ I-edit</a>
+    <a href="admin-new-page.html">➕ Bagong Pahina</a>
+    <a href="admin-pending.html">⏳ Nakabinbin</a>
+    <a href="setup-token.html">🔧 Token</a>
+    <a href="admin-settings.html">⚙️ Setting</a>
+  </div>
+
+  <div class="status-line">
+    <span id="conn-status">🔌 —</span>
+    <span id="token-indicator">🔒 Token: —</span>
+    <span id="session-timer">⏰ —</span>
+    <button onclick="doLogout()" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer">🚪 Logout</button>
+  </div>
+
+  <div class="dashboard-card">
+    <h2>👋 Maligayang Pagdating, Admin</h2>
+    <p style="color:#6b7280">Pumili ng gawain mula sa ibaba o sa menu sa itaas.</p>
+  </div>
+
+  <!-- ✅ KAHON NG TOKEN — KUSANG LALABAS ANG TOKEN KUNG MAY BAGO -->
+  <div id="token-card" class="dashboard-card hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleTokenCard()">
+      <h2 style="margin:0">🔑 GitHub Token (Naka-encrypt)</h2>
+      <span id="token-toggle-icon" style="font-size:18px">▼</span>
+    </div>
+    <div id="token-card-body" style="margin-top:14px">
+      <p style="color:#6b7280;margin-bottom:10px" id="token-hint">
+        Pumunta muna sa <a href="setup-token.html" style="color:#b91c1c">🔧 Token Setup</a> para i-encrypt ang token.
+      </p>
+
+      <label>Encrypted Token:</label>
+      <input type="text" id="saved-encrypted-token"
+             style="font-family:monospace;font-size:13px;"
+             placeholder="Kusang lalabas dito kapag na-encrypt na...">
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="saveEncryptedToken()">💾 I-save Token</button>
+        <button class="btn btn-secondary" onclick="clearToken()">🗑️ Burahin</button>
+      </div>
+
+      <div id="token-status" class="status"></div>
+    </div>
+  </div>
+
+  <div class="grid-menu">
+    <a href="admin-order.html" class="menu-btn">
+      <span>🔢</span>
+      <span>Ayusin Ayos</span>
+    </a>
+    <a href="admin-edit.html" class="menu-btn">
+      <span>✏️</span>
+      <span>I-edit Nilalaman</span>
+    </a>
+    <a href="admin-new-page.html" class="menu-btn">
+      <span>➕</span>
+      <span>Bagong Pahina</span>
+    </a>
+    <a href="admin-pending.html" class="menu-btn">
+      <span>⏳</span>
+      <span>Nakabinbin</span>
+    </a>
+    <a href="setup-token.html" class="menu-btn">
+      <span>🔧</span>
+      <span>Token Setup</span>
+    </a>
+    <a href="admin-settings.html" class="menu-btn">
+      <span>⚙️</span>
+      <span>Mga Setting</span>
+    </a>
+  </div>
+</div>
+
+<script>
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME = "bisyo";
+const BRANCH = "main";
+const SESSION_KEY = "bisyo_admin_session";
+const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
+const PENDING_TOKEN_KEY = "bisyo_pending_token";
+
+let sessionTimer = null;
+window.ENCRYPTED_TOKEN = "";
+let tokenCardCollapsed = false;
+
+// === Session ===
+function saveSession(pw, minutes) {
+  const ms = minutes * 60 * 1000;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+    password: pw,
+    expiresAt: Date.now() + ms,
+    durationMinutes: minutes
+  }));
+}
+function loadSession() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!s) return null;
+  const d = JSON.parse(s);
+  if (Date.now() > d.expiresAt) { clearSession(); return null; }
+  return d;
+}
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+function updateSessionDisplay() {
+  const s = loadSession();
+  if (!s) return;
+  const rem = Math.ceil((s.expiresAt - Date.now()) / 60000);
+  document.getElementById("session-timer").textContent = `⏰ ${rem}m natitira`;
+}
+
+// === Token Card Controls ===
+function showTokenCard() {
+  document.getElementById("token-card").classList.remove("hidden");
+  tokenCardCollapsed = false;
+  document.getElementById("token-card-body").style.display = "block";
+  document.getElementById("token-toggle-icon").textContent = "▼";
+}
+function hideTokenCard() {
+  document.getElementById("token-card").classList.add("hidden");
+}
+function toggleTokenCard() {
+  tokenCardCollapsed = !tokenCardCollapsed;
+  document.getElementById("token-card-body").style.display = tokenCardCollapsed ? "none" : "block";
+  document.getElementById("token-toggle-icon").textContent = tokenCardCollapsed ? "▶" : "▼";
+}
+
+// ✅ KUSANG KUNIN ANG BAGONG TOKEN NA IPINASA MULA SA SETUP-TOKEN
+function checkPendingToken() {
+  const pending = localStorage.getItem(PENDING_TOKEN_KEY);
+  if (pending) {
+    document.getElementById("saved-encrypted-token").value = pending;
+    showTokenCard();
+    document.getElementById("token-hint").innerHTML =
+      "✅ <strong>May bagong token!</strong> Pindutin ang I-save para kumpirmahin.";
+    localStorage.removeItem(PENDING_TOKEN_KEY); // ✅ Linisin pagkatapos makita
+  }
+}
+
+// === I-validate sa GitHub ===
+async function verifyTokenWithGitHub() {
+  if (!window.ENCRYPTED_TOKEN) return false;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/`);
+    if (res.status === 401 || res.status === 403) return false;
+    return res.ok;
+  } catch {
+    return null;
+  }
+}
+
+async function updateTokenCardVisibility() {
+  const hasToken = !!window.ENCRYPTED_TOKEN;
+  const pending = localStorage.getItem(PENDING_TOKEN_KEY);
+
+  if (pending) { showTokenCard(); return; }
+  if (!hasToken) { showTokenCard(); return; }
+
+  const isValid = await verifyTokenWithGitHub();
+  if (isValid === false) {
+    showTokenCard();
+    document.getElementById("token-status").className = "status error";
+    document.getElementById("token-status").textContent = "⚠️ Token hindi wasto o nag-expire na — palitan ito";
+  } else if (isValid === true) {
+    hideTokenCard();
+  } else {
+    showTokenCard();
+    collapseTokenCard();
+  }
+}
+
+// === I-save Token ===
+async function saveEncryptedToken() {
+  const token = document.getElementById("saved-encrypted-token").value.trim();
+  const statusEl = document.getElementById("token-status");
+
+  if (!token) {
+    statusEl.className = "status error";
+    statusEl.textContent = "❌ Walang token — pumunta sa Token Setup muna";
+    return;
+  }
+
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  window.ENCRYPTED_TOKEN = token;
+
+  statusEl.className = "status success";
+  statusEl.textContent = "✅ Nai-save na! Sinusuri...";
+
+  setTimeout(async () => {
+    statusEl.textContent = "✅ Tama — isinasara ang kahon...";
+    await new Promise(r => setTimeout(r, 1000));
+    updateTokenIndicator();
+    await updateTokenCardVisibility();
+  }, 500);
+}
+
+function clearToken() {
+  if (!confirm("Burahin ang nakasave na token?")) return;
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  window.ENCRYPTED_TOKEN = "";
+  document.getElementById("saved-encrypted-token").value = "";
+  document.getElementById("token-hint").innerHTML =
+    'Pumunta muna sa <a href="setup-token.html" style="color:#b91c1c">🔧 Token Setup</a> para i-encrypt ang token.';
+  document.getElementById("token-status").className = "status info";
+  document.getElementById("token-status").textContent = "🗑️ Tinanggal na — ilagay ang bago";
+  updateTokenIndicator();
+  updateTokenCardVisibility();
+}
+
+function loadSavedToken() {
+  const saved = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (saved) {
+    document.getElementById("saved-encrypted-token").value = saved;
+    window.ENCRYPTED_TOKEN = saved;
+  }
+  updateTokenIndicator();
+}
+
+function updateTokenIndicator() {
+  document.getElementById("token-indicator").textContent =
+    window.ENCRYPTED_TOKEN ? "🔒 Token: ✅ Naka-save" : "🔒 Token: ❌ Wala pa";
+}
+
+// === Login/Logout ===
+function doLogin() {
+  const pw = document.getElementById("admin-pass").value.trim();
+  const min = parseInt(document.getElementById("session-min").value) || 30;
+  if (!pw) return alert("Ilagay ang password");
+  saveSession(pw, min);
+  showDashboard();
+}
+function doLogout() {
+  clearSession();
+  if (sessionTimer) clearInterval(sessionTimer);
+  location.reload();
+}
+function showDashboard() {
+  document.getElementById("login-view").classList.add("hidden");
+  document.getElementById("dashboard-view").classList.remove("hidden");
+  updateConnStatus();
+  updateSessionDisplay();
+  loadSavedToken();
+  checkPendingToken(); // ✅ KUSANG KUNIN ANG BAGONG TOKEN
+  updateTokenCardVisibility();
+  sessionTimer = setInterval(updateSessionDisplay, 30000);
+}
+function updateConnStatus() {
+  document.getElementById("conn-status").textContent =
+    navigator.onLine ? "🔌 Online" : "🔌 Walang Internet";
+}
+
+window.onload = () => {
+  const s = loadSession();
+  if (s) showDashboard();
+  window.addEventListener('online', updateTokenCardVisibility);
+};
+</script>
+</body>
+</html>
