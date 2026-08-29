@@ -59,10 +59,25 @@
     </div>
 
     <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sm btn-primary" onclick="openNewPageModal()"><span class="icon-add"></span> ➕ Bagong Pahina</button>
       <button class="btn btn-sm btn-secondary" onclick="window.open('setup-token.html','_self')"><span class="icon-settings"></span> Setup Token</button>
       <button class="btn btn-sm btn-success" onclick="refreshSession()"><span class="icon-refresh"></span> Palawakin ang Session</button>
       <button class="btn btn-sm btn-warning" onclick="openChangePasswordModal()"><span class="icon-password"></span> Palitan ang Password</button>
       <button class="btn btn-sm btn-secondary" onclick="doLogout()"><span class="icon-logout"></span> Mag-logout</button>
+    </div>
+  </div>
+
+  <!-- ✅ BAGONG BAHAGI: AYUSIN ANG PAGKAKASUNOD-SUNOD SA MAIN.HTML -->
+  <div class="panel-card">
+    <div class="panel-title">
+      <span class="icon-order"></span> 🔢 Ayusin ang Pagkakasunod-sunod sa Main.html
+    </div>
+    <p style="color:#6b7280;font-size:14px;margin:0 0 12px 0">Pindutin ang ⬆️ ⬇️ para ilipat ang pwesto — kusang makikita agad sa main.html</p>
+    <div id="order-list"></div>
+    <div style="margin-top:12px">
+      <button class="btn btn-sm btn-success" onclick="savePageOrder()">💾 I-save ang Ayos</button>
+      <span id="order-status" style="margin-left:10px;color:#16a34a;display:none">✅ Nai-save na!</span>
+      <button class="btn btn-sm btn-secondary" style="margin-left:8px" onclick="resetPageOrder()">↩️ Ibalik sa Orihinal</button>
     </div>
   </div>
 
@@ -104,6 +119,37 @@
   </div>
 </div>
 
+<!-- ✅ BAGONG ANYO: GUMAWA NG BAGONG PAHINA -->
+<div id="new-page-modal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-title"><span class="icon-add"></span> Gumawa ng Bagong Pahina</div>
+    <div class="error" id="new-page-error"></div>
+
+    <label>Pangalan ng Pahina:</label>
+    <input type="text" id="new-page-name" class="input" placeholder="Halimbawa: Balita o Tungkol sa Atin">
+
+    <label>ID ng Pahina (walang puwang, maliit na titik):</label>
+    <input type="text" id="new-page-id" class="input" placeholder="Halimbawa: balita o tungkol-sa-atin">
+
+    <label>Uri ng Pahina:</label>
+    <select id="new-page-type" class="input">
+      <option value="html">HTML — Pahina ng Nilalaman</option>
+      <option value="css">CSS — Estilo at Disenyo</option>
+    </select>
+
+    <label>Lokasyon ng Pahina:</label>
+    <select id="new-page-folder" class="input">
+      <option value="pages">📂 Sa loob ng /pages — Mga Nilalaman</option>
+      <option value="root">📁 Sa ugat — katulad ng index.html / main.html</option>
+    </select>
+
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeNewPageModal()"><span class="icon-close"></span> Isara</button>
+      <button class="btn btn-primary" style="flex:1" onclick="createNewPage()"><span class="icon-add"></span> Gumawa</button>
+    </div>
+  </div>
+</div>
+
 <div id="pw-modal" class="modal hidden">
   <div class="modal-box">
     <div class="modal-title"><span class="icon-lock"></span> Palitan ang Password</div>
@@ -139,6 +185,7 @@ const STORAGE_KEY = "bisyo_offline_changes";
 const CACHE_PREFIX = "bisyo_cache_";
 const SESSION_STORAGE_KEY = "bisyo_session_data";
 const PASSWORD_MEMORY_KEY = "bisyo_last_password";
+const PAGE_ORDER_KEY = "bisyo_page_order"; // ✅ BAGUHIN: Pagkakasunod-sunod
 
 let ADMIN_PASSWORD = null;
 let decryptedToken = null;
@@ -148,7 +195,9 @@ let isOnline = navigator.onLine;
 let SESSION_DURATION_MS = 30 * 60 * 1000;
 let sessionCountdownTimer = null;
 let forceSource = null;
+let originalPageOrder = null; // ✅ Orihinal na ayos
 
+// ✅ DINAMIKONG LISTAHAN — MAAARI DAGDAGAN HABANG GUMAGANA ANG PAHINA
 const pages = [
   {id:"index",       name:"index.html",               type:"html", folder:"root", iconClass:"icon-home"},
   {id:"main",        name:"main.html",                type:"html", folder:"root", iconClass:"icon-page"},
@@ -172,12 +221,215 @@ const pages = [
   {id:"ibang-sugal",        name:"Ibang Uri ng Sugal",  type:"html", folder:"pages", iconClass:"icon-dice"},
   {id:"internet-laro",      name:"Internet / Laro",      type:"html", folder:"pages", iconClass:"icon-game"},
   {id:"labis-pagkain",      name:"Labis na Pagkain",     type:"html", folder:"pages", iconClass:"icon-food"},
-  {id:"vaping",             name:"Vaping",               type:"html", folder:"pages", iconClass:"icon-vape"}
+  {id:"vaping",             name:"Vaping",               type:"html", folder:"pages", iconClass:"icon-vape"},
+  {id:"aral-sa-bibliya",    name:"Aral mula sa Bibliya", type:"html", folder:"pages", iconClass:"icon-bible"}
 ];
+
+// ✅ KUNIN ANG MGA PAHINANG LALABAS SA MAIN.HTML LANG
+function getMainPages() {
+  return pages.filter(p => p.folder === "pages" && p.type === "html");
+}
+
+// ✅ KASALUKUYANG AYOS — BASAHIN MULA SA IMBAKAN
+function getCurrentPageOrder() {
+  const saved = localStorage.getItem(PAGE_ORDER_KEY);
+  if (saved) {
+    try {
+      const order = JSON.parse(saved);
+      // Siguraduhing kasama ang lahat ng pahina
+      const allIds = getMainPages().map(p => p.id);
+      const savedIds = [...order];
+      allIds.forEach(id => {
+        if (!savedIds.includes(id)) savedIds.push(id);
+      });
+      return savedIds;
+    } catch {}
+  }
+  // Kung walang naka-save — gamitin ang orihinal na ayos
+  return getMainPages().map(p => p.id);
+}
+
+// ✅ BUUIN ANG LISTAHAN NG AYOS SA ADMIN
+function renderOrderList() {
+  const container = document.getElementById("order-list");
+  const order = getCurrentPageOrder();
+  originalPageOrder = originalPageOrder || [...order]; // Tandaan ang orihinal
+  container.innerHTML = "";
+
+  order.forEach((pageId, index) => {
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return;
+
+    const row = document.createElement("div");
+    row.className = "order-row";
+    row.innerHTML = `
+      <span class="order-pos">${index + 1}</span>
+      <span class="order-name">${page.name}</span>
+      <div class="order-buttons">
+        <button onclick="movePageUp(${index})" ${index === 0 ? "disabled" : ""}>⬆️</button>
+        <button onclick="movePageDown(${index})" ${index === order.length - 1 ? "disabled" : ""}>⬇️</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ✅ ILIPAT PATAAS
+function movePageUp(index) {
+  if (index === 0) return;
+  const order = getCurrentPageOrder();
+  [order[index], order[index - 1]] = [order[index - 1], order[index]];
+  localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
+  renderOrderList();
+  document.getElementById("order-status").style.display = "none";
+}
+
+// ✅ ILIPAT PABABA
+function movePageDown(index) {
+  const order = getCurrentPageOrder();
+  if (index === order.length - 1) return;
+  [order[index], order[index + 1]] = [order[index + 1], order[index]];
+  localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
+  renderOrderList();
+  document.getElementById("order-status").style.display = "none";
+}
+
+// ✅ I-SAVE ANG AYOS — IPADALA SA GITHUB KUNG KONEKTADO
+async function savePageOrder() {
+  const order = getCurrentPageOrder();
+  localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
+
+  // ✅ I-save din para mabasa ng main.html
+  localStorage.setItem("bisyo_page_order", JSON.stringify(order));
+  localStorage.setItem("bisyo_page_order_updated", Date.now());
+
+  // ✅ I-upload sa GitHub kung may token at online
+  if (isOnline && decryptedToken) {
+    await uploadPageOrderToGitHub(order);
+  }
+
+  // ✅ Ipakita na tapos na
+  const status = document.getElementById("order-status");
+  status.style.display = "inline";
+  setTimeout(() => status.style.display = "none", 3000);
+  showStatus("✅ Nai-save ang bagong ayos — makikita sa main.html", "success");
+}
+
+// ✅ I-upload ang ayos sa GitHub
+async function uploadPageOrderToGitHub(order) {
+  try {
+    const filePath = "app/src/main/assets/page-order.json";
+    let sha = null;
+
+    // Kunin muna ang SHA kung mayroon na
+    const g = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
+      headers: { Authorization: `token ${decryptedToken}` }
+    });
+    if (g.ok) sha = (await g.json()).sha;
+
+    const content = JSON.stringify(order, null, 2);
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(content);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    const base64 = btoa(binary);
+
+    const body = {
+      message: `Update page order — ${new Date().toLocaleString('tl-PH')}`,
+      content: base64,
+      branch: BRANCH
+    };
+    if (sha) body.sha = sha;
+
+    await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${decryptedToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+  } catch (e) {
+    console.log("Hindi ma-upload ang ayos:", e);
+  }
+}
+
+// ✅ IBALIK SA ORIHINAL NA AYOS
+function resetPageOrder() {
+  if (!confirm("Ibalik ba sa orihinal na pagkakasunod-sunod?")) return;
+  localStorage.removeItem(PAGE_ORDER_KEY);
+  localStorage.removeItem("bisyo_page_order");
+  renderOrderList();
+  showStatus("↩️ Bumalik sa orihinal na ayos", "info");
+}
+
+// ==================================================
+// ✅ BAGONG PAHINA — MGA TUNGKULIN
+// ==================================================
+function openNewPageModal(){
+  document.getElementById('new-page-modal').classList.remove('hidden');
+  document.getElementById('new-page-error').textContent='';
+  document.getElementById('new-page-name').value='';
+  document.getElementById('new-page-id').value='';
+  document.getElementById('new-page-type').value='html';
+  document.getElementById('new-page-folder').value='pages';
+}
+function closeNewPageModal(){
+  document.getElementById('new-page-modal').classList.add('hidden');
+  document.getElementById('new-page-error').textContent='';
+}
+function showNewPageError(m){
+  document.getElementById('new-page-error').textContent=m;
+}
+
+function suggestIdFromName(name){
+  return name.toLowerCase().trim()
+    .replace(/[^\w\u0080-\uFFFF-]+/g,'-')
+    .replace(/^-+|-+$/g,'');
+}
+
+async function createNewPage(){
+  const nameInput=document.getElementById('new-page-name').value.trim();
+  let idInput=document.getElementById('new-page-id').value.trim();
+  const type=document.getElementById('new-page-type').value;
+  const folder=document.getElementById('new-page-folder').value;
+
+  if(!nameInput)return showNewPageError("Ilagay ang pangalan ng pahina");
+  if(!idInput)idInput=suggestIdFromName(nameInput);
+  if(!/^[a-z0-9_-]+$/.test(idInput))return showNewPageError("ID: maliit na titik, numero, gitling at salungguhit lang ang pwede");
+
+  if(pages.some(p=>p.id===idInput))return showNewPageError("Mayroon nang pahinang may ganung ID — gumamit ng iba");
+
+  const iconClass = type==='css' ? 'icon-style-page' : 'icon-page';
+
+  pages.push({
+    id: idInput,
+    name: nameInput,
+    type: type,
+    folder: folder,
+    iconClass: iconClass
+  });
+
+  // ✅ Kung pahina sa pages/ — idagdag din sa pagkakasunod-sunod
+  if (folder === "pages" && type === "html") {
+    const order = getCurrentPageOrder();
+    order.push(idInput);
+    localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
+  }
+
+  buildPageList();
+  renderOrderList(); // ✅ I-refresh ang listahan ng ayos
+  closeNewPageModal();
+
+  showStatus("✅ Bagong pahina: "+nameInput+" — handa nang i-edit at i-save","success");
+
+  // Agad na piliin ang bagong pahina
+  setTimeout(()=>selectPage(idInput),100);
+}
 
 function getTemplate(type){
   if(type === "css") return "/* ==========================================\n   style.css — Pangkalahatang Disenyo\n   ========================================== */\n*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,sans-serif}\nbody{background:#f3f4f6;color:#1f2937;line-height:1.6}";
-  return "<h2>Pamagat</h2><p>Nilalaman...</p>";
+  return "<h2>"+(document.getElementById('new-page-name')?.value?.trim()||"Pamagat")+"</h2>\n<p>Nilalaman...</p>";
 }
 
 function getFilePath(info){
@@ -240,7 +492,9 @@ async function tryAutoLogin(){
   document.getElementById('admin-pass').value=savedPassword;
   document.getElementById('login-form').classList.add('hidden');
   document.getElementById('admin-panel').classList.remove('hidden');
-  buildPageList();updatePendingUI();updateConnUI();startSessionCountdown();
+  buildPageList();
+  renderOrderList(); // ✅ Ipakita ang ayos pag-login
+  updatePendingUI();updateConnUI();startSessionCountdown();
   if(ENCRYPTED_TOKEN !== "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
     try{
       decryptedToken=await decryptToken(ENCRYPTED_TOKEN,ADMIN_PASSWORD);
@@ -282,7 +536,9 @@ async function doLogin(){
   }
   document.getElementById('login-form').classList.add('hidden');
   document.getElementById('admin-panel').classList.remove('hidden');
-  buildPageList();updatePendingUI();updateConnUI();startSessionCountdown();
+  buildPageList();
+  renderOrderList(); // ✅ Ipakita ang ayos pag-login
+  updatePendingUI();updateConnUI();startSessionCountdown();
   showStatus(decryptedToken
     ? "Handa — Magbasa at Mag-save sa GitHub"
     : "Lokal na Mode — I-setup ang Token para sa GitHub","success");
@@ -456,9 +712,6 @@ function previewContent(){
   w.document.close();
 }
 
-// ==================================================
-// ✅ AYUS NA UPLOAD — HINDI NA MASIRO ANG MGA TITIK!
-// ==================================================
 async function upload(id,content){
   if(!decryptedToken)return false;
   try{
@@ -466,12 +719,10 @@ async function upload(id,content){
     const filePath=getFilePath(info);
     let sha=null;
 
-    // Basahin ang kasalukuyang version para makuha ang SHA
     const g=await fetch("https://api.github.com/repos/"+REPO_OWNER+"/"+REPO_NAME+"/contents/"+filePath+"?ref="+BRANCH,
       {headers:{Authorization:"token "+decryptedToken}});
     if(g.ok)sha=(await g.json()).sha;
 
-    // ✅ TAMA NA ENCODING — LIGTAS SA LAHAT NG UTF-8 TITIK
     const encoder = new TextEncoder();
     const bytes = encoder.encode(content);
     let binary = '';
@@ -561,5 +812,38 @@ window.addEventListener('load',async function(){
   await tryAutoLogin();
 });
 </script>
+
+<style>
+/* ✅ PANG-STYLE NG BAGONG ANYO */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal.hidden { display:none !important; }
+.modal-box { background:white; border-radius:12px; padding:24px; max-width:440px; width:90%; max-height:90vh; overflow-y:auto; }
+.modal-title { font-size:18px; font-weight:bold; margin-bottom:16px; color:#1f2937; }
+select.input { width:100%; padding:10px; border:2px solid #e5e7eb; border-radius:8px; font-size:15px; background:white; }
+.error { color:#dc2626; margin:8px 0; min-height:1.2em; }
+
+/* ✅ ESTILO NG PAG-AYOS NG PWESTO */
+.order-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; margin:4px 0;
+  background:#f9fafb; border-radius:8px;
+  border-left:3px solid #b91c1c;
+}
+.order-pos {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:28px; height:28px;
+  background:#dc2626; color:white; border-radius:50%;
+  font-weight:bold; font-size:14px; margin-right:10px;
+}
+.order-name { flex:1; font-size:15px; color:#1f2937; }
+.order-buttons { display:flex; gap:4px; }
+.order-buttons button {
+  width:32px; height:32px; padding:0; border:none; border-radius:6px;
+  background:#e5e7eb; cursor:pointer; font-size:14px;
+}
+.order-buttons button:disabled { opacity:0.3; cursor:not-allowed; }
+.order-buttons button:hover:not(:disabled) { background:#d1d5db; }
+</style>
+
 </body>
 </html>
