@@ -1,0 +1,410 @@
+/* ==========================================
+   ✅ admin-panel.css — PARA SA MGA PAHINA NG ADMIN LANG
+   Proyekto: Mga Ilegal na Bisyo
+   ========================================== */
+
+/* ---------- PAMAGAT NG ADMIN PANEL — PULA + PUTI ---------- */
+.admin-header {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  color: white !important;
+  padding: 20px 16px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.15);
+}
+.admin-header h1 {
+  font-size: 20px;
+  color: white !important;
+}
+.admin-header p {
+  font-size: 13px;
+  opacity: .85;
+  margin-top: 3px;
+  color: white !important;
+}
+
+/* ---------- LOGIN FORM ---------- */
+.login-container {
+  max-width: 420px;
+  margin: 60px auto;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.login-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #b91c1c;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.input,
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+.input:focus,
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #b91c1c;
+}
+
+.error {
+  color: #dc2626;
+  margin-bottom: 12px;
+  min-height: 20px;
+}
+
+/* ---------- SESSION SETTING ---------- */
+.session-setting {
+  background: #eff6ff;
+  padding: 14px;
+  border-radius: 10px;
+  margin: 14px 0;
+  border-left: 3px solid #3b82f6;
+}
+.session-setting label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #1e40af;
+}
+.session-setting input {
+  width: 90px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 2px solid #e5e7eb;
+  font-size: 16px;
+  text-align: center;
+}
+.session-setting input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+.session-setting small {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ---------- PANEL AT KARD NG ADMIN ---------- */
+.panel {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.panel-card {
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 20px;
+  margin: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.panel-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #b91c1c;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.session-info { font-size: 13px; color: #16a34a; }
+.token-status { font-size: 13px; margin-left: 8px; }
+.last-saved { font-size: 13px; font-weight: normal; color: #6b7280; }
+
+/* ---------- KATAYUAN / STATUS BARS ---------- */
+.status-bar {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 13px;
+}
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.dot-online    { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+.dot-offline   { background: #f87171; box-shadow: 0 0 6px #f87171; }
+.dot-saved     { background: #4ade80; }
+.dot-pending   { background: #fbbf24; animation: pulse 1s infinite; }
+.dot-syncing   { background: #60a5fa; animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* ---------- PAGE LIST ---------- */
+.page-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.page-item {
+  padding: 12px 14px;
+  background: #f9fafb;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.page-item:hover {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+.page-item.active {
+  background: #b91c1c;
+  color: white;
+  border-color: #b91c1c;
+}
+.system-item { border-left: 3px solid #3b82f6; }
+.content-item { border-left: 3px solid #16a34a; }
+.offline-badge {
+  font-size: 10px;
+  background: #fbbf24;
+  color: #000;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* ---------- TEMPLATES ---------- */
+.template-section {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  padding: 14px;
+  margin: 10px;
+}
+.template-title {
+  font-weight: bold;
+  color: #92400e;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.template-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.template-btn {
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.template-btn:hover {
+  background: #f59e0b;
+  color: white;
+}
+
+/* ---------- EDITOR ---------- */
+.editor-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.editor-toolbar button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #e5e7eb;
+  cursor: pointer;
+}
+.editor-toolbar button:hover {
+  background: #d1d5db;
+}
+textarea#editor {
+  width: 100%;
+  min-height: 320px;
+  padding: 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: monospace;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+textarea#editor:focus {
+  outline: none;
+  border-color: #b91c1c;
+}
+textarea#editor.unsaved {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+.action-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- STATUS MESSAGES ---------- */
+.status {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.status.success  { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
+.status.error    { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
+.status.info     { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+.status.warning  { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
+
+.success { color: #16a34a; }
+.warning { color: #d97706; }
+.info { color: #2563eb; }
+.error-text { color: #dc2626; }
+
+/* ---------- MODAL / POPUP ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+.modal.show { display: flex; }
+.modal-box {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #b91c1c;
+  margin-bottom: 16px;
+}
+.modal label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* ---------- PENDING SECTION ---------- */
+.pending-section {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  padding: 14px;
+  margin: 10px;
+}
+.pending-title {
+  font-weight: bold;
+  color: #92400e;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pending-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: #fef3c7;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.pending-sync-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #f59e0b;
+  color: #000;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+.pending-clear-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #e5e7eb;
+  color: #333;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+/* ---------- ADMIN-SPECIFIC ICONS ---------- */
+.icon-login::before{content:"🔑";margin-right:4px}
+.icon-session::before{content:"⏰";margin-right:4px}
+.icon-remember::before{content:"💾";margin-right:4px}
+.icon-locked::before{content:"🔒";margin-right:4px}
+.icon-folder::before{content:"📁";margin-right:4px}
+.icon-cache::before{content:"🗑️";margin-right:4px}
+.icon-clear::before{content:"✕";margin-right:4px}
+.icon-refresh::before{content:"🔄";margin-right:4px}
+.icon-password::before{content:"🔐";margin-right:4px}
+.icon-logout::before{content:"🚪";margin-right:4px}
+.icon-pending::before{content:"⏳";margin-right:4px}
+.icon-edit::before{content:"✏️";margin-right:4px}
+.icon-save::before{content:"💾";margin-right:4px}
+.icon-preview::before{content:"👁️";margin-right:4px}
+.icon-lock::before{content:"🔒";margin-right:4px}
+.icon-close::before{content:"✕";margin-right:4px}
+.icon-ok::before{content:"✓";margin-right:4px}
+.icon-warning::before{content:"⚠️";margin-right:4px}
+.icon-info-note::before{content:"ℹ️";margin-right:4px}
+.icon-h2::before{content:"H2 ";font-weight:bold}
+.icon-h3::before{content:"H3 ";font-weight:bold}
+.icon-p::before{content:"P ";font-weight:bold}
+.icon-b::before{content:"B ";font-weight:bold}
+.icon-i::before{content:"I ";font-style:italic}
+.icon-ul::before{content:"• ";font-weight:bold}
+.icon-hr::before{content:"— "}
+.icon-admin-page::before{content:"👤 ";margin-right:4px}
+.icon-setup-page::before{content:"🔧 ";margin-right:4px}
+.icon-style-page::before{content:"🎨 ";margin-right:4px}
+
+/* ---------- PAGKAKAPUTOL SA MOBILE ---------- */
+@media (max-width: 480px) {
+  .page-list { grid-template-columns: 1fr; }
+  .top-bar { flex-direction: column; align-items: flex-start; }
+  textarea#editor { min-height: 200px; }
+  .editor-toolbar button { font-size: 13px; padding: 5px 10px; }
+}
