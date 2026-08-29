@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>I-edit ang Nilalaman</title>
+<style>
+.nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
+.nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
+.nav-bar a:hover,.nav-bar a.active{background:#b91c1c}
+.container{max-width:900px;margin:0 auto;padding:16px}
+select, textarea{width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;margin:8px 0 16px 0;font-family:monospace,sans-serif}
+textarea{min-height:350px;resize:vertical;line-height:1.5}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:15px;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;font-weight:bold}
+.btn-secondary{background:#e5e7eb;color:#374151}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.status{padding:12px 16px;border-radius:8px;margin:12px 0;display:none}
+.status.success{background:#dcfce7;color:#166534;display:block}
+.status.error{background:#fee2e2;color:#991b1b;display:block}
+.status.info{background:#eff6ff;color:#1e40af;display:block}
+label{font-weight:bold;margin-top:12px;display:inline-block}
+.loading{opacity:0.5;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-order.html">🔢 Ayusin Ayos</a>
+  <a href="admin-edit.html" class="active">✏️ I-edit</a>
+  <a href="admin-new-page.html">➕ Bagong Pahina</a>
+  <a href="admin-pending.html">⏳ Nakabinbin</a>
+  <a href="setup-token.html">🔧 Token</a>
+  <a href="admin-settings.html">⚙️ Setting</a>
+</div>
+
+<div class="container">
+  <h1>✏️ I-edit ang Nilalaman</h1>
+
+  <label>Pumili ng Pahina:</label>
+  <select id="page-select" onchange="loadPageContent()">
+    <option value="">— Pumili —</option>
+    <option value="alak">Alak</option>
+    <option value="sigarilyo">Sigarilyo</option>
+    <option value="shabu">Shabu</option>
+    <option value="heroin">Heroin</option>
+    <option value="marijuana">Marijuana</option>
+    <option value="ecstasy">Ecstasy</option>
+    <option value="cocaine">Cocaine</option>
+    <option value="sugal">Sugal</option>
+    <option value="internet-laro">Internet / Laro</option>
+    <option value="vaping">Vaping</option>
+  </select>
+
+  <div id="editor-area" style="display:none">
+    <label>Nilalaman ng Pahina:</label>
+    <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..."></textarea>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveContent()">💾 I-save</button>
+      <button class="btn btn-secondary" onclick="previewContent()">👁️ I-preview</button>
+      <button class="btn btn-secondary" onclick="clearCache()">🗑️ I-clear Cache</button>
+    </div>
+  </div>
+
+  <div id="status-msg" class="status"></div>
+</div>
+
+<script>
+const SESSION_KEY = "bisyo_admin_session";
+const STORAGE_KEY = "bisyo_page_content_";
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME = "bisyo";
+const BRANCH = "main";
+
+function checkSession() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!s || Date.now() > JSON.parse(s).expiresAt) {
+    alert("Nakalipas na ang session — mag-login muli");
+    location.href = "admin.html";
+    return false;
+  }
+  return true;
+}
+
+function getPassword() {
+  return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "{}").password || "";
+}
+
+async function loadPageContent() {
+  const id = document.getElementById("page-select").value;
+  const editorArea = document.getElementById("editor-area");
+  const editor = document.getElementById("content-editor");
+  
+  if (!id) { editorArea.style.display = "none"; return; }
+  editorArea.style.display = "block";
+  editor.value = "";
+  editor.classList.add("loading");
+
+  // Subaybayan: GitHub → Lokal Cache → Default
+  let content = null;
+  const online = navigator.onLine;
+
+  if (online) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages/${id}.html?ref=${BRANCH}`);
+      if (res.ok) {
+        const data = await res.json();
+        content = atob(data.content);
+        localStorage.setItem(STORAGE_KEY + id, content);
+        showStatus(`✅ Kinuha mula sa GitHub: ${id}.html`, "info");
+      }
+    } catch(e) { console.log("GitHub fail:", e); }
+  }
+
+  // Kung walang GitHub, gamitin ang lokal
+  if (!content) {
+    content = localStorage.getItem(STORAGE_KEY + id);
+    if (content) showStatus(`📂 Gamit ang nakaimbak na bersyon`, "info");
+    else content = `<h2>${id}</h2>\n<p>Ilagay dito ang nilalaman...</p>`;
+  }
+
+  editor.value = content;
+  editor.classList.remove("loading");
+}
+
+async function saveContent() {
+  const id = document.getElementById("page-select").value;
+  const content = document.getElementById("content-editor").value;
+  if (!id || !content.trim()) return showStatus("❌ Walang laman o walang napiling pahina", "error");
+
+  // ✅ I-save agad sa lokal
+  localStorage.setItem(STORAGE_KEY + id, content);
+
+  // ✅ Ihanda para i-sync sa GitHub
+  const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
+  pending.push({
+    id: Date.now(),
+    pageId: id,
+    content: content,
+    timestamp: new Date().toISOString(),
+    synced: false
+  });
+  localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
+
+  showStatus("✅ Nai-save! I-sesync kapag may internet.", "success");
+}
+
+function previewContent() {
+  const content = document.getElementById("content-editor").value;
+  if (!content.trim()) return alert("Walang laman na i-preview");
+  const w = window.open("", "_blank", "width=800,height=600");
+  w.document.write(`<html><body style="max-width:700px;margin:30px auto;padding:20px;font-family:Arial">${content}</body></html>`);
+  w.document.close();
+}
+
+function clearCache() {
+  const id = document.getElementById("page-select").value;
+  if (!id) return;
+  localStorage.removeItem(STORAGE_KEY + id);
+  showStatus("🗑️ Cache na-clear — muling kukuha mula sa pinagmulan", "info");
+  loadPageContent();
+}
+
+function showStatus(txt, cls) {
+  const el = document.getElementById("status-msg");
+  el.textContent = txt;
+  el.className = `status ${cls}`;
+  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 5000);
+}
+
+window.onload = () => checkSession();
+</script>
+</body>
+</html>
