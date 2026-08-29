@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="style.css">
 <title>✏️ I-edit ang Nilalaman</title>
 <style>
-/* ✅ PAGPIPILIAN — GINAWANG MALINAW AT MADALI MAKITA */
 select {
   width: 100%;
   padding: 14px 16px;
@@ -29,17 +28,6 @@ select:focus {
   border-color: #b91c1c;
   box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
 }
-select option {
-  padding: 10px;
-  background: white;
-  color: #1f2937;
-}
-select option:checked {
-  background: #b91c1c;
-  color: white;
-}
-
-/* ✅ LABEL — MALINAW */
 label {
   font-weight: bold;
   font-size: 15px;
@@ -47,8 +35,6 @@ label {
   display: block;
   margin: 16px 0 6px 0;
 }
-
-/* ✅ TEXT AREA */
 textarea {
   width: 100%;
   padding: 16px;
@@ -69,25 +55,13 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
 }
 textarea.loading { opacity: 0.6; pointer-events: none; }
-
-/* ✅ KONTEYNER */
 .container {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px 16px 40px;
 }
-h1 {
-  font-size: 24px;
-  color: #b91c1c;
-  margin-bottom: 6px;
-}
-.subtitle {
-  color: #6b7280;
-  font-size: 14px;
-  margin-bottom: 24px;
-}
-
-/* ✅ EDITOR AREA */
+h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
+.subtitle { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
 #editor-area {
   background: white;
   border-radius: 14px;
@@ -95,8 +69,6 @@ h1 {
   box-shadow: 0 2px 10px rgba(0,0,0,0.06);
   margin-top: 10px;
 }
-
-/* ✅ MGA PINDUTAN */
 .btn-group {
   display: flex;
   gap: 12px;
@@ -113,18 +85,8 @@ h1 {
   transition: all 0.2s;
 }
 .btn:hover { transform: translateY(-1px); }
-.btn-primary {
-  background: linear-gradient(90deg, #b91c1c, #dc2626);
-  color: white;
-}
-.btn-primary:hover { background: #a61818; }
-.btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
-}
-.btn-secondary:hover { background: #d1d5db; }
-
-/* ✅ KATAYUAN / STATUS */
+.btn-primary { background: linear-gradient(90deg, #b91c1c, #dc2626); color: white; }
+.btn-secondary { background: #e5e7eb; color: #374151; }
 .status {
   padding: 14px 18px;
   border-radius: 10px;
@@ -151,10 +113,10 @@ h1 {
 
 <div class="container">
   <h1>✏️ I-edit ang Nilalaman ng Pahina</h1>
-  <p class="subtitle">Pumili muna ng pahina sa ibaba — lalabas ang nilalaman sa kahon para mabago</p>
+  <p class="subtitle" id="page-hint">Pumili ng pahina o dumiretso sa pag-edit</p>
 
   <label for="page-select">📄 Pumili ng Pahina:</label>
-  <select id="page-select" onchange="loadPageContent()">
+  <select id="page-select" onchange="pageSelected()">
     <option value="">— Pumili ng pahina —</option>
     <option value="alak">🍺 Alak</option>
     <option value="sigarilyo">🚬 Sigarilyo</option>
@@ -178,7 +140,7 @@ h1 {
   </select>
 
   <div id="editor-area" style="display:none">
-    <label>📝 Nilalaman ng Pahina:</label>
+    <label id="editor-label">📝 Nilalaman ng Pahina:</label>
     <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..."></textarea>
 
     <div class="btn-group">
@@ -198,6 +160,15 @@ const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 
+// ✅ KUNGSAN GALING: mula sa URL ?file=...
+function getFileParam() {
+  const params = new URLSearchParams(window.location.search);
+  const fn = params.get('file');
+  if (!fn) return null;
+  // Alisin ang .html kung meron para makuha ang ID
+  return fn.replace(/\.html$/i, '');
+}
+
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
   if (!s || Date.now() > JSON.parse(s).expiresAt) {
@@ -208,19 +179,31 @@ function checkSession() {
   return true;
 }
 
-function getPassword() {
-  return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "{}").password || "";
+function pageSelected() {
+  const id = document.getElementById("page-select").value;
+  if (!id) {
+    document.getElementById("editor-area").style.display = "none";
+    document.getElementById("page-hint").textContent = "Pumili ng pahina o dumiretso sa pag-edit";
+    return;
+  }
+  document.getElementById("page-hint").innerHTML = `✅ <strong>${id.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</strong> — binubuksan...`;
+  loadPageContent(id);
 }
 
-async function loadPageContent() {
-  const id = document.getElementById("page-select").value;
+async function loadPageContent(forcedId) {
+  const id = forcedId || document.getElementById("page-select").value;
   const editorArea = document.getElementById("editor-area");
   const editor = document.getElementById("content-editor");
   
   if (!id) { editorArea.style.display = "none"; return; }
+  
+  // ✅ Itakda ang pagpili kung galing sa link
+  document.getElementById("page-select").value = id;
+  
   editorArea.style.display = "block";
   editor.value = "";
   editor.classList.add("loading");
+  document.getElementById("editor-label").textContent = `📝 I-edit: ${id}.html`;
 
   let content = null;
   const online = navigator.onLine;
@@ -245,6 +228,7 @@ async function loadPageContent() {
 
   editor.value = content;
   editor.classList.remove("loading");
+  document.getElementById("page-hint").innerHTML = `✅ <strong>${id.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</strong>`;
 }
 
 async function saveContent() {
@@ -290,7 +274,15 @@ function showStatus(txt, cls) {
   setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 6000);
 }
 
-window.onload = () => checkSession();
+// ✅ SA PAGBUKAS — KUNG MAY DUMATING NA FILE, AGAD BUBUKSAN!
+window.onload = () => {
+  if (!checkSession()) return;
+  const fromUrl = getFileParam();
+  if (fromUrl) {
+    document.getElementById("page-select").value = fromUrl;
+    loadPageContent(fromUrl); // ✅ AGAD — WALANG PIPILING ULIT!
+  }
+};
 </script>
 </body>
 </html>
