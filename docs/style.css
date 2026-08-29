@@ -1,4 +1,70 @@
 /* ==========================================
+   🎨 MGA ICON — NAKATAGO SA CSS
+   Hindi na masisira kapag nag-patch!
+   ========================================== */
+
+/* ---- Login ---- */
+.icon-login::before           { content: "🔑"; }
+.icon-session::before         { content: "⏰"; }
+
+/* ---- Panel ---- */
+.icon-locked::before          { content: "🔐"; }
+.icon-download::before        { content: "📥"; }
+.icon-upload::before          { content: "📤"; }
+.icon-refresh::before         { content: "🔄"; }
+.icon-save::before            { content: "💾"; }
+.icon-preview::before          { content: "👁️"; }
+.icon-settings::before        { content: "⚙️"; }
+.icon-logout::before          { content: "🚪"; }
+.icon-password::before         { content: "🔁"; }
+.icon-clear::before            { content: "🗑️"; }
+.icon-cache::before             { content: "🧹"; }
+.icon-github::before            { content: "🐙"; }
+.icon-info::before              { content: "ℹ️"; }
+.icon-warning::before            { content: "⚠️"; }
+.icon-success::before           { content: "✅"; }
+.icon-error::before             { content: "❌"; }
+.icon-pending::before           { content: "⏳"; }
+.icon-sync::before              { content: "🔄"; }
+
+/* ---- Pahina ---- */
+.icon-home::before              { content: "🏠"; }
+.icon-page::before              { content: "📄"; }
+.icon-admin::before             { content: "🔐"; }
+.icon-setup::before             { content: "⚙️"; }
+.icon-style::before             { content: "🎨"; }
+
+/* ---- Nilalaman ---- */
+.icon-alak::before              { content: "🍺"; }
+.icon-sigarilyo::before         { content: "🚬"; }
+.icon-shabu::before             { content: "💊"; }
+.icon-heroin::before            { content: "💉"; }
+.icon-marijuana::before         { content: "🌿"; }
+.icon-ecstasy::before           { content: "💜"; }
+.icon-cocaine::before           { content: "❄️"; }
+.icon-inject::before             { content: "💉"; }
+.icon-tuklaw::before             { content: "⚠️"; }
+.icon-sugal::before              { content: "🎰"; }
+.icon-inhalant::before           { content: "🫁"; }
+.icon-medicine::before           { content: "💊"; }
+.icon-lsd::before                { content: "✨"; }
+.icon-ketamine::before            { content: "🧪"; }
+.icon-dice::before                { content: "🎲"; }
+.icon-game::before                { content: "🎮"; }
+.icon-food::before                { content: "🍔"; }
+.icon-vape::before                { content: "💨"; }
+
+/* ---- Estilo ng Icon ---- */
+[class^="icon-"]::before,
+[class*=" icon-"]::before {
+  display: inline-block;
+  margin-right: 6px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+
+/* ==========================================
    GLOBAL / PANGKALAHATANG ESTILO
    ========================================== */
 * {
