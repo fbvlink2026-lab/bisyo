@@ -8,14 +8,15 @@
 </head>
 <body>
 
-<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+<div class="panel-card" style="max-width: 600px; margin: 2rem auto; padding: 24px;">
   <h1 style="color:#b91c1c; font-size:22px; margin-bottom:4px;">🔧 Pag-setup ng GitHub Token</h1>
-  <p style="color:#6b7280; margin-bottom:24px;">I-encrypt ang iyong Token gamit ang password mula sa Admin Panel.</p>
+  <p style="color:#6b7280; margin-bottom:24px;">I-encrypt at i-upload — iisang Token lang ang ilalagay mo.</p>
 
-  <div id="status"></div>
+  <div id="status" class="status hidden"></div>
   <div id="debug-info" class="debug-box hidden"></div>
 
   <label>🔑 GitHub Personal Access Token:</label>
+  <!-- ✅ DITO ILALAGAY — ITO NA RIN ANG GAGAMITIN SA PAG-UPLOAD! -->
   <input type="text" id="new-token" placeholder="ghp_xxxxxxxxxxxx..." style="font-family:monospace;">
 
   <label>🔒 Admin Password:</label>
@@ -23,21 +24,21 @@
   <p class="note" id="pass-note">✅ Kinuha mula sa session — hindi na kailangang ilagay muli</p>
 
   <div style="margin-top: 20px;">
-    <button class="btn-primary" onclick="processToken()">🔐 I-encrypt at Ihanda</button>
-    <button class="btn-secondary" onclick="window.location.href='admin.html'">⬅️ Bumalik sa Admin</button>
+    <button class="btn btn-primary" onclick="processToken()">🔐 I-encrypt at Ihanda</button>
+    <button class="btn btn-secondary" onclick="window.location.href='admin.html'">⬅️ Bumalik sa Admin</button>
   </div>
 
   <div id="result-box" class="hidden" style="margin-top:24px;">
     <h3 style="font-size:17px; margin-bottom:8px;">✅ Handa na — Kopyahin ang linyang ito:</h3>
     <pre id="token-line"></pre>
-    <p style="font-size:14px; color:#6b7280; margin:8px 0;">I-paste ito sa <code>admin.html</code> kapalit ng lumang <code>PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN</code></p>
-    <button class="btn-primary" onclick="copyLine()">📋 Kopyahin</button>
+    <p style="font-size:14px; color:#6b7280; margin:8px 0;">I-paste ito sa <code>admin.html</code> kapalit ng lumang linya</p>
+    <button class="btn btn-primary" onclick="copyLine()">📋 Kopyahin</button>
   </div>
 
   <div id="verify-section" class="hidden" style="margin-top:24px;">
     <h3 style="font-size:17px;">📤 I-upload sa GitHub</h3>
-    <p style="font-size:14px; color:#6b7280;">Pindutin para direktang palitan ang halaga sa admin.html sa GitHub:</p>
-    <button class="btn-primary" onclick="uploadToGitHub()">🔄 I-update ang admin.html</button>
+    <p style="font-size:14px; color:#6b7280;">Gamit ang token na nasa itaas — hindi na hihingi ulit!</p>
+    <button class="btn btn-primary" onclick="uploadToGitHub()">🔄 I-update ang admin.html</button>
     <div id="verify-status"></div>
   </div>
 </div>
@@ -48,15 +49,13 @@ const REPO_NAME = "bisyo";
 const BRANCH = "main";
 const ADMIN_HTML_PATH = "app/src/main/assets/admin.html";
 
-// ✅ TUMUGMA SA SESSION NG ADMIN.HTML — parehong susi!
 const SESSION_STORAGE_KEY = "bisyo_session_data";
 const PASSWORD_MEMORY_KEY = "bisyo_last_password";
 
 let encryptedTokenValue = null;
 
-// ========== SESSION CHECK — KUKUNIN ANG PASSWORD MULA SA ADMIN ==========
+// ========== KUNIN ANG PASSWORD MULA SA SESSION ==========
 function getAdminPassword() {
-  // ✅ Kumuha mula sa session — parehong paraan tulad ng sa admin.html
   let sessionData = null;
   let src = localStorage.getItem(SESSION_STORAGE_KEY);
   if(src) sessionData = JSON.parse(src);
@@ -66,15 +65,13 @@ function getAdminPassword() {
   }
   if(!sessionData) return null;
 
-  // Suriin kung hindi pa lumilipas ang oras
   const elapsed = Date.now() - sessionData.loginTime;
   if(elapsed >= sessionData.durationMs) return null;
 
-  // ✅ Kumuha ng password mula sa naalala
   return localStorage.getItem(PASSWORD_MEMORY_KEY);
 }
 
-// ========== PAGBUKAS NG PAHINA — AWTO PUPUNAN ANG PASSWORD ==========
+// ========== AWTO PUPUNAN ANG PASSWORD ==========
 window.addEventListener('DOMContentLoaded', () => {
   const pass = getAdminPassword();
   if(pass) {
@@ -82,9 +79,8 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('pass-note').textContent = '✅ Kinuha mula sa session — handa nang gamitin';
     document.getElementById('pass-note').style.color = '#16a34a';
   } else {
-    document.getElementById('pass-note').textContent = '⚠️ Walang nahanap na password — ilagay nang manu-mano o bumalik sa Admin at mag-login muli.';
+    document.getElementById('pass-note').textContent = '⚠️ Ilagay ang password o bumalik sa Admin at mag-login muli.';
     document.getElementById('pass-note').style.color = '#d97706';
-    showStatus('⚠️ Hindi awtomatikong nakuha — ilagay ang password o bumalik sa Admin', 'warning');
   }
 });
 
@@ -92,7 +88,6 @@ function showDebug(msg) {
   const dbg = document.getElementById('debug-info');
   dbg.classList.remove('hidden');
   dbg.innerHTML = `<strong>🔍 Detalye:</strong> ${msg}`;
-  console.log('DEBUG:', msg);
 }
 
 function showStatus(text, type) {
@@ -101,58 +96,44 @@ function showStatus(text, type) {
   s.className = 'status ' + type;
 }
 
-// ========== ENCRYPTION — TUMUGMA SA ADMIN.HTML ==========
+// ========== ENCRYPTION ==========
 async function deriveKey(password) {
-  try {
-    showDebug('Hinahanda ang susi...');
-    const encoder = new TextEncoder();
-    const salt = encoder.encode("BisyoSalt2026"); // ✅ PAREHONG ASIN!
+  const encoder = new TextEncoder();
+  const salt = encoder.encode("BisyoSalt2026");
 
-    const keyMaterial = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(password),
-      { name: 'PBKDF2' },
-      false,
-      ['deriveKey']
-    );
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
 
-    return await crypto.subtle.deriveKey(
-      { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
-      keyMaterial,
-      { name: 'AES-GCM', length: 256 },
-      false,
-      ['encrypt']
-    );
-  } catch (e) {
-    showDebug(`Error sa susi: ${e.name} — ${e.message}`);
-    throw e;
-  }
+  return await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt']
+  );
 }
 
 async function encryptToken(token, password) {
-  try {
-    showDebug('Sinisimulan ang pag-encrypt...');
-    const key = await deriveKey(password);
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoder = new TextEncoder();
-    const encrypted = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv: iv },
-      key,
-      encoder.encode(token)
-    );
-    // ✅ IV + NILALAMAN — PAREHONG PORMAT SA DECRYPT
-    const combined = new Uint8Array(iv.length + encrypted.byteLength);
-    combined.set(iv);
-    combined.set(new Uint8Array(encrypted), iv.length);
-    showDebug('✅ Tapos na ang pag-encrypt!');
-    return btoa(String.fromCharCode(...combined));
-  } catch (e) {
-    showDebug(`Encrypt Error: ${e.name} — ${e.message}`);
-    throw e;
-  }
+  const key = await deriveKey(password);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoder = new TextEncoder();
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv },
+    key,
+    encoder.encode(token)
+  );
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  return btoa(String.fromCharCode(...combined));
 }
 
-// ========== PANGUNAHING PROSESO ==========
+// ========== PROSESO ==========
 async function processToken() {
   const token = document.getElementById('new-token').value.trim();
   const password = document.getElementById('admin-pass').value;
@@ -180,7 +161,7 @@ async function processToken() {
   }
 }
 
-// ========== KOPYA NG RESULTA ==========
+// ========== KOPYA ==========
 function copyLine() {
   const line = document.getElementById('token-line').textContent;
   navigator.clipboard.writeText(line).then(() => {
@@ -196,35 +177,32 @@ function copyLine() {
   });
 }
 
-// ========== I-UPLOAD DIRETSO SA GITHUB ==========
+// ========== ✅ I-UPLOAD — KUNIN SA ITAAS, HINDI NA HIHINGI ULIT! ==========
 async function uploadToGitHub() {
-  const password = document.getElementById('admin-pass').value;
-  if (!encryptedTokenValue) return showStatus('❌ Walang naka-encrypt na Token — i-click muna ang "I-encrypt"', 'error');
+  if (!encryptedTokenValue) return showStatus('❌ I-click muna ang "I-encrypt" bago mag-upload', 'error');
 
-  const GITHUB_TOKEN = prompt('🔑 Ipasok ang iyong GitHub Personal Access Token para sa pag-upload:');
-  if (!GITHUB_TOKEN) return;
+  // ✅ KUNIN DIREKTA SA INPUT BOX — NANDYAN NA! WALA NANG PROMPT!
+  const GITHUB_TOKEN = document.getElementById('new-token').value.trim();
+  
+  if (!GITHUB_TOKEN) return showStatus('❌ Walang Token — ilagay muna sa itaas', 'error');
 
   const statusBox = document.getElementById('verify-status');
   statusBox.innerHTML = '<p>⏰ Kinukuha ang kasalukuyang admin.html...</p>';
 
   try {
-    // Kunin ang kasalukuyang file
     const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ADMIN_HTML_PATH}`, {
       headers: { Authorization: `token ${GITHUB_TOKEN}` }
     });
-    if (!getRes.ok) throw new Error(`Hindi makuha ang file: HTTP ${getRes.status}`);
+    if (!getRes.ok) throw new Error(`HTTP ${getRes.status}`);
     const fileData = await getRes.json();
     let content = atob(fileData.content.replace(/-/g, '+').replace(/_/g, '/'));
 
-    // ✅ PALITAN LANG ANG TIYAK NA LÍNEA — HUWAG BAGUHIN ANG IBA!
     const oldPattern = /const ENCRYPTED_TOKEN = ".*?";/;
-    if (!oldPattern.test(content)) {
-      throw new Error('❌ Hindi mahanap ang linyang ENCRYPTED_TOKEN — baka nabago na ang format');
-    }
+    if (!oldPattern.test(content)) throw new Error('❌ Hindi mahanap ang linyang ENCRYPTED_TOKEN');
+    
     const newLine = `const ENCRYPTED_TOKEN = "${encryptedTokenValue}";`;
     content = content.replace(oldPattern, newLine);
 
-    // ✅ I-upload pabalik — UTF-8 ligtas
     const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ADMIN_HTML_PATH}`, {
       method: 'PUT',
       headers: {
@@ -240,12 +218,12 @@ async function uploadToGitHub() {
     });
 
     if (putRes.ok) {
-      statusBox.innerHTML = `<div class="check-result updated">✅ Matagumpay na na-update sa GitHub!<br>Handa na — hindi na kailangang baguhin hangga't hindi napapalitan ang password o Token.</div>`;
+      statusBox.innerHTML = `<div class="check-result updated">✅ Matagumpay! Na-update na sa GitHub — hindi ka na tinanong ulit!</div>`;
     } else {
       throw new Error(`HTTP ${putRes.status}`);
     }
   } catch (err) {
-    statusBox.innerHTML = `<div class="check-result missing">❌ Nabigo: ${err.message}<br>💡 Gamitin na lang ang "Kopyahin" at i-paste nang manu-mano sa admin.html.</div>`;
+    statusBox.innerHTML = `<div class="check-result missing">❌ Nabigo: ${err.message}<br>💡 Kopyahin na lang at i-paste nang manu-mano.</div>`;
   }
 }
 </script>
