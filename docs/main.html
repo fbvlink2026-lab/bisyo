@@ -4,138 +4,149 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<style>
-.download-section{background:linear-gradient(135deg,#b91c1c,#dc2626);color:white;border-radius:14px;padding:22px;margin:16px;box-shadow:0 4px 12px rgba(185,28,28,.25);transition:opacity 0.3s ease}
-.download-section.hidden{display:none !important}
-.download-title{font-size:19px;font-weight:bold;margin-bottom:6px}
-.download-sub{font-size:14px;opacity:.9;margin-bottom:16px}
-.download-btn{display:inline-flex;align-items:center;gap:8px;background:white;color:#b91c1c;font-weight:bold;padding:12px 24px;border-radius:10px;text-decoration:none;box-shadow:0 3px 8px rgba(0,0,0,.12);border:none;cursor:pointer;font-size:16px}
-.download-btn:disabled{opacity:0.6;cursor:not-allowed}
-.download-btn:active{transform:scale(0.97)}
-.download-info{margin-top:14px;font-size:13px;line-height:1.8;opacity:0.9}
-.offline-note{background:#fef3c7;border:1px solid #fcd34d;border-radius:14px;padding:20px;margin:16px;color:#78350f}
 
-.progress-container{margin-top:16px;background:rgba(255,255,255,0.2);border-radius:10px;height:24px;overflow:hidden;display:none}
-.progress-bar{height:100%;background:#ffffff;border-radius:10px 0 0 10px;width:0%;transition:width 0.3s ease;display:flex;align-items:center;justify-content:center;color:#b91c1c;font-weight:bold;font-size:13px}
-.progress-text{margin-top:8px;font-size:14px;opacity:0.9;display:none}
-
-.dialog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999}
-.dialog-box{background:white;border-radius:16px;padding:24px;margin:24px;max-width:340px;color:#1f2937;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
-.dialog-title{font-size:20px;font-weight:bold;color:#b91c1c;margin-bottom:12px}
-.dialog-body{font-size:15px;line-height:1.6;margin-bottom:20px;color:#374151}
-.dialog-buttons{display:flex;gap:10px;justify-content:flex-end}
-.dialog-btn{padding:10px 20px;border-radius:8px;font-weight:bold;border:none;cursor:pointer;font-size:15px}
-.dialog-btn-cancel{background:#e5e7eb;color:#374151}
-.dialog-btn-confirm{background:#dc2626;color:white}
-
-.info-section{background:white;border-radius:14px;padding:20px;margin:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.info-section h2{font-size:18px;color:#b91c1c;margin:0 0 12px 0;border-left:3px solid #dc2626;padding-left:10px}
-.info-section p{font-size:15px;line-height:1.7;color:#374151;margin:0 0 10px}
-.info-section ul{margin:0 0 14px 0;padding-left:22px}
-.info-section li{font-size:15px;line-height:1.7;color:#374151;margin-bottom:6px}
-.divider{height:1px;background:#e5e7eb;margin:20px 0}
-.header{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;padding:20px 16px;box-shadow:0 3px 8px rgba(0,0,0,.15)}
-.header h1{font-size:20px;margin:0}
-.header p{font-size:14px;opacity:0.85;margin:4px 0 0 0}
-
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px 16px}
-.btn{display:flex;flex-direction:column;align-items:center;background:white;border-radius:12px;padding:16px 8px;text-decoration:none;box-shadow:0 2px 6px rgba(0,0,0,.08);border:1px solid #e5e7eb}
-.btn:active{transform:scale(0.97);background:#fef2f2}
-.num{width:36px;height:36px;line-height:36px;text-align:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;margin-bottom:6px}
-.txt{font-size:14px;color:#1f2937;text-align:center}
-.hidden{display:none !important}
-
-.admin-link{text-align:center;padding:16px 16px 24px 16px}
-.admin-link a{color:#6b7280;font-size:14px;text-decoration:none;opacity:0.7;transition:opacity 0.2s}
-.admin-link a:hover{opacity:1;color:#b91c1c}
-
-.section-title{font-size:18px;color:#b91c1c;margin:20px 16px 8px 16px;padding-bottom:4px;border-bottom:2px solid #fca5a5}
-.loading-text{text-align:center;padding:30px;color:#6b7280}
-</style>
 <script>
 const GITHUB_API_URL = "https://api.github.com/repos/fbvlink2026-lab/bisyo/contents/docs";
 const RAW_BASE_URL = "https://github.com/fbvlink2026-lab/bisyo/raw/main/docs/";
+
+// ✅ BERSYON — KUSANG KUKUHA MULA SA GITHUB
+const VERSION_FILE_URL = "https://raw.githubusercontent.com/fbvlink2026-lab/bisyo/main/version.txt";
+const VERSION_CACHE_KEY = "bisyo_cached_version";
+const DEFAULT_VERSION = "v1.0";
+
+// ✅ SABAY NA SA AYOS MULA SA ADMIN-ORDER.HTML
+const ORDER_KEY = "bisyo_page_order";
+const ALL_PAGES_KEY = "bisyo_all_pages";
+
 let foundApk = null, downloadUrl = null;
 let gotProgressFromApp = false;
 
 // ==================================================
-// ✅ KUSANG BUMUO NG LISTAHAN NG MGA PAHINA
-// HINDI NA HARDCODED — BASTA NASA pages/, LALABAS
+// ✅ BATAYANG LISTAHAN — HINDI NA HARDCODED ANG AYOS
 // ==================================================
-
-// 📋 Batayang Listahan — mga kilalang pahina at pagkakasunod-sunod
 const BASE_PAGES = [
-  {id:"alak",           name:"Alak",                desc:"Labis na pag-inom at epekto", group:"bisyo", num:1},
-  {id:"sigarilyo",      name:"Sigarilyo",           desc:"Paninigarilyo at panganib", group:"bisyo", num:2},
-  {id:"shabu",          name:"Shabu",               desc:"Karahasan at pagkasira ng isip", group:"bisyo", num:3},
-  {id:"heroin",         name:"Heroin",              desc:"Matinding pagkalulong at panganib", group:"bisyo", num:4},
-  {id:"marijuana",      name:"Marijuana",           desc:"Epekto sa pag-iisip at katawan", group:"bisyo", num:5},
-  {id:"ecstasy",        name:"Ecstasy",             desc:"Panganib sa kapistahan at pag-iisip", group:"bisyo", num:6},
-  {id:"cocaine",        name:"Cocaine",             desc:"Pagkagumon at panganib sa puso", group:"bisyo", num:7},
-  {id:"tinuturok-gamot",name:"Tinuturok na Gamot",   desc:"Pinakamapanganib na paraan ng paggamit", group:"bisyo", num:8},
-  {id:"tuklaw",         name:"Tuklaw / Pagkalulong", desc:"Paano nabubihag at paano makakalaya", group:"bisyo", num:9},
-  {id:"sugal",          name:"Sugal",               desc:"Pagkawala ng kabuhayan at pamilya", group:"bisyo", num:10},
-  {id:"inhalants",      name:"Inhalants",           desc:"Mabilisang pagkasira ng utak at baga", group:"bisyo", num:11},
-  {id:"pag-aabuso-gamot",name:"Pag-aabuso sa Gamot", desc:"Hindi lamang bawal na gamot — pati reseta", group:"bisyo", num:12},
-  {id:"lsd",            name:"LSD",                 desc:"Pagbabago sa paningin at pag-iisip", group:"bisyo", num:13},
-  {id:"ketamine",       name:"Ketamine",            desc:"Panganib at maling paggamit", group:"bisyo", num:14},
-  {id:"ibang-sugal",    name:"Ibang Uri ng Sugal",  desc:"Lotto, sabong, online — lahat ay panganib", group:"bisyo", num:15},
-  {id:"internet-laro",  name:"Internet / Laro",      desc:"Pagkalulong sa oras at isipan", group:"bisyo", num:16},
-  {id:"labis-pagkain",  name:"Labis na Pagkain",     desc:"Pagkain bilang pampalubag-loob", group:"bisyo", num:17},
-  {id:"vaping",         name:"Vaping",              desc:"Hindi ligtas — pati usok ay lason", group:"bisyo", num:18},
-  {id:"aral-sa-bibliya",name:"Aral mula sa Bibliya", desc:"Pag-asa at lakas laban sa bisyo", group:"extra", num:null}
+  {id:"alak",           name:"Alak",                desc:"Labis na pag-inom at epekto", group:"bisyo", num:1, file:"alak.html", folder:"pages/"},
+  {id:"sigarilyo",      name:"Sigarilyo",           desc:"Paninigarilyo at panganib", group:"bisyo", num:2, file:"sigarilyo.html", folder:"pages/"},
+  {id:"shabu",          name:"Shabu",               desc:"Karahasan at pagkasira ng isip", group:"bisyo", num:3, file:"shabu.html", folder:"pages/"},
+  {id:"heroin",         name:"Heroin",              desc:"Matinding pagkalulong at panganib", group:"bisyo", num:4, file:"heroin.html", folder:"pages/"},
+  {id:"marijuana",      name:"Marijuana",           desc:"Epekto sa pag-iisip at katawan", group:"bisyo", num:5, file:"marijuana.html", folder:"pages/"},
+  {id:"ecstasy",        name:"Ecstasy",             desc:"Panganib sa kapistahan at pag-iisip", group:"bisyo", num:6, file:"ecstasy.html", folder:"pages/"},
+  {id:"cocaine",        name:"Cocaine",             desc:"Pagkagumon at panganib sa puso", group:"bisyo", num:7, file:"cocaine.html", folder:"pages/"},
+  {id:"tinuturok-gamot",name:"Tinuturok na Gamot",   desc:"Pinakamapanganib na paraan ng paggamit", group:"bisyo", num:8, file:"tinuturok-gamot.html", folder:"pages/"},
+  {id:"tuklaw",         name:"Tuklaw / Pagkalulong", desc:"Paano nabubihag at paano makakalaya", group:"bisyo", num:9, file:"tuklaw.html", folder:"pages/"},
+  {id:"sugal",          name:"Sugal",               desc:"Pagkawala ng kabuhayan at pamilya", group:"bisyo", num:10, file:"sugal.html", folder:"pages/"},
+  {id:"inhalants",      name:"Inhalants",           desc:"Mabilisang pagkasira ng utak at baga", group:"bisyo", num:11, file:"inhalants.html", folder:"pages/"},
+  {id:"pag-aabuso-gamot",name:"Pag-aabuso sa Gamot", desc:"Hindi lamang bawal na gamot — pati reseta", group:"bisyo", num:12, file:"pag-aabuso-gamot.html", folder:"pages/"},
+  {id:"lsd",            name:"LSD",                 desc:"Pagbabago sa paningin at pag-iisip", group:"bisyo", num:13, file:"lsd.html", folder:"pages/"},
+  {id:"ketamine",       name:"Ketamine",            desc:"Panganib at maling paggamit", group:"bisyo", num:14, file:"ketamine.html", folder:"pages/"},
+  {id:"ibang-sugal",    name:"Ibang Uri ng Sugal",  desc:"Lotto, sabong, online — lahat ay panganib", group:"bisyo", num:15, file:"ibang-sugal.html", folder:"pages/"},
+  {id:"internet-laro",  name:"Internet / Laro",      desc:"Pagkalulong sa oras at isipan", group:"bisyo", num:16, file:"internet-laro.html", folder:"pages/"},
+  {id:"labis-pagkain",  name:"Labis na Pagkain",     desc:"Pagkain bilang pampalubag-loob", group:"bisyo", num:17, file:"labis-pagkain.html", folder:"pages/"},
+  {id:"vaping",         name:"Vaping",              desc:"Hindi ligtas — pati usok ay lason", group:"bisyo", num:18, file:"vaping.html", folder:"pages/"},
+  {id:"aral-sa-bibliya",name:"Aral mula sa Bibliya", desc:"Pag-asa at lakas laban sa bisyo", group:"extra", num:null, file:"aral-sa-bibliya.html", folder:"pages/"}
 ];
 
-let dynamicPages = [];
+// ✅ BERSYON — KUSANG KUKUHA
+function getCachedVersion() {
+  return localStorage.getItem(VERSION_CACHE_KEY) || DEFAULT_VERSION;
+}
+async function fetchLatestVersion() {
+  if (!isOnline()) return getCachedVersion();
+  try {
+    const res = await fetch(VERSION_FILE_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Hindi mabasa");
+    const versionText = (await res.text()).trim();
+    if (versionText) {
+      localStorage.setItem(VERSION_CACHE_KEY, versionText);
+      return versionText;
+    }
+    return DEFAULT_VERSION;
+  } catch {
+    return getCachedVersion();
+  }
+}
+async function updateVersionDisplay() {
+  const version = await fetchLatestVersion();
+  document.querySelectorAll(".version-display").forEach(el => el.textContent = version);
+}
 
-// ✅ Kumuha ng lahat ng .html mula sa pages/ sa GitHub
+// ✅ Kumuha ng lahat ng pahina — kasama ang mga idinagdag mula sa Admin
+function getAllPages() {
+  const stored = localStorage.getItem(ALL_PAGES_KEY);
+  let list = BASE_PAGES.slice();
+  if (stored) {
+    try {
+      const extra = JSON.parse(stored);
+      extra.forEach(p => {
+        if (!list.find(x => x.id === p.id)) list.push(p);
+      });
+    } catch {}
+  }
+  return list;
+}
+
+// ✅ BASAHIN ANG AYOS MULA SA ADMIN-ORDER.HTML
+function getPageOrder() {
+  const s = localStorage.getItem(ORDER_KEY);
+  if (s) {
+    try {
+      const savedOrder = JSON.parse(s);
+      const allPages = getAllPages();
+      return savedOrder.filter(id => allPages.find(p => p.id === id));
+    } catch {}
+  }
+  return getAllPages().map(p => p.id);
+}
+
+// ✅ Kumuha ng lahat ng .html mula sa pages/ sa GitHub — KUNG ONLINE
 async function fetchPagesFromGitHub() {
-  if (!isOnline()) return BASE_PAGES;
+  if (!isOnline()) return getAllPages();
   try {
     const res = await fetch(GITHUB_API_URL + "/pages", { cache: "no-store" });
     if (!res.ok) throw new Error("Hindi mabasa");
     const files = await res.json();
     const htmlFiles = files.filter(f => f.name.endsWith(".html"));
 
-    // ✅ Ipagmalaki ang mga bago — hindi nasa BASE_PAGES
-    const knownIds = BASE_PAGES.map(p => p.id);
-    const newPages = [];
+    const knownIds = getAllPages().map(p => p.id);
     htmlFiles.forEach(f => {
       const id = f.name.replace(".html", "");
       if (!knownIds.includes(id)) {
-        newPages.push({
+        BASE_PAGES.push({
           id: id,
           name: id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
           desc: "Karagdagang pahina",
           group: "bisyo",
-          num: null
+          num: null,
+          file: f.name,
+          folder: "pages/"
         });
       }
     });
-    dynamicPages = newPages;
-    return [...BASE_PAGES, ...newPages];
+    return getAllPages();
   } catch(e) {
-    console.log("Gamit ang batayang listahan:", e);
-    return BASE_PAGES;
+    console.log("Gamit ang lokal na listahan:", e);
+    return getAllPages();
   }
 }
 
-// ✅ Buuin ang mga buton — kusang lalabas ang lahat
+// ✅ BUUIN ANG MGA BUTON — SUNOD SA AYOS MULA SA ADMIN-ORDER.HTML
 async function buildPageGrids() {
   const allPages = await fetchPagesFromGitHub();
+  const order = getPageOrder();
   const bisyoGrid = document.getElementById("bisyo-grid");
   const extraGrid = document.getElementById("extra-grid");
 
   bisyoGrid.innerHTML = "";
   extraGrid.innerHTML = "";
 
-  let bisyoCount = 1;
-  allPages.forEach(page => {
+  order.forEach(pageId => {
+    const page = allPages.find(p => p.id === pageId);
+    if (!page) return;
+
     const container = page.group === "extra" ? extraGrid : bisyoGrid;
-    if (container === bisyoGrid && !page.num) page.num = bisyoCount++;
 
     const a = document.createElement("a");
-    a.href = `pages/${page.id}.html`;
+    a.href = `${page.folder || 'pages/'}${page.file || page.id + '.html'}`;
     a.className = "btn";
     a.innerHTML = `
       <span class="num">${page.num || '✦'}</span>
@@ -144,13 +155,12 @@ async function buildPageGrids() {
     container.appendChild(a);
   });
 
-  // ✅ Itago ang bahaging "Karagdagang Pahina" kung wala naman
   document.getElementById("extra-section").style.display =
     extraGrid.children.length > 0 ? "block" : "none";
 }
 
 // ==================================================
-// PAG-DOWNLOAD AT IBA PANG TUNGKULIN — HINDI NABAGO
+// PAG-DOWNLOAD AT IBA PANG TUNGKULIN
 // ==================================================
 
 function isOnline() { return navigator.onLine; }
@@ -260,8 +270,9 @@ async function startDownload() {
 window.onload = async function() {
   updateDownloadVisibility();
 
-  // ✅ Kusang buuin ang listahan ng pahina
+  // ✅ BASAHIN ANG AYOS AT BERSYON — KUSANG SUSUNOD
   await buildPageGrids();
+  await updateVersionDisplay(); // ✅ I-UPDATE ANG BERSYON AGAD
 
   if (!isOnline()) return;
   const btn = document.getElementById("download-apk-btn");
@@ -309,7 +320,7 @@ window.addEventListener("offline", updateDownloadVisibility);
   </div>
 
   <div class="download-info">
-    📦 Bersyon: <strong>v1.0</strong> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
+    📦 Bersyon: <strong class="version-display">v1.0</strong> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
     📱 Kinakailangan: Android 7.0 (API 24) o mas bagong bersyon<br>
     ✅ Libre — Walang Patalastas — Walang Karagdagang Bayad<br>
     📇 Opisyal — Proyekto ni Mark Jann Tampok
@@ -339,7 +350,7 @@ window.addEventListener("offline", updateDownloadVisibility);
   <ul>
     <li><strong>Mga Bisyo:</strong> Alak hanggang Vaping — 18 pangunahing paksa</li>
     <li><strong>Karagdagang Pahina:</strong> Aral mula sa Bibliya at iba pa</li>
-    <li><strong>Bagong Pahina:</strong> Awtomatikong lalabas dito kapag ginawa sa Admin Panel</li>
+    <li><strong>Bagong Pahina:</strong> Awtomatikong lalabas dito kapag isinama sa listahan sa Admin Panel</li>
   </ul>
 
   <div class="divider"></div>
@@ -359,13 +370,11 @@ window.addEventListener("offline", updateDownloadVisibility);
   <h2>📖 Mga Pahina — Basahin Dito</h2>
 </div>
 
-<!-- ✅ KUSANG LILIKHAIN — HINDI NA HARDCODED -->
 <h3 class="section-title">Mga Uri ng Bisyo</h3>
 <div class="grid" id="bisyo-grid">
   <div class="loading-text">Naglo-load...</div>
 </div>
 
-<!-- ✅ KARAGDAGANG PAHINA — KUSANG LALABAS KUNG MAYROON -->
 <div id="extra-section" style="display:none">
   <h3 class="section-title">Karagdagang Impormasyon</h3>
   <div class="grid" id="extra-grid"></div>
