@@ -4,846 +4,281 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>Admin Panel - Mga Ilegal na Bisyo</title>
+<title>Admin — Dashboard</title>
 </head>
 <body>
-<a href="main.html" class="back">← Bumalik sa Listahan</a>
-<div id="login-form" class="login-container">
-  <div class="login-title"><span class="icon-login"></span> Pag-login</div>
-  <div class="error" id="login-error"></div>
 
-  <label>Password ng Admin:</label>
-  <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
-
-  <div class="session-setting">
-    <label><span class="icon-session"></span> Tagal ng Session:</label>
-    <div style="display:flex;align-items:center;gap:8px">
-      <input type="number" id="session-minutes" value="30" min="1" max="480">
-      <span>minuto</span>
-    </div>
-    <small>Ilagay ang gusto mong oras bago kusa mag-logout (1-480 minuto)</small>
-  </div>
-
-  <label style="display:flex;align-items:center;gap:8px;margin:8px 0 12px 0;cursor:pointer">
-    <input type="checkbox" id="keep-logged-in" checked>
-    <span class="icon-remember"></span> Tandaan ang session
-  </label>
-
-  <button class="btn btn-primary" style="width:100%" onclick="doLogin()"><span class="icon-login"></span> Mag-login</button>
-  <p style="text-align:center;margin-top:12px;font-size:13px;color:#6b7280">
-    <span class="icon-info-note"></span> Ang password ay HINDI naiimbak — kailangan lang kapag magse-save sa GitHub.
-  </p>
-</div>
-
-<div id="admin-panel" class="panel hidden">
-  <div class="panel-card">
-    <div class="top-bar">
-      <div>
-        <span><strong><span class="icon-locked"></span> Naka-login na — Lokal na Mode</strong> <span id="token-status" style="background:#d97706;color:white;padding:2px 8px;border-radius:10px;font-size:12px">Walang Token — Magbasa Lang</span></span>
-        <span id="session-countdown" style="margin-left:12px;font-size:14px;color:#6b7280"></span>
-      </div>
-      <div class="status-bar">
-        <span><span id="conn-dot" class="status-dot"></span><span id="conn-label">—</span></span>
-        <span><span id="sync-dot" class="status-dot dot-saved"></span><span id="sync-label">Lokal</span></span>
-      </div>
-    </div>
-
-    <div style="margin-top:12px;padding:10px;background:rgba(0,0,0,0.05);border-radius:8px">
-      <div style="font-weight:bold;margin-bottom:8px;font-size:14px"><span class="icon-folder"></span> Pinagmulan at Paglilinis</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        <button class="btn btn-sm btn-secondary" onclick="clearCache()"><span class="icon-cache"></span> I-clear ang Cache</button>
-        <button class="btn btn-sm btn-secondary" onclick="clearLocalChanges()"><span class="icon-clear"></span> Burahin Lokal na Pagbabago</button>
-        <button class="btn btn-sm btn-success" onclick="refreshFromGitHub()"><span class="icon-refresh"></span> Kumuha Mula sa GitHub</button>
-        <button class="btn btn-sm btn-secondary" onclick="loadFromLocal()"><span class="icon-page"></span> Gamitin Lokal na Kopya</button>
-      </div>
-    </div>
-
-    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-sm btn-primary" onclick="openNewPageModal()"><span class="icon-add"></span> ➕ Bagong Pahina</button>
-      <button class="btn btn-sm btn-secondary" onclick="window.open('setup-token.html','_self')"><span class="icon-settings"></span> Setup Token</button>
-      <button class="btn btn-sm btn-success" onclick="refreshSession()"><span class="icon-refresh"></span> Palawakin ang Session</button>
-      <button class="btn btn-sm btn-warning" onclick="openChangePasswordModal()"><span class="icon-password"></span> Palitan ang Password</button>
-      <button class="btn btn-sm btn-secondary" onclick="doLogout()"><span class="icon-logout"></span> Mag-logout</button>
-    </div>
-  </div>
-
-  <!-- ✅ BAGONG BAHAGI: AYUSIN ANG PAGKAKASUNOD-SUNOD SA MAIN.HTML -->
-  <div class="panel-card">
-    <div class="panel-title">
-      <span class="icon-order"></span> 🔢 Ayusin ang Pagkakasunod-sunod sa Main.html
-    </div>
-    <p style="color:#6b7280;font-size:14px;margin:0 0 12px 0">Pindutin ang ⬆️ ⬇️ para ilipat ang pwesto — kusang makikita agad sa main.html</p>
-    <div id="order-list"></div>
-    <div style="margin-top:12px">
-      <button class="btn btn-sm btn-success" onclick="savePageOrder()">💾 I-save ang Ayos</button>
-      <span id="order-status" style="margin-left:10px;color:#16a34a;display:none">✅ Nai-save na!</span>
-      <button class="btn btn-sm btn-secondary" style="margin-left:8px" onclick="resetPageOrder()">↩️ Ibalik sa Orihinal</button>
-    </div>
-  </div>
-
-  <div id="pending-section" class="pending-section hidden">
-    <div class="pending-title"><span class="icon-pending"></span> Hindi pa nai-sync sa GitHub</div>
-    <div id="pending-list"></div>
-    <div style="margin-top:8px">
-      <button class="btn btn-sm btn-success" onclick="syncAllPending()"><span class="icon-refresh"></span> I-sync Lahat</button>
-      <button class="btn btn-sm btn-secondary" onclick="clearAllPending()"><span class="icon-clear"></span> Burahin Lahat</button>
-    </div>
-  </div>
-
-  <div class="panel-card">
-    <div class="panel-title">
-      <span class="icon-page"></span> Mga Pahina — Pumili para I-edit
-      <span id="last-saved-info" class="last-saved"></span>
-    </div>
-    <div class="page-list" id="page-list"></div>
-  </div>
-
-  <div class="panel-card">
-    <div class="panel-title" id="editor-title"><span class="icon-edit"></span> I-edit ang Nilalaman</div>
-    <div class="editor-toolbar" id="html-toolbar">
-      <button onclick="insertTag('h2')"><span class="icon-h2"></span> Pamagat 2</button>
-      <button onclick="insertTag('h3')"><span class="icon-h3"></span> Pamagat 3</button>
-      <button onclick="insertTag('p')"><span class="icon-p"></span> Talata</button>
-      <button onclick="insertTag('b')"><span class="icon-b"></span> Matapang</button>
-      <button onclick="insertTag('i')"><span class="icon-i"></span> Italiko</button>
-      <button onclick="insertTag('ul')"><span class="icon-ul"></span> Listahan</button>
-      <button onclick="insertTag('hr')"><span class="icon-hr"></span> Guhit</button>
-    </div>
-    <textarea id="editor" placeholder="Pumili muna ng pahina sa itaas..." oninput="markUnsaved()"></textarea>
-    <div class="action-bar">
-      <button class="btn btn-success" onclick="saveContent()"><span class="icon-save"></span> I-save</button>
-      <button class="btn btn-secondary" id="preview-btn" onclick="previewContent()"><span class="icon-preview"></span> Tingnan</button>
-      <button class="btn btn-secondary" onclick="syncCurrentPage()"><span class="icon-refresh"></span> I-sync Ngayon</button>
-    </div>
-    <div id="status" class="status"></div>
+<div id="login-view">
+  <div class="login-container">
+    <div class="login-title">🔑 Pag-login — Admin</div>
+    <div id="login-error" class="error"></div>
+    <label>Password:</label>
+    <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
+    <label>Tagal ng Session (minuto):</label>
+    <input type="number" id="session-min" class="input" value="30" min="5" max="480">
+    <button class="btn btn-primary" onclick="doLogin()">🔓 Mag-login</button>
   </div>
 </div>
 
-<!-- ✅ BAGONG ANYO: GUMAWA NG BAGONG PAHINA -->
-<div id="new-page-modal" class="modal hidden">
-  <div class="modal-box">
-    <div class="modal-title"><span class="icon-add"></span> Gumawa ng Bagong Pahina</div>
-    <div class="error" id="new-page-error"></div>
+<div id="dashboard-view" class="hidden">
+  <div class="nav-bar">
+    <a href="admin.html" class="active">🏠 Dashboard</a>
+    <a href="admin-order.html">🔢 Ayusin Ayos</a>
+    <a href="admin-edit.html">✏️ I-edit</a>
+    <a href="admin-new-page.html">➕ Bagong Pahina</a>
+    <a href="admin-pending.html">⏳ Nakabinbin</a>
+    <a href="setup-token.html">🔧 Token</a>
+    <a href="admin-settings.html">⚙️ Setting</a>
+  </div>
 
-    <label>Pangalan ng Pahina:</label>
-    <input type="text" id="new-page-name" class="input" placeholder="Halimbawa: Balita o Tungkol sa Atin">
+  <div class="status-line">
+    <span id="conn-status">🔌 —</span>
+    <span id="token-indicator">🔒 Token: —</span>
+    <span id="session-timer">⏰ —</span>
+    <button onclick="doLogout()" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer">🚪 Logout</button>
+  </div>
 
-    <label>ID ng Pahina (walang puwang, maliit na titik):</label>
-    <input type="text" id="new-page-id" class="input" placeholder="Halimbawa: balita o tungkol-sa-atin">
+  <div class="dashboard-card">
+    <h2>👋 Maligayang Pagdating, Admin</h2>
+    <p style="color:#6b7280">Pumili ng gawain mula sa ibaba o sa menu sa itaas.</p>
+  </div>
 
-    <label>Uri ng Pahina:</label>
-    <select id="new-page-type" class="input">
-      <option value="html">HTML — Pahina ng Nilalaman</option>
-      <option value="css">CSS — Estilo at Disenyo</option>
-    </select>
+  <!-- ✅ KAHON NG TOKEN — KUSANG LALABAS ANG TOKEN KUNG MAY BAGO -->
+  <div id="token-card" class="dashboard-card hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleTokenCard()">
+      <h2 style="margin:0">🔑 GitHub Token (Naka-encrypt)</h2>
+      <span id="token-toggle-icon" style="font-size:18px">▼</span>
+    </div>
+    <div id="token-card-body" style="margin-top:14px">
+      <p style="color:#6b7280;margin-bottom:10px" id="token-hint">
+        Pumunta muna sa <a href="setup-token.html" style="color:#b91c1c">🔧 Token Setup</a> para i-encrypt ang token.
+      </p>
 
-    <label>Lokasyon ng Pahina:</label>
-    <select id="new-page-folder" class="input">
-      <option value="pages">📂 Sa loob ng /pages — Mga Nilalaman</option>
-      <option value="root">📁 Sa ugat — katulad ng index.html / main.html</option>
-    </select>
+      <label>Encrypted Token:</label>
+      <input type="text" id="saved-encrypted-token"
+             style="font-family:monospace;font-size:13px;"
+             placeholder="Kusang lalabas dito kapag na-encrypt na...">
 
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeNewPageModal()"><span class="icon-close"></span> Isara</button>
-      <button class="btn btn-primary" style="flex:1" onclick="createNewPage()"><span class="icon-add"></span> Gumawa</button>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="saveEncryptedToken()">💾 I-save Token</button>
+        <button class="btn btn-secondary" onclick="clearToken()">🗑️ Burahin</button>
+      </div>
+
+      <div id="token-status" class="status"></div>
     </div>
   </div>
-</div>
 
-<div id="pw-modal" class="modal hidden">
-  <div class="modal-box">
-    <div class="modal-title"><span class="icon-lock"></span> Palitan ang Password</div>
-    <p style="color:#78350f;margin-bottom:12px;font-size:14px"><span class="icon-warning"></span> Tandaan ang bagong password — kailangan ito para sa pag-save sa GitHub.</p>
-    <div class="error" id="pw-error"></div>
-    <label>Lumang Password:</label>
-    <input type="password" id="old-pw" class="input">
-    <label>Bagong Password (min. 6 letra):</label>
-    <input type="password" id="new-pw" class="input">
-    <label>Ulitin Bagong Password:</label>
-    <input type="password" id="confirm-pw" class="input">
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn btn-secondary" style="flex:1" onclick="closePwModal()"><span class="icon-close"></span> Isara</button>
-      <button class="btn btn-primary" style="flex:1" onclick="changePassword()"><span class="icon-ok"></span> Palitan</button>
-    </div>
+  <div class="grid-menu">
+    <a href="admin-order.html" class="menu-btn">
+      <span>🔢</span>
+      <span>Ayusin Ayos</span>
+    </a>
+    <a href="admin-edit.html" class="menu-btn">
+      <span>✏️</span>
+      <span>I-edit Nilalaman</span>
+    </a>
+    <a href="admin-new-page.html" class="menu-btn">
+      <span>➕</span>
+      <span>Bagong Pahina</span>
+    </a>
+    <a href="admin-pending.html" class="menu-btn">
+      <span>⏳</span>
+      <span>Nakabinbin</span>
+    </a>
+    <a href="setup-token.html" class="menu-btn">
+      <span>🔧</span>
+      <span>Token Setup</span>
+    </a>
+    <a href="admin-settings.html" class="menu-btn">
+      <span>⚙️</span>
+      <span>Mga Setting</span>
+    </a>
   </div>
 </div>
 
 <script>
-// ==================================================
-// PALITAN LANG ANG LINYA ITO — WALANG IBANG BABAGUHIN!
-const ENCRYPTED_TOKEN = "Ve6v9SSfdqGr0/xuncY8yZZ/7wYejvBXJ6EGr0I/4BqcG9+wbtSYemd7k96mwr6lFDhIqea2+SC/k0JbKYV2nJqtIw0=";
-// ==================================================
-
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
+const SESSION_KEY = "bisyo_admin_session";
+const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
+const PENDING_TOKEN_KEY = "bisyo_pending_token";
 
-const ASSETS_ROOT = "app/src/main/assets";
-const PAGES_SUBFOLDER = "app/src/main/assets/pages";
+let sessionTimer = null;
+window.ENCRYPTED_TOKEN = "";
+let tokenCardCollapsed = false;
 
-const STORAGE_KEY = "bisyo_offline_changes";
-const CACHE_PREFIX = "bisyo_cache_";
-const SESSION_STORAGE_KEY = "bisyo_session_data";
-const PASSWORD_MEMORY_KEY = "bisyo_last_password";
-const PAGE_ORDER_KEY = "bisyo_page_order"; // ✅ BAGUHIN: Pagkakasunod-sunod
-
-let ADMIN_PASSWORD = null;
-let decryptedToken = null;
-let currentPageId = null;
-let currentFileType = "html";
-let isOnline = navigator.onLine;
-let SESSION_DURATION_MS = 30 * 60 * 1000;
-let sessionCountdownTimer = null;
-let forceSource = null;
-let originalPageOrder = null; // ✅ Orihinal na ayos
-
-// ✅ DINAMIKONG LISTAHAN — MAAARI DAGDAGAN HABANG GUMAGANA ANG PAHINA
-const pages = [
-  {id:"index",       name:"index.html",               type:"html", folder:"root", iconClass:"icon-home"},
-  {id:"main",        name:"main.html",                type:"html", folder:"root", iconClass:"icon-page"},
-  {id:"admin",       name:"admin.html",               type:"html", folder:"root", iconClass:"icon-admin-page"},
-  {id:"setup-token", name:"setup-token.html",         type:"html", folder:"root", iconClass:"icon-setup-page"},
-  {id:"style",       name:"style.css — Disenyo",      type:"css",  folder:"root", iconClass:"icon-style-page"},
-  {id:"alak",               name:"Alak",                type:"html", folder:"pages", iconClass:"icon-alak"},
-  {id:"sigarilyo",          name:"Sigarilyo",           type:"html", folder:"pages", iconClass:"icon-sigarilyo"},
-  {id:"shabu",              name:"Shabu",                type:"html", folder:"pages", iconClass:"icon-shabu"},
-  {id:"heroin",             name:"Heroin",               type:"html", folder:"pages", iconClass:"icon-heroin"},
-  {id:"marijuana",          name:"Marijuana",            type:"html", folder:"pages", iconClass:"icon-marijuana"},
-  {id:"ecstasy",            name:"Ecstasy",              type:"html", folder:"pages", iconClass:"icon-ecstasy"},
-  {id:"cocaine",            name:"Cocaine",              type:"html", folder:"pages", iconClass:"icon-cocaine"},
-  {id:"tinuturok-gamot",    name:"Tinuturok na Gamot",   type:"html", folder:"pages", iconClass:"icon-inject"},
-  {id:"tuklaw",             name:"Tuklaw / Pagkalulong", type:"html", folder:"pages", iconClass:"icon-tuklaw"},
-  {id:"sugal",              name:"Sugal",                type:"html", folder:"pages", iconClass:"icon-sugal"},
-  {id:"inhalants",          name:"Inhalants",            type:"html", folder:"pages", iconClass:"icon-inhalant"},
-  {id:"pag-aabuso-gamot",   name:"Pag-aabuso sa Gamot",  type:"html", folder:"pages", iconClass:"icon-medicine"},
-  {id:"lsd",                name:"LSD",                  type:"html", folder:"pages", iconClass:"icon-lsd"},
-  {id:"ketamine",           name:"Ketamine",             type:"html", folder:"pages", iconClass:"icon-ketamine"},
-  {id:"ibang-sugal",        name:"Ibang Uri ng Sugal",  type:"html", folder:"pages", iconClass:"icon-dice"},
-  {id:"internet-laro",      name:"Internet / Laro",      type:"html", folder:"pages", iconClass:"icon-game"},
-  {id:"labis-pagkain",      name:"Labis na Pagkain",     type:"html", folder:"pages", iconClass:"icon-food"},
-  {id:"vaping",             name:"Vaping",               type:"html", folder:"pages", iconClass:"icon-vape"},
-  {id:"aral-sa-bibliya",    name:"Aral mula sa Bibliya", type:"html", folder:"pages", iconClass:"icon-bible"}
-];
-
-// ✅ KUNIN ANG MGA PAHINANG LALABAS SA MAIN.HTML LANG
-function getMainPages() {
-  return pages.filter(p => p.folder === "pages" && p.type === "html");
+// === Session ===
+function saveSession(pw, minutes) {
+  const ms = minutes * 60 * 1000;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+    password: pw,
+    expiresAt: Date.now() + ms,
+    durationMinutes: minutes
+  }));
+}
+function loadSession() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!s) return null;
+  const d = JSON.parse(s);
+  if (Date.now() > d.expiresAt) { clearSession(); return null; }
+  return d;
+}
+function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+function updateSessionDisplay() {
+  const s = loadSession();
+  if (!s) return;
+  const rem = Math.ceil((s.expiresAt - Date.now()) / 60000);
+  document.getElementById("session-timer").textContent = `⏰ ${rem}m natitira`;
 }
 
-// ✅ KASALUKUYANG AYOS — BASAHIN MULA SA IMBAKAN
-function getCurrentPageOrder() {
-  const saved = localStorage.getItem(PAGE_ORDER_KEY);
-  if (saved) {
-    try {
-      const order = JSON.parse(saved);
-      // Siguraduhing kasama ang lahat ng pahina
-      const allIds = getMainPages().map(p => p.id);
-      const savedIds = [...order];
-      allIds.forEach(id => {
-        if (!savedIds.includes(id)) savedIds.push(id);
-      });
-      return savedIds;
-    } catch {}
+// === Token Card Controls ===
+function showTokenCard() {
+  document.getElementById("token-card").classList.remove("hidden");
+  tokenCardCollapsed = false;
+  document.getElementById("token-card-body").style.display = "block";
+  document.getElementById("token-toggle-icon").textContent = "▼";
+}
+function hideTokenCard() {
+  document.getElementById("token-card").classList.add("hidden");
+}
+function toggleTokenCard() {
+  tokenCardCollapsed = !tokenCardCollapsed;
+  document.getElementById("token-card-body").style.display = tokenCardCollapsed ? "none" : "block";
+  document.getElementById("token-toggle-icon").textContent = tokenCardCollapsed ? "▶" : "▼";
+}
+
+// ✅ KUSANG KUNIN ANG BAGONG TOKEN NA IPINASA MULA SA SETUP-TOKEN
+function checkPendingToken() {
+  const pending = localStorage.getItem(PENDING_TOKEN_KEY);
+  if (pending) {
+    document.getElementById("saved-encrypted-token").value = pending;
+    showTokenCard();
+    document.getElementById("token-hint").innerHTML =
+      "✅ <strong>May bagong token!</strong> Pindutin ang I-save para kumpirmahin.";
+    localStorage.removeItem(PENDING_TOKEN_KEY); // ✅ Linisin pagkatapos makita
   }
-  // Kung walang naka-save — gamitin ang orihinal na ayos
-  return getMainPages().map(p => p.id);
 }
 
-// ✅ BUUIN ANG LISTAHAN NG AYOS SA ADMIN
-function renderOrderList() {
-  const container = document.getElementById("order-list");
-  const order = getCurrentPageOrder();
-  originalPageOrder = originalPageOrder || [...order]; // Tandaan ang orihinal
-  container.innerHTML = "";
-
-  order.forEach((pageId, index) => {
-    const page = pages.find(p => p.id === pageId);
-    if (!page) return;
-
-    const row = document.createElement("div");
-    row.className = "order-row";
-    row.innerHTML = `
-      <span class="order-pos">${index + 1}</span>
-      <span class="order-name">${page.name}</span>
-      <div class="order-buttons">
-        <button onclick="movePageUp(${index})" ${index === 0 ? "disabled" : ""}>⬆️</button>
-        <button onclick="movePageDown(${index})" ${index === order.length - 1 ? "disabled" : ""}>⬇️</button>
-      </div>
-    `;
-    container.appendChild(row);
-  });
-}
-
-// ✅ ILIPAT PATAAS
-function movePageUp(index) {
-  if (index === 0) return;
-  const order = getCurrentPageOrder();
-  [order[index], order[index - 1]] = [order[index - 1], order[index]];
-  localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
-  renderOrderList();
-  document.getElementById("order-status").style.display = "none";
-}
-
-// ✅ ILIPAT PABABA
-function movePageDown(index) {
-  const order = getCurrentPageOrder();
-  if (index === order.length - 1) return;
-  [order[index], order[index + 1]] = [order[index + 1], order[index]];
-  localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
-  renderOrderList();
-  document.getElementById("order-status").style.display = "none";
-}
-
-// ✅ I-SAVE ANG AYOS — IPADALA SA GITHUB KUNG KONEKTADO
-async function savePageOrder() {
-  const order = getCurrentPageOrder();
-  localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
-
-  // ✅ I-save din para mabasa ng main.html
-  localStorage.setItem("bisyo_page_order", JSON.stringify(order));
-  localStorage.setItem("bisyo_page_order_updated", Date.now());
-
-  // ✅ I-upload sa GitHub kung may token at online
-  if (isOnline && decryptedToken) {
-    await uploadPageOrderToGitHub(order);
-  }
-
-  // ✅ Ipakita na tapos na
-  const status = document.getElementById("order-status");
-  status.style.display = "inline";
-  setTimeout(() => status.style.display = "none", 3000);
-  showStatus("✅ Nai-save ang bagong ayos — makikita sa main.html", "success");
-}
-
-// ✅ I-upload ang ayos sa GitHub
-async function uploadPageOrderToGitHub(order) {
+// === I-validate sa GitHub ===
+async function verifyTokenWithGitHub() {
+  if (!window.ENCRYPTED_TOKEN) return false;
   try {
-    const filePath = "app/src/main/assets/page-order.json";
-    let sha = null;
-
-    // Kunin muna ang SHA kung mayroon na
-    const g = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
-      headers: { Authorization: `token ${decryptedToken}` }
-    });
-    if (g.ok) sha = (await g.json()).sha;
-
-    const content = JSON.stringify(order, null, 2);
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(content);
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    const base64 = btoa(binary);
-
-    const body = {
-      message: `Update page order — ${new Date().toLocaleString('tl-PH')}`,
-      content: base64,
-      branch: BRANCH
-    };
-    if (sha) body.sha = sha;
-
-    await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `token ${decryptedToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-  } catch (e) {
-    console.log("Hindi ma-upload ang ayos:", e);
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/`);
+    if (res.status === 401 || res.status === 403) return false;
+    return res.ok;
+  } catch {
+    return null;
   }
 }
 
-// ✅ IBALIK SA ORIHINAL NA AYOS
-function resetPageOrder() {
-  if (!confirm("Ibalik ba sa orihinal na pagkakasunod-sunod?")) return;
-  localStorage.removeItem(PAGE_ORDER_KEY);
-  localStorage.removeItem("bisyo_page_order");
-  renderOrderList();
-  showStatus("↩️ Bumalik sa orihinal na ayos", "info");
-}
+async function updateTokenCardVisibility() {
+  const hasToken = !!window.ENCRYPTED_TOKEN;
+  const pending = localStorage.getItem(PENDING_TOKEN_KEY);
 
-// ==================================================
-// ✅ BAGONG PAHINA — MGA TUNGKULIN
-// ==================================================
-function openNewPageModal(){
-  document.getElementById('new-page-modal').classList.remove('hidden');
-  document.getElementById('new-page-error').textContent='';
-  document.getElementById('new-page-name').value='';
-  document.getElementById('new-page-id').value='';
-  document.getElementById('new-page-type').value='html';
-  document.getElementById('new-page-folder').value='pages';
-}
-function closeNewPageModal(){
-  document.getElementById('new-page-modal').classList.add('hidden');
-  document.getElementById('new-page-error').textContent='';
-}
-function showNewPageError(m){
-  document.getElementById('new-page-error').textContent=m;
-}
+  if (pending) { showTokenCard(); return; }
+  if (!hasToken) { showTokenCard(); return; }
 
-function suggestIdFromName(name){
-  return name.toLowerCase().trim()
-    .replace(/[^\w\u0080-\uFFFF-]+/g,'-')
-    .replace(/^-+|-+$/g,'');
-}
-
-async function createNewPage(){
-  const nameInput=document.getElementById('new-page-name').value.trim();
-  let idInput=document.getElementById('new-page-id').value.trim();
-  const type=document.getElementById('new-page-type').value;
-  const folder=document.getElementById('new-page-folder').value;
-
-  if(!nameInput)return showNewPageError("Ilagay ang pangalan ng pahina");
-  if(!idInput)idInput=suggestIdFromName(nameInput);
-  if(!/^[a-z0-9_-]+$/.test(idInput))return showNewPageError("ID: maliit na titik, numero, gitling at salungguhit lang ang pwede");
-
-  if(pages.some(p=>p.id===idInput))return showNewPageError("Mayroon nang pahinang may ganung ID — gumamit ng iba");
-
-  const iconClass = type==='css' ? 'icon-style-page' : 'icon-page';
-
-  pages.push({
-    id: idInput,
-    name: nameInput,
-    type: type,
-    folder: folder,
-    iconClass: iconClass
-  });
-
-  // ✅ Kung pahina sa pages/ — idagdag din sa pagkakasunod-sunod
-  if (folder === "pages" && type === "html") {
-    const order = getCurrentPageOrder();
-    order.push(idInput);
-    localStorage.setItem(PAGE_ORDER_KEY, JSON.stringify(order));
+  const isValid = await verifyTokenWithGitHub();
+  if (isValid === false) {
+    showTokenCard();
+    document.getElementById("token-status").className = "status error";
+    document.getElementById("token-status").textContent = "⚠️ Token hindi wasto o nag-expire na — palitan ito";
+  } else if (isValid === true) {
+    hideTokenCard();
+  } else {
+    showTokenCard();
+    collapseTokenCard();
   }
-
-  buildPageList();
-  renderOrderList(); // ✅ I-refresh ang listahan ng ayos
-  closeNewPageModal();
-
-  showStatus("✅ Bagong pahina: "+nameInput+" — handa nang i-edit at i-save","success");
-
-  // Agad na piliin ang bagong pahina
-  setTimeout(()=>selectPage(idInput),100);
 }
 
-function getTemplate(type){
-  if(type === "css") return "/* ==========================================\n   style.css — Pangkalahatang Disenyo\n   ========================================== */\n*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,sans-serif}\nbody{background:#f3f4f6;color:#1f2937;line-height:1.6}";
-  return "<h2>"+(document.getElementById('new-page-name')?.value?.trim()||"Pamagat")+"</h2>\n<p>Nilalaman...</p>";
-}
+// === I-save Token ===
+async function saveEncryptedToken() {
+  const token = document.getElementById("saved-encrypted-token").value.trim();
+  const statusEl = document.getElementById("token-status");
 
-function getFilePath(info){
-  const ext = info.type === "css" ? "css" : "html";
-  const filename = info.id + "." + ext;
-  return info.folder === "pages" ? PAGES_SUBFOLDER + "/" + filename : ASSETS_ROOT + "/" + filename;
-}
-
-function setSessionDurationFromInput(){
-  const m=parseInt(document.getElementById('session-minutes').value,10);
-  const v=Math.max(1,Math.min(480,isNaN(m)?30:m));
-  document.getElementById('session-minutes').value=v;
-  SESSION_DURATION_MS=v*60*1000;
-}
-function startSessionCountdown(){
-  if(sessionCountdownTimer)clearInterval(sessionCountdownTimer);
-  sessionCountdownTimer=setInterval(function(){
-    const d=loadSessionData();if(!d)return;
-    const r=d.durationMs-(Date.now()-d.loginTime);
-    if(r<=0){doLogout();showStatus("Lumipas na ang oras","warning");return}
-    document.getElementById('session-countdown').textContent=
-      "Natitira: " + Math.floor(r/60000) + "m " + Math.floor((r%60000)/1000) + "s";
-  },1000);
-}
-function saveSessionData(){
-  const keep=document.getElementById('keep-logged-in').checked;
-  localStorage.removeItem(SESSION_STORAGE_KEY);sessionStorage.removeItem(SESSION_STORAGE_KEY);
-  if(keep && ADMIN_PASSWORD){
-    localStorage.setItem(PASSWORD_MEMORY_KEY, ADMIN_PASSWORD);
-  }else{
-    localStorage.removeItem(PASSWORD_MEMORY_KEY);
-  }
-  const d={loginTime:Date.now(),durationMs:SESSION_DURATION_MS};
-  keep?localStorage.setItem(SESSION_STORAGE_KEY,JSON.stringify(d))
-      :sessionStorage.setItem(SESSION_STORAGE_KEY,JSON.stringify(d));
-}
-function loadSessionData(){
-  let d=localStorage.getItem(SESSION_STORAGE_KEY);
-  if(!d)d=sessionStorage.getItem(SESSION_STORAGE_KEY);
-  return d?JSON.parse(d):null;
-}
-function clearSessionData(){
-  localStorage.removeItem(SESSION_STORAGE_KEY);
-  sessionStorage.removeItem(SESSION_STORAGE_KEY);
-}
-function fillRememberedPassword(){
-  const s=localStorage.getItem(PASSWORD_MEMORY_KEY);
-  if(s)document.getElementById('admin-pass').value=s;
-}
-
-async function tryAutoLogin(){
-  const d=loadSessionData();
-  if(!d)return false;
-  if(Date.now()-d.loginTime>=d.durationMs){clearSessionData();return false;}
-  SESSION_DURATION_MS=d.durationMs;
-  document.getElementById('session-minutes').value=Math.round(d.durationMs/60000);
-  const savedPassword=localStorage.getItem(PASSWORD_MEMORY_KEY);
-  if(!savedPassword)return false;
-  ADMIN_PASSWORD=savedPassword;
-  document.getElementById('admin-pass').value=savedPassword;
-  document.getElementById('login-form').classList.add('hidden');
-  document.getElementById('admin-panel').classList.remove('hidden');
-  buildPageList();
-  renderOrderList(); // ✅ Ipakita ang ayos pag-login
-  updatePendingUI();updateConnUI();startSessionCountdown();
-  if(ENCRYPTED_TOKEN !== "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
-    try{
-      decryptedToken=await decryptToken(ENCRYPTED_TOKEN,ADMIN_PASSWORD);
-      if(decryptedToken){
-        document.getElementById('token-status').textContent="Naka-konekta sa GitHub";
-        document.getElementById('token-status').style.background="#16a34a";
-        showStatus("Nakabalik — Konektado sa GitHub","success");
-      }
-    }catch(e){
-      showStatus("Nakabalik — Lokal na Mode","info");
-    }
-  }else{
-    showStatus("Nakabalik — Lokal na Mode lang","info");
-  }
-  return true;
-}
-function refreshSession(){saveSessionData();startSessionCountdown();showStatus("Pinalawig ang session","success")}
-
-async function doLogin(){
-  document.getElementById('login-error').textContent='';
-  showStatus('','');
-  const p=document.getElementById('admin-pass').value.trim();
-  if(!p)return showLoginError("Ilagay ang password");
-  if(p.length<6)return showLoginError("Hindi bababa sa 6 letra");
-  ADMIN_PASSWORD=p;
-  setSessionDurationFromInput();
-  saveSessionData();
-  decryptedToken=null;
-  document.getElementById('token-status').textContent="Walang Token — Magbasa Lang";
-  document.getElementById('token-status').style.background="#d97706";
-  if(ENCRYPTED_TOKEN !== "PROVIDED_WHEN_BUILT_WITH_SETUP_TOKEN"){
-    try{
-      decryptedToken=await decryptToken(ENCRYPTED_TOKEN,p);
-      if(decryptedToken){
-        document.getElementById('token-status').textContent="Naka-konekta sa GitHub";
-        document.getElementById('token-status').style.background="#16a34a";
-      }
-    }catch(e){}
-  }
-  document.getElementById('login-form').classList.add('hidden');
-  document.getElementById('admin-panel').classList.remove('hidden');
-  buildPageList();
-  renderOrderList(); // ✅ Ipakita ang ayos pag-login
-  updatePendingUI();updateConnUI();startSessionCountdown();
-  showStatus(decryptedToken
-    ? "Handa — Magbasa at Mag-save sa GitHub"
-    : "Lokal na Mode — I-setup ang Token para sa GitHub","success");
-}
-function showLoginError(m){document.getElementById('login-error').textContent=m}
-function doLogout(){
-  if(sessionCountdownTimer)clearInterval(sessionCountdownTimer);
-  clearSessionData();
-  ADMIN_PASSWORD=decryptedToken=currentPageId=null;
-  document.getElementById('admin-panel').classList.add('hidden');
-  document.getElementById('login-form').classList.remove('hidden');
-  document.getElementById('editor').value='';
-  document.getElementById('admin-pass').value='';
-  showStatus("","");
-}
-
-window.addEventListener('online',function(){isOnline=true;updateConnUI()});
-window.addEventListener('offline',function(){isOnline=false;updateConnUI()});
-function updateConnUI(){
-  document.getElementById('conn-dot').className='status-dot '+(isOnline?'dot-online':'dot-offline');
-  document.getElementById('conn-label').textContent=isOnline?'Online':'Walang Internet';
-}
-function setSyncState(s){
-  document.getElementById('sync-dot').className='status-dot dot-'+s;
-  document.getElementById('sync-label').textContent=
-    s==='saved'?(decryptedToken?'Naka-sync':'Lokal'):
-    s==='pending'?'Lokal na Pagbabago':'Sinusync...';
-}
-function markUnsaved(){document.getElementById('editor').classList.add('unsaved');setSyncState('pending')}
-function markSaved(){document.getElementById('editor').classList.remove('unsaved')}
-
-function clearCache(){
-  if(!confirm("Burahin ang lahat ng nakaimbak na kopya?"))return;
-  Object.keys(localStorage).filter(function(k){return k.startsWith(CACHE_PREFIX)}).forEach(function(k){localStorage.removeItem(k)});
-  showStatus("Cache binura","success");if(currentPageId)selectPage(currentPageId);
-}
-function clearLocalChanges(){
-  if(!confirm("Burahin lahat ng hindi pa naisave na pagbabago?"))return;
-  localStorage.removeItem(STORAGE_KEY);updatePendingUI();showStatus("Lokal na pagbabago binura","success");
-  if(currentPageId)selectPage(currentPageId);
-}
-function refreshFromGitHub(){
-  if(!currentPageId)return showStatus("Pumili muna ng pahina","warning");
-  if(!decryptedToken)return showStatus("Kailangan ng Token — I-setup muna","warning");
-  forceSource="github";selectPage(currentPageId);
-  setTimeout(function(){forceSource=null},3000);
-  showStatus("Kinuha mula sa GitHub","success");
-}
-function loadFromLocal(){
-  if(!currentPageId)return showStatus("Pumili muna ng pahina","warning");
-  forceSource="local";selectPage(currentPageId);
-  setTimeout(function(){forceSource=null},3000);
-  showStatus("Gamit ang lokal na kopya","info");
-}
-
-function getChanges(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return []}}
-function saveChange(id,content,name){
-  const a=getChanges().filter(function(c){return c.pageId!==id});
-  a.unshift({pageId:id,pageName:name,content:content,timestamp:Date.now()});
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(a));
-  localStorage.setItem(CACHE_PREFIX+id,content);updatePendingUI();
-}
-function removeChange(id){localStorage.setItem(STORAGE_KEY,JSON.stringify(getChanges().filter(function(c){return c.pageId!==id})));updatePendingUI()}
-function hasChange(id){return !!getChanges().find(function(c){return c.pageId===id})}
-function getCached(id){return localStorage.getItem(CACHE_PREFIX+id)}
-function updatePendingUI(){
-  const s=document.getElementById('pending-section'),l=document.getElementById('pending-list'),a=getChanges();
-  s.classList.toggle('hidden',!a.length);
-  l.innerHTML=a.map(function(c){return '<div class="pending-item"><span><strong>'+c.pageName+'</strong><br><small>'+new Date(c.timestamp).toLocaleString('tl-PH')+'</small></span><div><button class="btn btn-sm btn-success" onclick="syncOne(\''+c.pageId+'\')">Sync</button></div></div>'}).join('');
-}
-
-async function deriveKey(p){
-  const e=new TextEncoder(),s=e.encode("BisyoSalt2026");
-  const k=await crypto.subtle.importKey("raw",e.encode(p),{name:"PBKDF2"},false,["deriveKey"]);
-  return crypto.subtle.deriveKey({name:"PBKDF2",salt:s,iterations:100000,hash:"SHA-256"},k,{name:"AES-GCM",length:256},false,["decrypt"]);
-}
-async function decryptToken(enc,p){
-  try{
-    const d=Uint8Array.from(atob(enc),function(c){return c.charCodeAt(0)});
-    return new TextDecoder().decode(await crypto.subtle.decrypt(
-      {name:"AES-GCM",iv:d.slice(0,12)},await deriveKey(p),d.slice(12)
-    ));
-  }catch{return null}
-}
-
-function buildPageList(){
-  const c=document.getElementById('page-list');c.innerHTML='';
-  pages.forEach(function(p){
-    const d=Object.assign(document.createElement('div'),{
-      className:'page-item'+(currentPageId===p.id?' active':'')+(p.folder==='root'?' system-item':' content-item')
-    });
-    d.innerHTML='<span class="'+p.iconClass+'">'+p.name+'</span>'+(hasChange(p.id)?'<span class="offline-badge">Lokal</span>':'');
-    d.onclick=function(){selectPage(p.id)};c.appendChild(d);
-  });
-}
-function decodeBase64(s){try{return decodeURIComponent(escape(window.atob(s.replace(/-/g,'+').replace(/_/g,'/'))))}catch{return null}}
-
-async function selectPage(id){
-  currentPageId=id;buildPageList();
-  const info=pages.find(function(p){return p.id===id});
-  currentFileType=info.type;
-  document.getElementById('editor-title').textContent=
-    info.type==='css'?"I-edit ang Disenyo: "+info.name:"I-edit: "+info.name;
-  document.getElementById('html-toolbar').style.display=info.type==='css'?'none':'flex';
-  const previewBtn=document.getElementById('preview-btn');
-  if(previewBtn)previewBtn.style.display=info.type==='css'?'none':'inline-flex';
-  document.getElementById('editor').value='';
-  const filePath=getFilePath(info);
-  const loc=getChanges().find(function(c){return c.pageId===id});
-  if(loc){
-    document.getElementById('editor').value=loc.content;
-    setSyncState('pending');
-    showStatus("Lokal na kopya — hindi pa naisave sa GitHub","warning");
+  if (!token) {
+    statusEl.className = "status error";
+    statusEl.textContent = "❌ Walang token — pumunta sa Token Setup muna";
     return;
   }
-  let got=false;
-  if((forceSource==="github"||!forceSource) && isOnline && decryptedToken){
-    showStatus("Binabasa mula sa GitHub...","info");
-    try{
-      const r=await fetch("https://api.github.com/repos/"+REPO_OWNER+"/"+REPO_NAME+"/contents/"+filePath+"?ref="+BRANCH,
-        {headers:{Authorization:"token "+decryptedToken},signal:AbortSignal.timeout(15000)});
-      if(r.ok){
-        const d=await r.json(),c=decodeBase64(d.content);
-        if(c&&c.trim()){
-          document.getElementById('editor').value=c;
-          localStorage.setItem(CACHE_PREFIX+id,c);
-          setSyncState('saved');
-          showStatus("Nabasa mula sa GitHub — "+c.length+" letra","success");
-          got=true;
-        }
-      }else if(r.status===404){
-        document.getElementById('editor').value=getTemplate(info.type);
-        setSyncState('saved');
-        showStatus("Bago — wala pa sa GitHub","info");
-        got=true;
-      }else{
-        showStatus("GitHub: "+r.status,"warning");
-      }
-    }catch(e){showStatus("Hindi makakonekta: "+e.message,"warning")}
+
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  window.ENCRYPTED_TOKEN = token;
+
+  statusEl.className = "status success";
+  statusEl.textContent = "✅ Nai-save na! Sinusuri...";
+
+  setTimeout(async () => {
+    statusEl.textContent = "✅ Tama — isinasara ang kahon...";
+    await new Promise(r => setTimeout(r, 1000));
+    updateTokenIndicator();
+    await updateTokenCardVisibility();
+  }, 500);
+}
+
+function clearToken() {
+  if (!confirm("Burahin ang nakasave na token?")) return;
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  window.ENCRYPTED_TOKEN = "";
+  document.getElementById("saved-encrypted-token").value = "";
+  document.getElementById("token-hint").innerHTML =
+    'Pumunta muna sa <a href="setup-token.html" style="color:#b91c1c">🔧 Token Setup</a> para i-encrypt ang token.';
+  document.getElementById("token-status").className = "status info";
+  document.getElementById("token-status").textContent = "🗑️ Tinanggal na — ilagay ang bago";
+  updateTokenIndicator();
+  updateTokenCardVisibility();
+}
+
+function loadSavedToken() {
+  const saved = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (saved) {
+    document.getElementById("saved-encrypted-token").value = saved;
+    window.ENCRYPTED_TOKEN = saved;
   }
-  if(!got){
-    const cached=getCached(id);
-    if(cached&&cached.trim()){
-      document.getElementById('editor').value=cached;
-      setSyncState('saved');
-      showStatus("Gamit ang nakaimbak na kopya","info");
-      got=true;
-    }
-  }
-  if(!got){
-    document.getElementById('editor').value=getTemplate(info.type);
-    setSyncState('saved');
-    showStatus("Bagong pahina — handa nang isulat","info");
-  }
+  updateTokenIndicator();
 }
 
-function insertTag(t){
-  if(currentFileType!=='html')return;
-  const ta=document.getElementById('editor'),s=ta.selectionStart,e=ta.selectionEnd;
-  const sel=ta.value.slice(s,e)||'Nilalaman';
-  let w="<"+t+">"+sel+"</"+t+">";
-  if(t==='ul')w="<ul>\n  <li>"+sel+"</li>\n</ul>";
-  if(t==='hr')w="<hr>";
-  ta.value=ta.value.slice(0,s)+w+ta.value.slice(e);
-  ta.focus();markUnsaved();
-}
-function previewContent(){
-  if(currentFileType==='css')return showStatus("Hindi pwedeng i-preview ang disenyo","error");
-  const w=window.open('','_blank');
-  w.document.write('<!DOCTYPE html><html lang="tl"><head><meta charset="UTF-8"><link rel="stylesheet" href="style.css"></head><body>'+document.getElementById('editor').value+'</body></html>');
-  w.document.close();
+function updateTokenIndicator() {
+  document.getElementById("token-indicator").textContent =
+    window.ENCRYPTED_TOKEN ? "🔒 Token: ✅ Naka-save" : "🔒 Token: ❌ Wala pa";
 }
 
-async function upload(id,content){
-  if(!decryptedToken)return false;
-  try{
-    const info=pages.find(function(p){return p.id===id});
-    const filePath=getFilePath(info);
-    let sha=null;
-
-    const g=await fetch("https://api.github.com/repos/"+REPO_OWNER+"/"+REPO_NAME+"/contents/"+filePath+"?ref="+BRANCH,
-      {headers:{Authorization:"token "+decryptedToken}});
-    if(g.ok)sha=(await g.json()).sha;
-
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(content);
-    let binary = '';
-    for(let i=0;i<bytes.length;i++) binary += String.fromCharCode(bytes[i]);
-    const safeBase64 = btoa(binary);
-
-    const b={
-      message:"Update "+info.name+" — "+new Date().toLocaleString('tl-PH'),
-      content: safeBase64,
-      branch: BRANCH
-    };
-    if(sha)b.sha=sha;
-
-    const p=await fetch("https://api.github.com/repos/"+REPO_OWNER+"/"+REPO_NAME+"/contents/"+filePath,{
-      method:'PUT',
-      headers:{
-        Authorization:"token "+decryptedToken,
-        'Content-Type':'application/json; charset=utf-8'
-      },
-      body:JSON.stringify(b)
-    });
-    return p.ok;
-  }catch{return false}
+// === Login/Logout ===
+function doLogin() {
+  const pw = document.getElementById("admin-pass").value.trim();
+  const min = parseInt(document.getElementById("session-min").value) || 30;
+  if (!pw) return alert("Ilagay ang password");
+  saveSession(pw, min);
+  showDashboard();
+}
+function doLogout() {
+  clearSession();
+  if (sessionTimer) clearInterval(sessionTimer);
+  location.reload();
+}
+function showDashboard() {
+  document.getElementById("login-view").classList.add("hidden");
+  document.getElementById("dashboard-view").classList.remove("hidden");
+  updateConnStatus();
+  updateSessionDisplay();
+  loadSavedToken();
+  checkPendingToken(); // ✅ KUSANG KUNIN ANG BAGONG TOKEN
+  updateTokenCardVisibility();
+  sessionTimer = setInterval(updateSessionDisplay, 30000);
+}
+function updateConnStatus() {
+  document.getElementById("conn-status").textContent =
+    navigator.onLine ? "🔌 Online" : "🔌 Walang Internet";
 }
 
-async function saveContent(){
-  if(!currentPageId)return showStatus("Pumili muna ng pahina","warning");
-  const content=document.getElementById('editor').value;
-  if(!content.trim())return showStatus("Walang nilalaman na isasave","warning");
-  const info=pages.find(function(p){return p.id===currentPageId});
-  saveChange(currentPageId,content,info.name);markSaved();buildPageList();
-  if(isOnline && decryptedToken){
-    setSyncState('syncing');
-    if(await upload(currentPageId,content)){
-      removeChange(currentPageId);markSaved();buildPageList();
-      showStatus("NAI-SAVE SA GITHUB!","success");
-    }else{
-      setSyncState('pending');
-      showStatus("Lokal muna — susubukan ulit mamaya","warning");
-    }
-  }else{
-    setSyncState('pending');
-    showStatus("Lokal na — I-setup ang Token para ma-upload sa GitHub","info");
-  }
-}
-
-async function syncAllPending(){
-  if(!decryptedToken)return showStatus("Kailangan ng Token — I-setup muna","error");
-  if(!isOnline)return showStatus("Kailangan ng Internet","error");
-  let count=0;
-  for(const c of getChanges()){
-    if(await upload(c.pageId,c.content)){removeChange(c.pageId);count++}
-  }
-  updatePendingUI();
-  showStatus("Na-sync: "+count+" pahina(s)","success");
-}
-async function syncOne(id){
-  const c=getChanges().find(function(x){return x.pageId===id});
-  if(c && await upload(id,c.content)){removeChange(id);updatePendingUI();showStatus("Na-sync sa GitHub","success")}
-}
-function clearAllPending(){if(!confirm("Burahin lahat ng nakabinbing pagbabago?"))return;localStorage.removeItem(STORAGE_KEY);updatePendingUI();showStatus("Nabura lahat","info")}
-
-function showStatus(t,ty){
-  const s=document.getElementById('status');
-  if(!t){s.textContent='';s.className='status';return}
-  s.textContent=t;
-  s.className='status '+ty;
-}
-
-function openChangePasswordModal(){document.getElementById('pw-modal').classList.remove('hidden')}
-function closePwModal(){document.getElementById('pw-modal').classList.add('hidden');document.getElementById('pw-error').textContent=''}
-function changePassword(){
-  const o=document.getElementById('old-pw').value,n=document.getElementById('new-pw').value,c=document.getElementById('confirm-pw').value;
-  if(o!==ADMIN_PASSWORD)return document.getElementById('pw-error').textContent="Maling lumang password";
-  if(n.length<6)return document.getElementById('pw-error').textContent="Hindi bababa sa 6 letra";
-  if(n!==c)return document.getElementById('pw-error').textContent="Hindi tugma ang password";
-  ADMIN_PASSWORD=n;
-  if(localStorage.getItem(PASSWORD_MEMORY_KEY)){localStorage.setItem(PASSWORD_MEMORY_KEY,n)}
-  alert("Napalitan na! Tandaan: kailangan ulit i-decrypt ang token gamit ang bagong password.");
-  closePwModal();decryptedToken=null;
-  document.getElementById('token-status').textContent="Kailangan ulit i-decrypt";
-  document.getElementById('token-status').style.background="#ef4444";
-}
-
-window.addEventListener('load',async function(){
-  fillRememberedPassword();
-  await tryAutoLogin();
-});
+window.onload = () => {
+  const s = loadSession();
+  if (s) showDashboard();
+  window.addEventListener('online', updateTokenCardVisibility);
+};
 </script>
-
-<style>
-/* ✅ PANG-STYLE NG BAGONG ANYO */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; }
-.modal.hidden { display:none !important; }
-.modal-box { background:white; border-radius:12px; padding:24px; max-width:440px; width:90%; max-height:90vh; overflow-y:auto; }
-.modal-title { font-size:18px; font-weight:bold; margin-bottom:16px; color:#1f2937; }
-select.input { width:100%; padding:10px; border:2px solid #e5e7eb; border-radius:8px; font-size:15px; background:white; }
-.error { color:#dc2626; margin:8px 0; min-height:1.2em; }
-
-/* ✅ ESTILO NG PAG-AYOS NG PWESTO */
-.order-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 12px; margin:4px 0;
-  background:#f9fafb; border-radius:8px;
-  border-left:3px solid #b91c1c;
-}
-.order-pos {
-  display:inline-flex; align-items:center; justify-content:center;
-  width:28px; height:28px;
-  background:#dc2626; color:white; border-radius:50%;
-  font-weight:bold; font-size:14px; margin-right:10px;
-}
-.order-name { flex:1; font-size:15px; color:#1f2937; }
-.order-buttons { display:flex; gap:4px; }
-.order-buttons button {
-  width:32px; height:32px; padding:0; border:none; border-radius:6px;
-  background:#e5e7eb; cursor:pointer; font-size:14px;
-}
-.order-buttons button:disabled { opacity:0.3; cursor:not-allowed; }
-.order-buttons button:hover:not(:disabled) { background:#d1d5db; }
-</style>
-
 </body>
 </html>
