@@ -5,6 +5,60 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
 <title>🔢 Ayusin Pagkakasunod-sunod</title>
+<style>
+/* ✅ ESTILO NG CHECKBOX — MALINAW */
+.show-hide-cb {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #b91c1c;
+  margin: 0;
+  flex-shrink: 0;
+}
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  margin: 6px 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: opacity 0.25s;
+}
+.order-row.hidden-from-main {
+  opacity: 0.55;
+  background: #f3f4f6;
+}
+.order-pos {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: #dc2626;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.order-name {
+  flex: 1;
+  font-size: 15px;
+}
+.order-row .btn {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.label-toggle {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+  user-select: none;
+}
+</style>
 </head>
 <body>
 
@@ -20,29 +74,32 @@
 
 <div class="container">
   <h1>🔢 Ayusin ang Pagkakasunod-sunod</h1>
-  <p style="color:#6b7280;margin-bottom:10px">⬆️⬇️ Ilipat ang pwesto • ✏️ I-edit ang pahina • 🗑️ Alisin sa listahan</p>
+  <p style="color:#6b7280;margin-bottom:16px">⬆️⬇️ Ilipat • ✅ Ipakita/Itago sa Main • ✏️ I-edit • 🗑️ Alisin sa listahan</p>
 
-  <!-- ✅ SURIIN ANG GITHUB — KUNG MAY BAGONG FILE -->
+  <!-- ✅ SURIIN ANG GITHUB ASSETS -->
   <div class="panel-card">
     <div class="top-bar">
       <strong>🔍 Suriin ang Assets sa GitHub</strong>
       <span id="scan-status" class="last-saved">—</span>
     </div>
-    <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Kung online — babasahin ang <code>assets/</code> at <code>assets/pages/</code> — makikita ang lahat ng uri ng file</p>
+    <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Kung online — babasahin ang <code>assets/</code> at <code>assets/pages/</code></p>
     <button class="btn btn-primary" onclick="scanGitHubAssets()">🔍 SURIIN NGAYON</button>
     <div id="found-files-section" class="hidden" style="margin-top:14px">
       <p style="font-weight:bold">📄 Mga Nakitang File:</p>
       <div id="found-files-list" style="max-height:240px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px;background:#fafafa"></div>
       <div class="btn-group" style="margin-top:10px">
-        <button class="btn btn-success" onclick="addFoundToList()">✅ Isama ang Napili sa Listahan</button>
-        <button class="btn btn-secondary" onclick="hideFoundFiles()">❌ Huwag Isama</button>
+        <button class="btn btn-success" onclick="addFoundToList()">✅ Isama sa Listahan</button>
+        <button class="btn btn-secondary" onclick="hideFoundFiles()">❌ Isara</button>
       </div>
     </div>
   </div>
 
   <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb">
 
-  <h2>📋 Kasalukuyang Listahan — Lalabas sa Main.html</h2>
+  <h2>📋 Kasalukuyang Listahan</h2>
+  <p style="font-size:14px;color:#6b7280;margin:-8px 0 12px">
+    ✅ Tikdang <strong>IPAKITA</strong> sa Main.html &nbsp;|&nbsp; ☐ Walang tsek = <strong>NAGTATAGO</strong> — hindi mabubura, nandoon pa rin sa listahan
+  </p>
   <div id="order-list"></div>
 
   <div class="action-bar">
@@ -55,6 +112,7 @@
 
 <script>
 const ORDER_KEY = "bisyo_page_order";
+const VISIBLE_KEY = "bisyo_page_visible"; // ✅ BAGONG — ALIN ANG LALABAS SA MAIN.HTML
 const ALL_PAGES_KEY = "bisyo_all_pages";
 const SESSION_KEY = "bisyo_admin_session";
 const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
@@ -134,7 +192,24 @@ function saveAllPages(pages) {
   localStorage.setItem(ALL_PAGES_KEY, JSON.stringify(pages.filter(p => !defaults.has(p.id))));
 }
 
-// === PAGKAKASUNOD-SUNOD — ITO ANG BABASAHIN NG MAIN.HTML ===
+// === ✅ ALIN ANG LALABAS SA MAIN.HTML ===
+function getVisibleSet() {
+  const s = localStorage.getItem(VISIBLE_KEY);
+  if (s) try { return new Set(JSON.parse(s)) } catch {}
+  // Lahat nakikita bilang default
+  return new Set(getAllPages().map(p => p.id));
+}
+function setPageVisible(id, isVisible) {
+  const visible = getVisibleSet();
+  isVisible ? visible.add(id) : visible.delete(id);
+  localStorage.setItem(VISIBLE_KEY, JSON.stringify([...visible]));
+  render(); // ✅ Agad palitan ang itsura
+}
+function isPageVisible(id) {
+  return getVisibleSet().has(id);
+}
+
+// === PAGKAKASUNOD-SUNOD — BABASAHIN NG MAIN.HTML ===
 function getOrder() {
   const s = localStorage.getItem(ORDER_KEY);
   if (s) try { return JSON.parse(s) } catch {}
@@ -154,23 +229,19 @@ async function scanGitHubAssets() {
     showStatus("❌ Walang wastong token — hindi makabasa sa GitHub", "error");
     return;
   }
-
   document.getElementById("scan-status").textContent = "🔍 Sinusuri...";
   foundFiles = [];
-
   try {
     await fetchFolder(BASE_PATH, realToken, "");
     await fetchFolder(BASE_PATH + "pages/", realToken, "pages/");
-
     displayFoundFiles();
     document.getElementById("scan-status").textContent = `✅ ${foundFiles.length} nakita`;
-    showStatus(`✅ Natagpuan: ${foundFiles.length} file — piliin kung isasama`, "success");
+    showStatus(`✅ Natagpuan: ${foundFiles.length} file`, "success");
   } catch (e) {
     document.getElementById("scan-status").textContent = "❌ Nabigo";
-    showStatus("❌ Nabigo ang pagbasa: " + e.message, "error");
+    showStatus("❌ Nabigo: " + e.message, "error");
   }
 }
-
 async function fetchFolder(folderPath, token, folderLabel) {
   const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${folderPath}?ref=${BRANCH}`, {
     headers: { "Authorization": `token ${token}` }
@@ -178,26 +249,20 @@ async function fetchFolder(folderPath, token, folderLabel) {
   if (!res.ok) return;
   const items = await res.json();
   if (!Array.isArray(items)) return;
-
   items.forEach(item => {
     if (item.type === "file") {
       const ext = item.name.split(".").pop().toLowerCase();
       const id = item.name.replace(/\.[^.]+$/,"");
       const existing = getAllPages().find(p => p.file === item.name && p.folder === folderLabel);
-
       foundFiles.push({
         id: existing ? existing.id : `${folderLabel}${id}`,
         name: existing ? existing.name : id.replace(/-/g," "),
-        file: item.name,
-        folder: folderLabel,
-        path: folderPath + item.name,
-        type: ext,
-        alreadyListed: !!existing
+        file: item.name, folder: folderLabel,
+        type: ext, alreadyListed: !!existing
       });
     }
   });
 }
-
 function displayFoundFiles() {
   const container = document.getElementById("found-files-list");
   container.innerHTML = "";
@@ -212,70 +277,73 @@ function displayFoundFiles() {
   });
   document.getElementById("found-files-section").classList.remove("hidden");
 }
-
-// === ✅ ISAMA SA LISTAHAN → LALABAS SA MAIN.HTML ===
 function addFoundToList() {
   const allPages = getAllPages();
   const order = getOrder();
+  const visible = getVisibleSet();
   let addedCount = 0;
-
   foundFiles.forEach((f, idx) => {
     const cb = document.getElementById(`file-cb-${idx}`);
     if (!cb || cb.disabled || !cb.checked) return;
-
     if (!allPages.find(p => p.file === f.file && p.folder === f.folder)) {
       allPages.push({ id: f.id, name: f.name, file: f.file, folder: f.folder });
       order.push(f.id);
+      visible.add(f.id); // ✅ Nakikita bilang default
       addedCount++;
     }
   });
-
   if (addedCount > 0) {
     saveAllPages(allPages);
     localStorage.setItem(ORDER_KEY, JSON.stringify(order));
+    localStorage.setItem(VISIBLE_KEY, JSON.stringify([...visible]));
     render();
     showStatus(`✅ ${addedCount} naidagdag — LALABAS AGAD SA MAIN.HTML`, "success");
-  } else {
-    showStatus("Walang bagong idinagdag", "info");
   }
   hideFoundFiles();
 }
-
 function hideFoundFiles() {
   document.getElementById("found-files-section").classList.add("hidden");
 }
 
-// === RENDER NG LISTAHAN — MAY ✏️ EDIT BUTTON ===
+// === ✅ RENDER — MAY CHECKBOX SA UNANG BAHAGI ===
 function render() {
   const list = document.getElementById("order-list");
   const order = getOrder();
   const allPages = getAllPages();
+  const visible = getVisibleSet();
   list.innerHTML = "";
 
   order.forEach((id, idx) => {
     const page = allPages.find(p => p.id === id);
     if (!page) return;
+    const shown = visible.has(id);
     list.innerHTML += `
-      <div class="order-row">
+      <div class="order-row ${shown?'':'hidden-from-main'}">
+        <!-- ✅ CHECKBOX — Ipakita / Itago sa Main.html -->
+        <input type="checkbox" class="show-hide-cb" 
+               ${shown?'checked':''} 
+               onchange="setPageVisible('${id}', this.checked)"
+               title="${shown?'✅ Nakikita sa Main.html':'☐ HINDI LALABAS sa Main.html — nandoon pa rin sa listahan'}">
+        
         <span class="order-pos">${idx+1}</span>
-        <div style="flex:1">
-          <div class="order-name">${page.name}</div>
-          <div style="font-size:12px;color:#6b7280">📂 ${page.folder||'pages/'}${page.file||page.id+'.html'}</div>
+        <div class="order-name" title="${page.folder||'pages/'}${page.file||page.id+'.html'}">
+          ${page.name}
+          ${shown?'':'<span style="font-size:11px;color:#d97706;margin-left:6px">☐ Nakatago</span>'}
         </div>
+        
         <button class="btn btn-sm btn-up" onclick="move(${idx},-1)" ${idx===0?'disabled':''}>⬆️</button>
         <button class="btn btn-sm btn-down" onclick="move(${idx},1)" ${idx===order.length-1?'disabled':''}>⬇️</button>
-        <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.file||page.id+'.html'}')" title="I-edit ang pahina">✏️</button>
+        <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.file||page.id+'.html'}')" title="I-edit">✏️</button>
         <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')" title="Alisin sa listahan">🗑️</button>
       </div>`;
   });
 }
 
-// === ✅ PUMUNTA SA PAG-EDIT NG PAHINA ===
 function goEdit(filename) {
   location.href = `admin-edit.html?file=${encodeURIComponent(filename)}`;
 }
 
-// === ✅ ILIPAT ANG PWEStO — KUSANG NAI-SAVE ===
+// === ✅ ILIPAT — KUSANG NAI-SAVE ===
 function move(i, dir) {
   const o = getOrder();
   [o[i], o[i+dir]] = [o[i+dir], o[i]];
@@ -284,30 +352,36 @@ function move(i, dir) {
   showStatus("✅ Inilipat — makikita sa main.html", "info");
 }
 
-// === ✅ ALISIN SA LISTAHAN ===
+// === ✅ ALISIN SA LISTAHAN — HINDI LANG SA PAGPAPAKITA ===
 function askRemove(id, name) {
-  const opt = confirm(`"${name}"\n\nOK = ❌ HUWAG IPALITAW SA MAIN.HTML\nCancel = ✅ Panatilihin sa listahan`);
+  const opt = confirm(`"${name}"\n\n⚠️ Aalisin ba TALAGA sa listahan?\n\n— Kung ITAGO LANG: gamitin ang CHECKBOX sa kaliwa ✅\n— Kung BURAHIN SA LISTAHAN: OK`);
   if (opt) {
     removeFromList(id);
   }
 }
 function removeFromList(id) {
+  // Alisin sa ayos
   const o = getOrder().filter(x => x !== id);
   localStorage.setItem(ORDER_KEY, JSON.stringify(o));
+  // Alisin sa nakikita
+  const visible = getVisibleSet();
+  visible.delete(id);
+  localStorage.setItem(VISIBLE_KEY, JSON.stringify([...visible]));
   render();
-  showStatus(`✅ Inalis sa listahan — HINDI NA LALABAS SA MAIN.HTML`, "success");
+  showStatus(`✅ Inalis sa listahan — hindi na lalabas kahit saan`, "success");
 }
 
 function saveOrder() {
   localStorage.setItem(ORDER_KEY, JSON.stringify(getOrder()));
-  showStatus("✅✅ NAI-SAVE — ANG AYOS AY GANOON NA RIN SA MAIN.HTML", "success");
+  showStatus("✅✅ NAI-SAVE — Ang tsek = lalabas sa Main.html, walang tsek = nakatago lang", "success");
 }
 function resetOrder() {
   if (!confirm("Ibalik sa orihinal na ayos at listahan?")) return;
   localStorage.removeItem(ORDER_KEY);
+  localStorage.removeItem(VISIBLE_KEY);
   localStorage.removeItem(ALL_PAGES_KEY);
   render();
-  showStatus("↩️ Bumalik sa orihinal — babasahin ng main.html", "info");
+  showStatus("↩️ Bumalik sa orihinal — lahat ay nakikita", "info");
 }
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
