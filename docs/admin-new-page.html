@@ -4,24 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>Bagong Pahina</title>
-<style>
-.nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
-.nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
-.nav-bar a:hover,.nav-bar a.active{background:#b91c1c}
-.container{max-width:600px;margin:0 auto;padding:24px 16px}
-.form-card{background:white;padding:24px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-label{font-weight:bold;margin:16px 0 4px 0;display:block}
-input, textarea{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px}
-textarea{min-height:180px;resize:vertical}
-.btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;width:100%;margin-top:16px}
-.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white}
-.btn-secondary{background:#e5e7eb;color:#374151}
-.status{padding:14px;border-radius:8px;margin-top:16px;display:none}
-.status.success{background:#dcfce7;color:#166534;display:block}
-.status.error{background:#fee2e2;color:#991b1b;display:block}
-.note{color:#6b7280;font-size:14px;margin-top:6px}
-</style>
+<title>➕ Bagong Pahina — Diretso sa Assets</title>
 </head>
 <body>
 
@@ -39,17 +22,28 @@ textarea{min-height:180px;resize:vertical}
   <div class="form-card">
     <h1>➕ Gumawa ng Bagong Pahina</h1>
 
+    <!-- ✅ MALINAW NA LOKASYON -->
+    <div class="note">
+      📂 Direktang pupunta sa: <code>app/src/main/assets/pages/</code><br>
+      Kung walang internet — makikita sa <a href="admin-pending.html">⏳ Nakabinbin</a> hanggang makapag-sync.
+    </div>
+
     <label>Pangalan ng Pahina:</label>
-    <input type="text" id="page-name" placeholder="Hal. Kasamaan ng Pagsusugal">
+    <input type="text" id="page-name" placeholder="Hal. Epekto ng Sigarilyo">
 
-    <label>URL / Pangalan ng File:</label>
-    <input type="text" id="page-id" placeholder="Hal. pagsusugal-sa-internet">
-    <div class="note">Gumamit ng maliliit na titik at gitling (-), walang puwang</div>
+    <label>Pangalan ng File (sa assets/pages/):</label>
+    <input type="text" id="page-id" placeholder="Hal. epekto-ng-sigarilyo">
+    <div class="note">Gumamit ng maliliit na titik at gitling (-), walang puwang — <code>.html</code> awtomatiko na</div>
 
-    <label>Paunang Nilalaman:</label>
-    <textarea id="page-content" placeholder="<h2>Pamagat</h2>&#10;<p>Nilalaman dito...</p>"></textarea>
+    <label>Nilalaman ng Pahina:</label>
+    <textarea id="page-content" placeholder="<h2>Pamagat Dito</h2>
+<p>Isulat dito ang buong nilalaman...</p>
+<ul>
+  <li>Punto 1</li>
+  <li>Punto 2</li>
+</ul>"></textarea>
 
-    <button class="btn btn-primary" onclick="createPage()">✅ Gumawa ng Pahina</button>
+    <button class="btn btn-primary" onclick="createPage()">✅ GAWIN AT I-SAVE SA ASSETS</button>
     <button class="btn btn-secondary" onclick="resetForm()">↩️ Linisin</button>
 
     <div id="status-msg" class="status"></div>
@@ -58,7 +52,13 @@ textarea{min-height:180px;resize:vertical}
 
 <script>
 const SESSION_KEY = "bisyo_admin_session";
-const PAGES_KEY = "bisyo_page_list";
+const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
+const PENDING_KEY = "bisyo_offline_changes";
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME = "bisyo";
+const BRANCH = "main";
+// ✅ TAMA ANG LOKASYON — ASSETS/PAHINA
+const ASSETS_PATH = "app/src/main/assets/pages";
 
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
@@ -70,41 +70,123 @@ function checkSession() {
   return true;
 }
 
-function createPage() {
+function getEncryptedToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+}
+function getPassword() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  return s ? JSON.parse(s).password : "";
+}
+
+// ✅ DEKRIPSYON — kailangan para magamit ang token
+function decryptToken(encrypted, password) {
+  try {
+    const decoded = atob(encrypted);
+    let result = "";
+    for (let i = 0; i < decoded.length; i++) {
+      result += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+    }
+    return result;
+  } catch { return ""; }
+}
+
+async function createPage() {
   const name = document.getElementById("page-name").value.trim();
   let id = document.getElementById("page-id").value.trim();
-  const content = document.getElementById("page-content").value.trim();
+  let content = document.getElementById("page-content").value.trim();
 
-  if (!name || !id) return showStatus("❌ Punan ang pangalan at URL/file", "error");
+  // ✅ PAGTITIWALA
+  if (!name || !id) return showStatus("❌ Punan ang pangalan at pangalan ng file", "error");
   id = id.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  if (!id) return showStatus("❌ Hindi wasto ang pangalan ng file", "error");
+  if (!content) content = `<h2>${name}</h2><p>Ilagay dito ang nilalaman...</p>`;
 
-  // ✅ I-save ang pahina
-  localStorage.setItem("bisyo_page_content_" + id, 
-    `<h2>${name}</h2>\n` + (content || "<p>Ilagay dito ang nilalaman...</p>"));
+  // ✅ BUONG LOKASYON SA ASSETS
+  const filePath = `${ASSETS_PATH}/${id}.html`;
 
-  // ✅ Idagdag sa listahan
-  const pages = JSON.parse(localStorage.getItem(PAGES_KEY) || "[]");
-  if (!pages.includes(id)) pages.push(id);
-  localStorage.setItem(PAGES_KEY, JSON.stringify(pages));
+  // ✅ I-SAVE AGAD SA LOKAL — kahit walang internet
+  localStorage.setItem(`bisyo_page_content_${id}`, content);
 
-  // ✅ Idagdag sa pagkakasunod-sunod
-  const order = JSON.parse(localStorage.getItem("bisyo_page_order") || "[]");
-  if (!order.includes(id)) order.push(id);
-  localStorage.setItem("bisyo_page_order", JSON.stringify(order));
-
-  // ✅ Ihanda para sa GitHub
-  const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
+  // ✅ IHANDA PARA SA GITHUB — pupunta sa ASSETS
+  const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
   pending.push({
     type: "new-page",
     pageId: id,
-    name: name,
+    pageName: name,
+    filePath: filePath, // 📂 EKSACTONG LOKASYON SA ASSETS
+    content: content,
     timestamp: new Date().toISOString(),
     synced: false
   });
-  localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
+  localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
-  showStatus(`✅ Pahina naisagawa: ${id}.html — handa nang i-edit at i-sync`, "success");
+  // ✅ KUNG MAY INTERNET — I-SYNC AGAD SA ASSETS
+  if (navigator.onLine) {
+    showStatus(`📤 Ipinapasa sa GitHub → ${filePath} ...`, "info");
+    const saved = await tryUploadToGitHub(id, filePath, content);
+    if (saved) {
+      markAsSynced(id);
+      showStatus(`✅ NAI-SAVE SA ASSETS: ${filePath}`, "success");
+    } else {
+      showStatus(`⏳ Nakabinbin — gagamitin kapag online na: ${filePath}`, "warning");
+    }
+  } else {
+    showStatus(`📴 Walang internet — NAKABINBIN. Kapag online na: ${filePath}`, "info");
+  }
+
   resetForm();
+}
+
+// ✅ TUNAY NA PAG-UPLOAD SA GITHUB ASSETS
+async function tryUploadToGitHub(pageId, filePath, content) {
+  const encrypted = getEncryptedToken();
+  if (!encrypted) return false; // walang token — hindi pa pwede
+
+  const password = getPassword();
+  const realToken = decryptToken(encrypted, password);
+  if (!realToken) return false; // mali ang password o token
+
+  try {
+    // Kunin muna ang SHA kung mayroon na (para ma-update)
+    let sha = "";
+    try {
+      const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
+        headers: { "Authorization": `token ${realToken}` }
+      });
+      if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+    } catch {}
+
+    // I-upload/isulat sa ASSETS
+    const body = {
+      message: `Bagong pahina: ${pageId}.html — mula sa Admin Panel`,
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: BRANCH
+    };
+    if (sha) body.sha = sha; // i-update kung mayroon na
+
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `token ${realToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    return res.ok;
+  } catch (e) {
+    console.error("Upload fail:", e);
+    return false;
+  }
+}
+
+function markAsSynced(pageId) {
+  let list = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
+  list = list.map(item => {
+    if (item.pageId === pageId) return { ...item, synced: true };
+    return item;
+  });
+  localStorage.setItem(PENDING_KEY, JSON.stringify(list));
 }
 
 function resetForm() {
@@ -117,7 +199,7 @@ function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
   el.className = `status ${cls}`;
-  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 6000);
+  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 8000);
 }
 
 window.onload = () => checkSession();
