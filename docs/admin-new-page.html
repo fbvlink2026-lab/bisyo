@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>Bagong Pahina</title>
+<style>
+.nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
+.nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
+.nav-bar a:hover,.nav-bar a.active{background:#b91c1c}
+.container{max-width:600px;margin:0 auto;padding:24px 16px}
+.form-card{background:white;padding:24px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+label{font-weight:bold;margin:16px 0 4px 0;display:block}
+input, textarea{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px}
+textarea{min-height:180px;resize:vertical}
+.btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;width:100%;margin-top:16px}
+.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white}
+.btn-secondary{background:#e5e7eb;color:#374151}
+.status{padding:14px;border-radius:8px;margin-top:16px;display:none}
+.status.success{background:#dcfce7;color:#166534;display:block}
+.status.error{background:#fee2e2;color:#991b1b;display:block}
+.note{color:#6b7280;font-size:14px;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-order.html">🔢 Ayusin Ayos</a>
+  <a href="admin-edit.html">✏️ I-edit</a>
+  <a href="admin-new-page.html" class="active">➕ Bagong Pahina</a>
+  <a href="admin-pending.html">⏳ Nakabinbin</a>
+  <a href="setup-token.html">🔧 Token</a>
+  <a href="admin-settings.html">⚙️ Setting</a>
+</div>
+
+<div class="container">
+  <div class="form-card">
+    <h1>➕ Gumawa ng Bagong Pahina</h1>
+
+    <label>Pangalan ng Pahina:</label>
+    <input type="text" id="page-name" placeholder="Hal. Kasamaan ng Pagsusugal">
+
+    <label>URL / Pangalan ng File:</label>
+    <input type="text" id="page-id" placeholder="Hal. pagsusugal-sa-internet">
+    <div class="note">Gumamit ng maliliit na titik at gitling (-), walang puwang</div>
+
+    <label>Paunang Nilalaman:</label>
+    <textarea id="page-content" placeholder="<h2>Pamagat</h2>&#10;<p>Nilalaman dito...</p>"></textarea>
+
+    <button class="btn btn-primary" onclick="createPage()">✅ Gumawa ng Pahina</button>
+    <button class="btn btn-secondary" onclick="resetForm()">↩️ Linisin</button>
+
+    <div id="status-msg" class="status"></div>
+  </div>
+</div>
+
+<script>
+const SESSION_KEY = "bisyo_admin_session";
+const PAGES_KEY = "bisyo_page_list";
+
+function checkSession() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!s || Date.now() > JSON.parse(s).expiresAt) {
+    alert("Nakalipas na ang session — mag-login muli");
+    location.href = "admin.html";
+    return false;
+  }
+  return true;
+}
+
+function createPage() {
+  const name = document.getElementById("page-name").value.trim();
+  let id = document.getElementById("page-id").value.trim();
+  const content = document.getElementById("page-content").value.trim();
+
+  if (!name || !id) return showStatus("❌ Punan ang pangalan at URL/file", "error");
+  id = id.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
+  // ✅ I-save ang pahina
+  localStorage.setItem("bisyo_page_content_" + id, 
+    `<h2>${name}</h2>\n` + (content || "<p>Ilagay dito ang nilalaman...</p>"));
+
+  // ✅ Idagdag sa listahan
+  const pages = JSON.parse(localStorage.getItem(PAGES_KEY) || "[]");
+  if (!pages.includes(id)) pages.push(id);
+  localStorage.setItem(PAGES_KEY, JSON.stringify(pages));
+
+  // ✅ Idagdag sa pagkakasunod-sunod
+  const order = JSON.parse(localStorage.getItem("bisyo_page_order") || "[]");
+  if (!order.includes(id)) order.push(id);
+  localStorage.setItem("bisyo_page_order", JSON.stringify(order));
+
+  // ✅ Ihanda para sa GitHub
+  const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
+  pending.push({
+    type: "new-page",
+    pageId: id,
+    name: name,
+    timestamp: new Date().toISOString(),
+    synced: false
+  });
+  localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
+
+  showStatus(`✅ Pahina naisagawa: ${id}.html — handa nang i-edit at i-sync`, "success");
+  resetForm();
+}
+
+function resetForm() {
+  document.getElementById("page-name").value = "";
+  document.getElementById("page-id").value = "";
+  document.getElementById("page-content").value = "";
+}
+
+function showStatus(txt, cls) {
+  const el = document.getElementById("status-msg");
+  el.textContent = txt;
+  el.className = `status ${cls}`;
+  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 6000);
+}
+
+window.onload = () => checkSession();
+</script>
+</body>
+</html>
