@@ -1,6 +1,5 @@
 /* ==========================================
-   ✅ style.css — BUONG ESTILO NG BUONG PROYEKTO
-   Pinagsamang bersyon — Walang Doble
+   ✅ style.css — INAYOS: PUTI ANG SULAT SA PULA
    ========================================== */
 
 /* ---------- PANGKALAHATANG PANUNTUNAN ---------- */
@@ -21,20 +20,22 @@ body {
 /* ---------- NAKATAGONG LAMAN ---------- */
 .hidden { display: none !important; }
 
-/* ---------- PAMAGAT / HEADER — PULA + PUTING SULAT ---------- */
+/* ---------- HEADER — PULA + PUTING SULAT ---------- */
 .header {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
-  color: white;
+  color: white !important;
   padding: 20px 16px;
   box-shadow: 0 3px 8px rgba(0,0,0,.15);
 }
 .header h1 {
   font-size: 20px;
+  color: white !important;
   margin-bottom: 4px;
 }
 .header p {
   font-size: 13px;
-  opacity: 0.85;
+  opacity: 0.9;
+  color: white !important;
   margin-top: 3px;
 }
 
@@ -59,6 +60,7 @@ body {
 .nav-bar a:hover,
 .nav-bar a.active {
   background: #b91c1c;
+  color: white !important;
 }
 
 /* ---------- KAHON NG LAMAN ---------- */
@@ -101,12 +103,13 @@ li {
   padding: 16px;
   margin: 16px;
   border-radius: 10px;
+  color: #78350f;
 }
 
-/* ---------- DOWNLOAD SECTION — PULA ---------- */
+/* ---------- DOWNLOAD SECTION — PULA + PUTING SULAT ---------- */
 .download-section {
   background: linear-gradient(135deg, #b91c1c, #dc2626);
-  color: white;
+  color: white !important;
   border-radius: 14px;
   padding: 22px;
   margin: 16px;
@@ -114,15 +117,25 @@ li {
   transition: opacity 0.3s ease;
 }
 .download-section.hidden { opacity: 0; display: none !important; }
-.download-title { font-size: 19px; font-weight: bold; margin-bottom: 6px; }
-.download-sub { font-size: 14px; opacity: 0.9; margin-bottom: 16px; }
+.download-title {
+  font-size: 19px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: white !important;
+}
+.download-sub {
+  font-size: 14px;
+  opacity: 0.95;
+  margin-bottom: 16px;
+  color: white !important;
+}
 
 .download-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: white;
-  color: #b91c1c;
+  color: #b91c1c !important;
   font-weight: bold;
   font-size: 16px;
   border: none;
@@ -133,7 +146,7 @@ li {
   transition: transform 0.2s;
 }
 .download-btn:hover { transform: scale(1.02); }
-.download-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.download-btn:disabled { opacity: 0.7; cursor: not-allowed; color: #b91c1c !important; }
 
 .progress-container {
   background: rgba(255,255,255,0.25);
@@ -145,7 +158,7 @@ li {
 }
 .progress-bar {
   background: white;
-  color: #b91c1c;
+  color: #b91c1c !important;
   font-size: 11px;
   font-weight: bold;
   text-align: center;
@@ -158,8 +171,9 @@ li {
 .progress-text {
   font-size: 13px;
   margin-top: 6px;
-  opacity: 0.9;
+  opacity: 0.95;
   display: none;
+  color: white !important;
 }
 
 .download-info {
@@ -169,7 +183,9 @@ li {
   background: rgba(255,255,255,0.12);
   padding: 12px;
   border-radius: 10px;
+  color: white !important;
 }
+.download-info strong { color: #fef2f2 !important; }
 
 /* ---------- DIALOG / POPUP ---------- */
 .dialog-overlay {
@@ -193,7 +209,7 @@ li {
 .dialog-title {
   font-size: 20px;
   font-weight: bold;
-  color: #b91c1c;
+  color: #b91c1c !important;
   margin-bottom: 12px;
 }
 .dialog-body {
@@ -222,7 +238,7 @@ li {
 }
 .dialog-btn-confirm {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
-  color: white;
+  color: white !important;
 }
 
 /* ---------- IMPORMASYONG SEKSYON ---------- */
@@ -233,7 +249,7 @@ li {
 }
 .info-section h2 {
   font-size: 19px;
-  color: #b91c1c;
+  color: #b91c1c !important;
   margin: 28px 0 10px;
   padding-bottom: 6px;
   border-bottom: 2px solid #f3f4f6;
@@ -294,7 +310,7 @@ li {
   line-height: 36px;
   text-align: center;
   background: #dc2626;
-  color: white;
+  color: white !important;
   border-radius: 50%;
   font-weight: bold;
   font-size: 16px;
@@ -317,7 +333,7 @@ li {
 /* ---------- BALIK BUTTON AT NILALAMAN NG PAHINA ---------- */
 .back {
   display: inline-flex;
-  color: #dc2626;
+  color: #dc2626 !important;
   text-decoration: none;
   font-weight: 500;
   padding: 12px 16px;
@@ -335,7 +351,7 @@ li {
 }
 .content h2 {
   font-size: 18px;
-  color: #b91c1c;
+  color: #b91c1c !important;
   margin: 20px 0 8px;
   border-left: 3px solid #dc2626;
   padding-left: 10px;
@@ -358,7 +374,7 @@ li {
   transition: all 0.2s;
 }
 .admin-link a:hover {
-  color: #b91c1c;
+  color: #b91c1c !important;
   background: #fef2f2;
 }
 
@@ -384,7 +400,7 @@ li {
 .panel-title {
   font-size: 18px;
   font-weight: bold;
-  color: #b91c1c;
+  color: #b91c1c !important;
   margin-bottom: 14px;
   display: flex;
   justify-content: space-between;
@@ -408,10 +424,10 @@ li {
   font-weight: bold;
   text-align: center;
   margin-bottom: 20px;
-  color: #1f2937;
+  color: #b91c1c !important;
 }
 .error {
-  color: #dc2626;
+  color: #dc2626 !important;
   margin-bottom: 12px;
   min-height: 20px;
 }
@@ -446,7 +462,7 @@ input, select, textarea, .input {
 }
 input:focus, select:focus, textarea:focus, .input:focus {
   outline: none;
-  border-color: #b91c1c;
+  border-color: #b91c1c !important;
 }
 textarea {
   min-height: 320px;
@@ -476,18 +492,18 @@ textarea:placeholder { color: #9ca3af; }
 
 .btn-primary {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
-  color: white;
+  color: white !important;
 }
-.btn-primary:hover { background: #a81818; }
+.btn-primary:hover { background: #a81818; color: white !important; }
 .btn-secondary {
   background: #e5e7eb;
   color: #374151;
   font-weight: 500;
 }
 .btn-secondary:hover { background: #d1d5db; }
-.btn-success { background: #16a34a; color: white; }
+.btn-success { background: #16a34a; color: white !important; }
 .btn-warning { background: #f59e0b; color: #1f2937; }
-.btn-danger { background: #fee2e2; color: #dc2626; }
+.btn-danger { background: #fee2e2; color: #dc2626 !important; }
 .btn-danger:hover { background: #fecaca; }
 .btn-sm { padding: 6px 12px; font-size: 13px; }
 .btn-group {
@@ -580,14 +596,14 @@ textarea:placeholder { color: #9ca3af; }
   display: grid;
   place-items: center;
   background: #dc2626;
-  color: white;
+  color: white !important;
   border-radius: 50%;
   font-weight: bold;
   font-size: 14px;
 }
 .order-name { flex: 1; font-size: 15px; }
 .btn-up, .btn-down { background: #e5e7eb; }
-.btn-del { background: #fee2e2; color: #dc2626; }
+.btn-del { background: #fee2e2; color: #dc2626 !important; }
 
 /* ---------- NAKABINBING PAGBABAGO ---------- */
 .item {
@@ -642,7 +658,7 @@ textarea:placeholder { color: #9ca3af; }
 }
 .page-item.active {
   background: #b91c1c;
-  color: white;
+  color: white !important;
   border-color: #b91c1c;
 }
 .system-item { border-left: 3px solid #3b82f6; }
@@ -712,7 +728,7 @@ textarea#editor.unsaved {
 }
 .template-btn:hover {
   background: #f59e0b;
-  color: white;
+  color: white !important;
 }
 
 /* ---------- PENDING SECTION ---------- */
@@ -763,12 +779,12 @@ textarea#editor.unsaved {
 .modal-title {
   font-size: 18px;
   font-weight: bold;
-  color: #b91c1c;
+  color: #b91c1c !important;
   margin-bottom: 16px;
 }
 
 /* ---------- SETUP-TOKEN PAGE ---------- */
-.error-text { color: #dc2626; }
+.error-text { color: #dc2626 !important; }
 .warning { color: #d97706; }
 .success { color: #16a34a; }
 .info { color: #2563eb; }
