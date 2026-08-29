@@ -6,15 +6,16 @@
 <link rel="stylesheet" href="style.css">
 
 <script>
+// ✅ GitHub — APK at bersyon lang ang nasa docs/
 const GITHUB_API_URL = "https://api.github.com/repos/fbvlink2026-lab/bisyo/contents/docs";
 const RAW_BASE_URL = "https://github.com/fbvlink2026-lab/bisyo/raw/main/docs/";
-
-// ✅ BERSYON — KUSANG KUKUHA MULA SA GITHUB
 const VERSION_FILE_URL = "https://raw.githubusercontent.com/fbvlink2026-lab/bisyo/main/version.txt";
+
+// ✅ TAMA: mga pahina ng nilalaman ay nasa assets/pages/ lang
+const PAGES_FOLDER = "pages/";
+
 const VERSION_CACHE_KEY = "bisyo_cached_version";
 const DEFAULT_VERSION = "v1.0";
-
-// ✅ SABAY NA SA AYOS MULA SA ADMIN-ORDER.HTML
 const ORDER_KEY = "bisyo_page_order";
 const ALL_PAGES_KEY = "bisyo_all_pages";
 
@@ -22,31 +23,33 @@ let foundApk = null, downloadUrl = null;
 let gotProgressFromApp = false;
 
 // ==================================================
-// ✅ BATAYANG LISTAHAN — HINDI NA HARDCODED ANG AYOS
+// ✅ BATAYANG LISTAHAN — mga pahina ng nilalaman
 // ==================================================
 const BASE_PAGES = [
-  {id:"alak",           name:"Alak",                desc:"Labis na pag-inom at epekto", group:"bisyo", num:1, file:"alak.html", folder:"pages/"},
-  {id:"sigarilyo",      name:"Sigarilyo",           desc:"Paninigarilyo at panganib", group:"bisyo", num:2, file:"sigarilyo.html", folder:"pages/"},
-  {id:"shabu",          name:"Shabu",               desc:"Karahasan at pagkasira ng isip", group:"bisyo", num:3, file:"shabu.html", folder:"pages/"},
-  {id:"heroin",         name:"Heroin",              desc:"Matinding pagkalulong at panganib", group:"bisyo", num:4, file:"heroin.html", folder:"pages/"},
-  {id:"marijuana",      name:"Marijuana",           desc:"Epekto sa pag-iisip at katawan", group:"bisyo", num:5, file:"marijuana.html", folder:"pages/"},
-  {id:"ecstasy",        name:"Ecstasy",             desc:"Panganib sa kapistahan at pag-iisip", group:"bisyo", num:6, file:"ecstasy.html", folder:"pages/"},
-  {id:"cocaine",        name:"Cocaine",             desc:"Pagkagumon at panganib sa puso", group:"bisyo", num:7, file:"cocaine.html", folder:"pages/"},
-  {id:"tinuturok-gamot",name:"Tinuturok na Gamot",   desc:"Pinakamapanganib na paraan ng paggamit", group:"bisyo", num:8, file:"tinuturok-gamot.html", folder:"pages/"},
-  {id:"tuklaw",         name:"Tuklaw / Pagkalulong", desc:"Paano nabubihag at paano makakalaya", group:"bisyo", num:9, file:"tuklaw.html", folder:"pages/"},
-  {id:"sugal",          name:"Sugal",               desc:"Pagkawala ng kabuhayan at pamilya", group:"bisyo", num:10, file:"sugal.html", folder:"pages/"},
-  {id:"inhalants",      name:"Inhalants",           desc:"Mabilisang pagkasira ng utak at baga", group:"bisyo", num:11, file:"inhalants.html", folder:"pages/"},
-  {id:"pag-aabuso-gamot",name:"Pag-aabuso sa Gamot", desc:"Hindi lamang bawal na gamot — pati reseta", group:"bisyo", num:12, file:"pag-aabuso-gamot.html", folder:"pages/"},
-  {id:"lsd",            name:"LSD",                 desc:"Pagbabago sa paningin at pag-iisip", group:"bisyo", num:13, file:"lsd.html", folder:"pages/"},
-  {id:"ketamine",       name:"Ketamine",            desc:"Panganib at maling paggamit", group:"bisyo", num:14, file:"ketamine.html", folder:"pages/"},
-  {id:"ibang-sugal",    name:"Ibang Uri ng Sugal",  desc:"Lotto, sabong, online — lahat ay panganib", group:"bisyo", num:15, file:"ibang-sugal.html", folder:"pages/"},
-  {id:"internet-laro",  name:"Internet / Laro",      desc:"Pagkalulong sa oras at isipan", group:"bisyo", num:16, file:"internet-laro.html", folder:"pages/"},
-  {id:"labis-pagkain",  name:"Labis na Pagkain",     desc:"Pagkain bilang pampalubag-loob", group:"bisyo", num:17, file:"labis-pagkain.html", folder:"pages/"},
-  {id:"vaping",         name:"Vaping",              desc:"Hindi ligtas — pati usok ay lason", group:"bisyo", num:18, file:"vaping.html", folder:"pages/"},
-  {id:"aral-sa-bibliya",name:"Aral mula sa Bibliya", desc:"Pag-asa at lakas laban sa bisyo", group:"extra", num:null, file:"aral-sa-bibliya.html", folder:"pages/"}
+  {id:"alak",           name:"Alak",                desc:"Labis na pag-inom at epekto", group:"bisyo", num:1, file:"alak.html"},
+  {id:"sigarilyo",      name:"Sigarilyo",           desc:"Paninigarilyo at panganib", group:"bisyo", num:2, file:"sigarilyo.html"},
+  {id:"shabu",          name:"Shabu",               desc:"Karahasan at pagkasira ng isip", group:"bisyo", num:3, file:"shabu.html"},
+  {id:"heroin",         name:"Heroin",              desc:"Matinding pagkalulong at panganib", group:"bisyo", num:4, file:"heroin.html"},
+  {id:"marijuana",      name:"Marijuana",           desc:"Epekto sa pag-iisip at katawan", group:"bisyo", num:5, file:"marijuana.html"},
+  {id:"ecstasy",        name:"Ecstasy",             desc:"Panganib sa kapistahan at pag-iisip", group:"bisyo", num:6, file:"ecstasy.html"},
+  {id:"cocaine",        name:"Cocaine",             desc:"Pagkagumon at panganib sa puso", group:"bisyo", num:7, file:"cocaine.html"},
+  {id:"tinuturok-gamot",name:"Tinuturok na Gamot",   desc:"Pinakamapanganib na paraan ng paggamit", group:"bisyo", num:8, file:"tinuturok-gamot.html"},
+  {id:"tuklaw",         name:"Tuklaw / Pagkalulong", desc:"Paano nabubihag at paano makakalaya", group:"bisyo", num:9, file:"tuklaw.html"},
+  {id:"sugal",          name:"Sugal",               desc:"Pagkawala ng kabuhayan at pamilya", group:"bisyo", num:10, file:"sugal.html"},
+  {id:"inhalants",      name:"Inhalants",           desc:"Mabilisang pagkasira ng utak at baga", group:"bisyo", num:11, file:"inhalants.html"},
+  {id:"pag-aabuso-gamot",name:"Pag-aabuso sa Gamot", desc:"Hindi lamang bawal na gamot — pati reseta", group:"bisyo", num:12, file:"pag-aabuso-gamot.html"},
+  {id:"lsd",            name:"LSD",                 desc:"Pagbabago sa paningin at pag-iisip", group:"bisyo", num:13, file:"lsd.html"},
+  {id:"ketamine",       name:"Ketamine",            desc:"Panganib at maling paggamit", group:"bisyo", num:14, file:"ketamine.html"},
+  {id:"ibang-sugal",    name:"Ibang Uri ng Sugal",  desc:"Lotto, sabong, online — lahat ay panganib", group:"bisyo", num:15, file:"ibang-sugal.html"},
+  {id:"internet-laro",  name:"Internet / Laro",      desc:"Pagkalulong sa oras at isipan", group:"bisyo", num:16, file:"internet-laro.html"},
+  {id:"labis-pagkain",  name:"Labis na Pagkain",     desc:"Pagkain bilang pampalubag-loob", group:"bisyo", num:17, file:"labis-pagkain.html"},
+  {id:"vaping",         name:"Vaping",              desc:"Hindi ligtas — pati usok ay lason", group:"bisyo", num:18, file:"vaping.html"},
+  {id:"aral-sa-bibliya",name:"Aral mula sa Bibliya", desc:"Pag-asa at lakas laban sa bisyo", group:"extra", num:null, file:"aral-sa-bibliya.html"}
 ];
 
-// ✅ BERSYON — KUSANG KUKUHA
+// ==================================================
+// ✅ BERSYON — kusang kumuha mula sa GitHub
+// ==================================================
 function getCachedVersion() {
   return localStorage.getItem(VERSION_CACHE_KEY) || DEFAULT_VERSION;
 }
@@ -70,7 +73,9 @@ async function updateVersionDisplay() {
   document.querySelectorAll(".version-display").forEach(el => el.textContent = version);
 }
 
-// ✅ Kumuha ng lahat ng pahina — kasama ang mga idinagdag mula sa Admin
+// ==================================================
+// ✅ LISTAHAN — nasa assets/pages/ LANG ang mga nilalaman
+// ==================================================
 function getAllPages() {
   const stored = localStorage.getItem(ALL_PAGES_KEY);
   let list = BASE_PAGES.slice();
@@ -85,7 +90,7 @@ function getAllPages() {
   return list;
 }
 
-// ✅ BASAHIN ANG AYOS MULA SA ADMIN-ORDER.HTML
+// ✅ AYOS MULA SA ADMIN PANEL
 function getPageOrder() {
   const s = localStorage.getItem(ORDER_KEY);
   if (s) {
@@ -98,7 +103,7 @@ function getPageOrder() {
   return getAllPages().map(p => p.id);
 }
 
-// ✅ Kumuha ng lahat ng .html mula sa pages/ sa GitHub — KUNG ONLINE
+// ✅ Kumuha ng bagong pahina mula sa GitHub — pero binubuksan sa lokal na assets/pages/
 async function fetchPagesFromGitHub() {
   if (!isOnline()) return getAllPages();
   try {
@@ -117,8 +122,7 @@ async function fetchPagesFromGitHub() {
           desc: "Karagdagang pahina",
           group: "bisyo",
           num: null,
-          file: f.name,
-          folder: "pages/"
+          file: f.name
         });
       }
     });
@@ -129,7 +133,7 @@ async function fetchPagesFromGitHub() {
   }
 }
 
-// ✅ BUUIN ANG MGA BUTON — SUNOD SA AYOS MULA SA ADMIN-ORDER.HTML
+// ✅ BUUIN ANG MGA BUTON — TAMA: papunta sa pages/pangalan.html
 async function buildPageGrids() {
   const allPages = await fetchPagesFromGitHub();
   const order = getPageOrder();
@@ -146,7 +150,7 @@ async function buildPageGrids() {
     const container = page.group === "extra" ? extraGrid : bisyoGrid;
 
     const a = document.createElement("a");
-    a.href = `${page.folder || 'pages/'}${page.file || page.id + '.html'}`;
+    a.href = PAGES_FOLDER + (page.file || page.id + '.html'); // ✅ pages/ — tama!
     a.className = "btn";
     a.innerHTML = `
       <span class="num">${page.num || '✦'}</span>
@@ -160,9 +164,8 @@ async function buildPageGrids() {
 }
 
 // ==================================================
-// PAG-DOWNLOAD AT IBA PANG TUNGKULIN
+// ✅ PAG-DOWNLOAD — APK LANG ang nasa docs/
 // ==================================================
-
 function isOnline() { return navigator.onLine; }
 function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
 
@@ -175,7 +178,7 @@ function updateDownloadVisibility() {
 async function findAnyApk() {
   if (!isOnline()) return null;
   try {
-    const res = await fetch(GITHUB_API_URL, { cache: "no-store" });
+    const res = await fetch(GITHUB_API_URL, { cache: "no-store" }); // ✅ docs/ — APK lang dito
     if (!res.ok) throw new Error("API Error");
     const files = await res.json();
     const apk = files.filter(f => f.name.toLowerCase().endsWith(".apk"))[0];
@@ -236,7 +239,7 @@ function downloadCompleteFromApp() {
 }
 
 function downloadErrorFromApp() {
-  setProgress(0, "❌ Nabigo — Subukan muli");
+  setProgress(0, "❌ Nabigo — Subukan Muli");
   const btn = document.getElementById("download-apk-btn");
   btn.textContent = "🔄 Subukan Muli";
   btn.disabled = false;
@@ -269,10 +272,8 @@ async function startDownload() {
 
 window.onload = async function() {
   updateDownloadVisibility();
-
-  // ✅ BASAHIN ANG AYOS AT BERSYON — KUSANG SUSUNOD
   await buildPageGrids();
-  await updateVersionDisplay(); // ✅ I-UPDATE ANG BERSYON AGAD
+  await updateVersionDisplay();
 
   if (!isOnline()) return;
   const btn = document.getElementById("download-apk-btn");
