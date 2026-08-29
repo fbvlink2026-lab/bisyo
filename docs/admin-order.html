@@ -4,26 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>Ayusin Pagkakasunod-sunod</title>
-<style>
-.nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
-.nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
-.nav-bar a:hover,.nav-bar a.active{background:#b91c1c}
-.container{max-width:700px;margin:0 auto;padding:16px}
-.order-row{display:flex;align-items:center;gap:10px;padding:12px;background:white;border-radius:8px;margin:6px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.order-pos{width:30px;height:30px;display:grid;place-items:center;background:#dc2626;color:white;border-radius:50%;font-weight:bold;font-size:14px}
-.order-name{flex:1;font-size:15px}
-.btn{padding:8px 12px;border:none;border-radius:6px;cursor:pointer;font-size:14px}
-.btn-sm{padding:4px 8px;font-size:13px}
-.btn-up,.btn-down{background:#e5e7eb}
-.btn-del{background:#fee2e2;color:#dc2626}
-.btn-primary{background:#b91c1c;color:white;padding:10px 20px;font-weight:bold}
-.btn-secondary{background:#e5e7eb;color:#374151}
-.action-bar{display:flex;gap:10px;margin:20px 0;flex-wrap:wrap}
-.status{padding:10px 14px;border-radius:6px;margin:12px 0;display:none}
-.status.success{background:#dcfce7;color:#166534;display:block}
-.status.info{background:#eff6ff;color:#1e40af;display:block}
-</style>
+<title>🔢 Ayusin Pagkakasunod-sunod</title>
 </head>
 <body>
 
@@ -39,12 +20,33 @@
 
 <div class="container">
   <h1>🔢 Ayusin ang Pagkakasunod-sunod</h1>
-  <p style="color:#6b7280;margin-bottom:20px">⬆️⬇️ Ilipat ang pwesto • 🗑️ Alisin sa listahan o tuluyang burahin</p>
+  <p style="color:#6b7280;margin-bottom:10px">⬆️⬇️ Ilipat ang pwesto • ✅ Piliin kung isasama • 🗑️ Alisin sa listahan</p>
 
+  <!-- ✅ SURIIN ANG GITHUB — KUNG MAY BAGONG FILE -->
+  <div class="panel-card">
+    <div class="top-bar">
+      <strong>🔍 Suriin ang Assets sa GitHub</strong>
+      <span id="scan-status" class="last-saved">—</span>
+    </div>
+    <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Kung online — babasahin ang <code>assets/</code> at <code>assets/pages/</code> — makikita ang lahat ng uri ng file</p>
+    <button class="btn btn-primary" onclick="scanGitHubAssets()">🔍 SURIIN NGAYON</button>
+    <div id="found-files-section" class="hidden" style="margin-top:14px">
+      <p style="font-weight:bold">📄 Mga Nakitang File:</p>
+      <div id="found-files-list" style="max-height:240px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;padding:8px;background:#fafafa"></div>
+      <div class="btn-group" style="margin-top:10px">
+        <button class="btn btn-success" onclick="addFoundToList()">✅ Isama ang Napili sa Listahan</button>
+        <button class="btn btn-secondary" onclick="hideFoundFiles()">❌ Huwag Isama</button>
+      </div>
+    </div>
+  </div>
+
+  <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb">
+
+  <h2>📋 Kasalukuyang Listahan — Lalabas sa Main.html</h2>
   <div id="order-list"></div>
 
   <div class="action-bar">
-    <button class="btn btn-primary" onclick="saveOrder()">💾 I-save ang Ayos</button>
+    <button class="btn btn-primary" onclick="saveOrder()">💾 I-save ang Ayos → MAKIKITA SA MAIN.HTML</button>
     <button class="btn btn-secondary" onclick="resetOrder()">↩️ Ibalik sa Orihinal</button>
   </div>
 
@@ -53,30 +55,39 @@
 
 <script>
 const ORDER_KEY = "bisyo_page_order";
+const ALL_PAGES_KEY = "bisyo_all_pages";
 const SESSION_KEY = "bisyo_admin_session";
+const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME = "bisyo";
+const BRANCH = "main";
+const BASE_PATH = "app/src/main/assets/";
 
-const PAGES = [
-  {id:"alak", name:"Alak"},
-  {id:"sigarilyo", name:"Sigarilyo"},
-  {id:"shabu", name:"Shabu"},
-  {id:"heroin", name:"Heroin"},
-  {id:"marijuana", name:"Marijuana"},
-  {id:"ecstasy", name:"Ecstasy"},
-  {id:"cocaine", name:"Cocaine"},
-  {id:"tinuturok-gamot", name:"Tinuturok na Gamot"},
-  {id:"tuklaw", name:"Tuklaw / Pagkalulong"},
-  {id:"sugal", name:"Sugal"},
-  {id:"inhalants", name:"Inhalants"},
-  {id:"pag-aabuso-gamot", name:"Pag-aabuso sa Gamot"},
-  {id:"lsd", name:"LSD"},
-  {id:"ketamine", name:"Ketamine"},
-  {id:"ibang-sugal", name:"Ibang Uri ng Sugal"},
-  {id:"internet-laro", name:"Internet / Laro"},
-  {id:"labis-pagkain", name:"Labis na Pagkain"},
-  {id:"vaping", name:"Vaping"},
-  {id:"aral-sa-bibliya", name:"Aral mula sa Bibliya"}
+const DEFAULT_PAGES = [
+  {id:"alak", name:"Alak", file:"alak.html", folder:"pages/"},
+  {id:"sigarilyo", name:"Sigarilyo", file:"sigarilyo.html", folder:"pages/"},
+  {id:"shabu", name:"Shabu", file:"shabu.html", folder:"pages/"},
+  {id:"heroin", name:"Heroin", file:"heroin.html", folder:"pages/"},
+  {id:"marijuana", name:"Marijuana", file:"marijuana.html", folder:"pages/"},
+  {id:"ecstasy", name:"Ecstasy", file:"ecstasy.html", folder:"pages/"},
+  {id:"cocaine", name:"Cocaine", file:"cocaine.html", folder:"pages/"},
+  {id:"tinuturok-gamot", name:"Tinuturok na Gamot", file:"tinuturok-gamot.html", folder:"pages/"},
+  {id:"tuklaw", name:"Tuklaw / Pagkalulong", file:"tuklaw.html", folder:"pages/"},
+  {id:"sugal", name:"Sugal", file:"sugal.html", folder:"pages/"},
+  {id:"inhalants", name:"Inhalants", file:"inhalants.html", folder:"pages/"},
+  {id:"pag-aabuso-gamot", name:"Pag-aabuso sa Gamot", file:"pag-aabuso-gamot.html", folder:"pages/"},
+  {id:"lsd", name:"LSD", file:"lsd.html", folder:"pages/"},
+  {id:"ketamine", name:"Ketamine", file:"ketamine.html", folder:"pages/"},
+  {id:"ibang-sugal", name:"Ibang Uri ng Sugal", file:"ibang-sugal.html", folder:"pages/"},
+  {id:"internet-laro", name:"Internet / Laro", file:"internet-laro.html", folder:"pages/"},
+  {id:"labis-pagkain", name:"Labis na Pagkain", file:"labis-pagkain.html", folder:"pages/"},
+  {id:"vaping", name:"Vaping", file:"vaping.html", folder:"pages/"},
+  {id:"aral-sa-bibliya", name:"Aral mula sa Bibliya", file:"aral-sa-bibliya.html", folder:"pages/"}
 ];
 
+let foundFiles = [];
+
+// === SESSION ===
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
   if (!s || Date.now() > JSON.parse(s).expiresAt) {
@@ -86,69 +97,219 @@ function checkSession() {
   }
   return true;
 }
+function getPassword() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  return s ? JSON.parse(s).password : "";
+}
+function getEncryptedToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+}
+function decryptToken(encrypted, password) {
+  try {
+    const decoded = atob(encrypted);
+    let result = "";
+    for (let i = 0; i < decoded.length; i++) {
+      result += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+    }
+    return result;
+  } catch { return ""; }
+}
+
+// === LISTAHAN NG LAHAT NG PAHINA ===
+function getAllPages() {
+  const stored = localStorage.getItem(ALL_PAGES_KEY);
+  let list = DEFAULT_PAGES.slice();
+  if (stored) {
+    try {
+      const extra = JSON.parse(stored);
+      extra.forEach(p => {
+        if (!list.find(x => x.id === p.id)) list.push(p);
+      });
+    } catch {}
+  }
+  return list;
+}
+function saveAllPages(pages) {
+  const defaults = new Set(DEFAULT_PAGES.map(p=>p.id));
+  localStorage.setItem(ALL_PAGES_KEY, JSON.stringify(pages.filter(p => !defaults.has(p.id))));
+}
+
+// === PAGKAKASUNOD-SUNOD — ITO ANG BABASAHIN NG MAIN.HTML ===
 function getOrder() {
   const s = localStorage.getItem(ORDER_KEY);
   if (s) try { return JSON.parse(s) } catch {}
-  return PAGES.map(p => p.id);
+  return DEFAULT_PAGES.map(p => p.id);
 }
+
+// === ✅ SURIIN ANG GITHUB ASSETS ===
+async function scanGitHubAssets() {
+  if (!navigator.onLine) {
+    showStatus("📴 Walang internet — hindi masuri ang GitHub", "warning");
+    return;
+  }
+  const encrypted = getEncryptedToken();
+  const password = getPassword();
+  const realToken = decryptToken(encrypted, password);
+  if (!realToken) {
+    showStatus("❌ Walang wastong token — hindi makabasa sa GitHub", "error");
+    return;
+  }
+
+  document.getElementById("scan-status").textContent = "🔍 Sinusuri...";
+  foundFiles = [];
+
+  try {
+    await fetchFolder(BASE_PATH, realToken, "");
+    await fetchFolder(BASE_PATH + "pages/", realToken, "pages/");
+
+    displayFoundFiles();
+    document.getElementById("scan-status").textContent = `✅ ${foundFiles.length} nakita`;
+    showStatus(`✅ Natagpuan: ${foundFiles.length} file — piliin kung isasama`, "success");
+  } catch (e) {
+    document.getElementById("scan-status").textContent = "❌ Nabigo";
+    showStatus("❌ Nabigo ang pagbasa: " + e.message, "error");
+  }
+}
+
+async function fetchFolder(folderPath, token, folderLabel) {
+  const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${folderPath}?ref=${BRANCH}`, {
+    headers: { "Authorization": `token ${token}` }
+  });
+  if (!res.ok) return;
+  const items = await res.json();
+  if (!Array.isArray(items)) return;
+
+  items.forEach(item => {
+    if (item.type === "file") {
+      const ext = item.name.split(".").pop().toLowerCase();
+      const id = item.name.replace(/\.[^.]+$/,"");
+      const existing = getAllPages().find(p => p.file === item.name && p.folder === folderLabel);
+
+      foundFiles.push({
+        id: existing ? existing.id : `${folderLabel}${id}`,
+        name: existing ? existing.name : id.replace(/-/g," "),
+        file: item.name,
+        folder: folderLabel,
+        path: folderPath + item.name,
+        type: ext,
+        alreadyListed: !!existing
+      });
+    }
+  });
+}
+
+function displayFoundFiles() {
+  const container = document.getElementById("found-files-list");
+  container.innerHTML = "";
+  foundFiles.forEach((f, idx) => {
+    container.innerHTML += `
+      <label style="display:flex;align-items:center;gap:8px;padding:6px 4px;${f.alreadyListed?'opacity:0.6':''}">
+        <input type="checkbox" id="file-cb-${idx}" ${f.alreadyListed?'checked disabled':''}>
+        <span style="font-family:monospace;font-size:13px">${f.folder}${f.file}</span>
+        <span style="margin-left:auto;font-size:12px;color:${f.type==='html'?'#16a34a':'#6b7280'}">.${f.type}</span>
+        ${f.alreadyListed?'<span style="margin-left:4px;font-size:11px;color:#16a34a">✓ Nasa Listahan</span>':''}
+      </label>`;
+  });
+  document.getElementById("found-files-section").classList.remove("hidden");
+}
+
+// === ✅ ISAMA SA LISTAHAN → LALABAS SA MAIN.HTML ===
+function addFoundToList() {
+  const allPages = getAllPages();
+  const order = getOrder();
+  let addedCount = 0;
+
+  foundFiles.forEach((f, idx) => {
+    const cb = document.getElementById(`file-cb-${idx}`);
+    if (!cb || cb.disabled || !cb.checked) return;
+
+    if (!allPages.find(p => p.file === f.file && p.folder === f.folder)) {
+      allPages.push({ id: f.id, name: f.name, file: f.file, folder: f.folder });
+      order.push(f.id); // ✅ Agad isinama — lalabas sa main.html
+      addedCount++;
+    }
+  });
+
+  if (addedCount > 0) {
+    saveAllPages(allPages);
+    localStorage.setItem(ORDER_KEY, JSON.stringify(order)); // ✅ I-save — babasahin ng main.html
+    render();
+    showStatus(`✅ ${addedCount} naidagdag — LALABAS AGAD SA MAIN.HTML`, "success");
+  } else {
+    showStatus("Walang bagong idinagdag", "info");
+  }
+  hideFoundFiles();
+}
+
+function hideFoundFiles() {
+  document.getElementById("found-files-section").classList.add("hidden");
+}
+
+// === RENDER NG LISTAHAN ===
 function render() {
   const list = document.getElementById("order-list");
   const order = getOrder();
+  const allPages = getAllPages();
   list.innerHTML = "";
+
   order.forEach((id, idx) => {
-    const page = PAGES.find(p => p.id === id);
+    const page = allPages.find(p => p.id === id);
     if (!page) return;
     list.innerHTML += `
       <div class="order-row">
         <span class="order-pos">${idx+1}</span>
-        <span class="order-name">${page.name}</span>
+        <div style="flex:1">
+          <div class="order-name">${page.name}</div>
+          <div style="font-size:12px;color:#6b7280">📂 ${page.folder||'pages/'}${page.file||page.id+'.html'}</div>
+        </div>
         <button class="btn btn-sm btn-up" onclick="move(${idx},-1)" ${idx===0?'disabled':''}>⬆️</button>
         <button class="btn btn-sm btn-down" onclick="move(${idx},1)" ${idx===order.length-1?'disabled':''}>⬇️</button>
         <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')">🗑️</button>
       </div>`;
   });
 }
+
+// === ✅ ILIPAT ANG PWEStO — KUSANG NAI-SAVE → MAIN.HTML SUSUNOD ===
 function move(i, dir) {
   const o = getOrder();
   [o[i], o[i+dir]] = [o[i+dir], o[i]];
-  localStorage.setItem(ORDER_KEY, JSON.stringify(o));
+  localStorage.setItem(ORDER_KEY, JSON.stringify(o)); // ✅ Agad nai-save
   render();
+  showStatus("✅ Inilipat — makikita sa main.html", "info");
 }
+
+// === ✅ PAGPILI KUNG ISASAMA SA MAIN.HTML ===
 function askRemove(id, name) {
-  const opt = confirm(`"${name}"\n\nOK = 🗑️ TALAGANG BURAHIN ANG FILE\nCancel = ✅ Alisin LANG sa Listahan`);
+  const opt = confirm(`"${name}"\n\nOK = ❌ HUWAG IPALITAW SA MAIN.HTML\nCancel = ✅ Panatilihin sa listahan`);
   if (opt) {
-    if(confirm(`⚠️ SIGURADO KA BA TALAGANG BURAHIN ANG "${name}"? HINDI NA ITO MABABALIK!`)) {
-      permanentlyDelete(id, name);
-    }
-  } else {
-    removeFromList(id);
+    removeFromList(id); // ✅ Hindi baburahin — HINDI NA LALABAS SA MAIN.HTML
   }
 }
 function removeFromList(id) {
   const o = getOrder().filter(x => x !== id);
   localStorage.setItem(ORDER_KEY, JSON.stringify(o));
   render();
-  showStatus(`✅ Inalis sa listahan — file ay nandoon pa rin`, "info");
+  showStatus(`✅ Inalis sa listahan — HINDI NA LALABAS SA MAIN.HTML — file nandoon pa rin`, "success");
 }
-function permanentlyDelete(id, name) {
-  removeFromList(id);
-  showStatus(`✅✅ TALAGANG BINURA: ${name}`, "success");
-}
+
 function saveOrder() {
-  showStatus("✅ Nai-save ang ayos — makikita sa main.html", "success");
+  localStorage.setItem(ORDER_KEY, JSON.stringify(getOrder()));
+  showStatus("✅✅ NAI-SAVE — ANG AYOS AY GANOON NA RIN SA MAIN.HTML", "success");
 }
 function resetOrder() {
-  if (!confirm("Ibalik sa orihinal na ayos?")) return;
+  if (!confirm("Ibalik sa orihinal na ayos at listahan?")) return;
   localStorage.removeItem(ORDER_KEY);
+  localStorage.removeItem(ALL_PAGES_KEY);
   render();
-  showStatus("↩️ Bumalik sa orihinal", "info");
+  showStatus("↩️ Bumalik sa orihinal — babasahin ng main.html", "info");
 }
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
   el.className = `status ${cls}`;
-  setTimeout(()=>{el.style.display="none"},4000);
+  setTimeout(()=>{el.style.display="none";el.className="status"},6000);
 }
+
 window.onload = () => checkSession() && render();
 </script>
 </body>
