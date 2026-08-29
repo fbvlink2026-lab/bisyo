@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>➕ Bagong Pahina — Diretso sa Assets</title>
+<title>➕ Bagong File / Pahina — Sa Assets</title>
 </head>
 <body>
 
@@ -12,7 +12,7 @@
   <a href="admin.html">🏠 Dashboard</a>
   <a href="admin-order.html">🔢 Ayusin Ayos</a>
   <a href="admin-edit.html">✏️ I-edit</a>
-  <a href="admin-new-page.html" class="active">➕ Bagong Pahina</a>
+  <a href="admin-new-page.html" class="active">➕ Bagong File</a>
   <a href="admin-pending.html">⏳ Nakabinbin</a>
   <a href="setup-token.html">🔧 Token</a>
   <a href="admin-settings.html">⚙️ Setting</a>
@@ -20,31 +20,42 @@
 
 <div class="container">
   <div class="form-card">
-    <h1>➕ Gumawa ng Bagong Pahina</h1>
+    <h1>➕ Gumawa ng Bagong File sa Assets</h1>
 
-    <!-- ✅ MALINAW NA LOKASYON -->
+    <!-- ✅ PAGPILI NG LOKASYON -->
     <div class="note">
-      📂 Direktang pupunta sa: <code>app/src/main/assets/pages/</code><br>
-      Kung walang internet — makikita sa <a href="admin-pending.html">⏳ Nakabinbin</a> hanggang makapag-sync.
+      📂 Pumili ng lokasyon — sa ugat ng <code>assets/</code> o sa loob ng <code>assets/pages/</code>
     </div>
 
-    <label>Pangalan ng Pahina:</label>
-    <input type="text" id="page-name" placeholder="Hal. Epekto ng Sigarilyo">
+    <label>📂 Lokasyon:</label>
+    <select id="location-select" onchange="updatePathHint()">
+      <option value="assets/">📂 Sa ugat: app/src/main/assets/</option>
+      <option value="assets/pages/" selected>📂 Sa pages: app/src/main/assets/pages/</option>
+      <option value="custom">✏️ Ipasok ang sariling landas...</option>
+    </select>
 
-    <label>Pangalan ng File (sa assets/pages/):</label>
-    <input type="text" id="page-id" placeholder="Hal. epekto-ng-sigarilyo">
-    <div class="note">Gumamit ng maliliit na titik at gitling (-), walang puwang — <code>.html</code> awtomatiko na</div>
+    <label id="custom-path-label" style="display:none">✏️ Sariling Landas:</label>
+    <input type="text" id="custom-path" placeholder="Hal. assets/template/" style="display:none">
 
-    <label>Nilalaman ng Pahina:</label>
-    <textarea id="page-content" placeholder="<h2>Pamagat Dito</h2>
-<p>Isulat dito ang buong nilalaman...</p>
-<ul>
-  <li>Punto 1</li>
-  <li>Punto 2</li>
-</ul>"></textarea>
+    <p id="path-hint" style="margin:8px 0 16px 0;color:#6b7280;font-size:14px">
+      📂 Pupunta sa: <code>app/src/main/assets/pages/</code>
+    </p>
 
-    <button class="btn btn-primary" onclick="createPage()">✅ GAWIN AT I-SAVE SA ASSETS</button>
-    <button class="btn btn-secondary" onclick="resetForm()">↩️ Linisin</button>
+    <label>Pangalan ng File (kabilang ang .html / .css / .js atbp.):</label>
+    <input type="text" id="filename" placeholder="Hal. index.html o style.css o tungkol.html">
+    <div class="note">💡 Ipasok ang buong pangalan kasama ang uri — hal. <code>index.html</code>, hindi <code>index</code> lang</div>
+
+    <label>Maikling Paglalarawan / Pamagat:</label>
+    <input type="text" id="page-name" placeholder="Hal. Tungkol sa Proyekto">
+
+    <label>Nilalaman ng File:</label>
+    <textarea id="file-content" placeholder="<h2>Pamagat Dito</h2>
+<p>Isulat dito ang buong nilalaman...</p>"></textarea>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="createFile()">✅ I-SAVE SA ASSETS</button>
+      <button class="btn btn-secondary" onclick="resetForm()">↩️ Linisin</button>
+    </div>
 
     <div id="status-msg" class="status"></div>
   </div>
@@ -57,8 +68,7 @@ const PENDING_KEY = "bisyo_offline_changes";
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
-// ✅ TAMA ANG LOKASYON — ASSETS/PAHINA
-const ASSETS_PATH = "app/src/main/assets/pages";
+const BASE_PATH = "app/src/main/";
 
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
@@ -70,6 +80,34 @@ function checkSession() {
   return true;
 }
 
+function updatePathHint() {
+  const sel = document.getElementById("location-select").value;
+  const hint = document.getElementById("path-hint");
+  const customLabel = document.getElementById("custom-path-label");
+  const customInput = document.getElementById("custom-path");
+
+  if (sel === "custom") {
+    hint.style.display = "none";
+    customLabel.style.display = "block";
+    customInput.style.display = "block";
+  } else {
+    hint.style.display = "block";
+    customLabel.style.display = "none";
+    customInput.style.display = "none";
+    hint.innerHTML = `📂 Pupunta sa: <code>${BASE_PATH}${sel}</code>`;
+  }
+}
+
+function getFullPath() {
+  const sel = document.getElementById("location-select").value;
+  if (sel === "custom") {
+    const cp = document.getElementById("custom-path").value.trim();
+    if (!cp) return null;
+    return BASE_PATH + (cp.endsWith("/") ? cp : cp + "/");
+  }
+  return BASE_PATH + sel;
+}
+
 function getEncryptedToken() {
   return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
 }
@@ -78,7 +116,6 @@ function getPassword() {
   return s ? JSON.parse(s).password : "";
 }
 
-// ✅ DEKRIPSYON — kailangan para magamit ang token
 function decryptToken(encrypted, password) {
   try {
     const decoded = atob(encrypted);
@@ -90,64 +127,62 @@ function decryptToken(encrypted, password) {
   } catch { return ""; }
 }
 
-async function createPage() {
-  const name = document.getElementById("page-name").value.trim();
-  let id = document.getElementById("page-id").value.trim();
-  let content = document.getElementById("page-content").value.trim();
+async function createFile() {
+  const filename = document.getElementById("filename").value.trim();
+  const name = document.getElementById("page-name").value.trim() || filename;
+  let content = document.getElementById("file-content").value;
 
   // ✅ PAGTITIWALA
-  if (!name || !id) return showStatus("❌ Punan ang pangalan at pangalan ng file", "error");
-  id = id.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-  if (!id) return showStatus("❌ Hindi wasto ang pangalan ng file", "error");
-  if (!content) content = `<h2>${name}</h2><p>Ilagay dito ang nilalaman...</p>`;
+  if (!filename) return showStatus("❌ Ilagay ang pangalan ng file", "error");
+  if (!content) content = `<!-- ${name} -->\n<p>Ilagay ang nilalaman dito...</p>`;
 
-  // ✅ BUONG LOKASYON SA ASSETS
-  const filePath = `${ASSETS_PATH}/${id}.html`;
+  // ✅ KUMPLETONG LOKASYON
+  const folderPath = getFullPath();
+  if (!folderPath) return showStatus("❌ Ilagay ang sariling landas", "error");
+  const filePath = folderPath + filename;
 
-  // ✅ I-SAVE AGAD SA LOKAL — kahit walang internet
-  localStorage.setItem(`bisyo_page_content_${id}`, content);
+  // ✅ I-SAVE AGAD SA LOKAL
+  localStorage.setItem(`bisyo_file_${filePath}`, content);
 
-  // ✅ IHANDA PARA SA GITHUB — pupunta sa ASSETS
+  // ✅ IHANDA PARA SA GITHUB
   const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
   pending.push({
-    type: "new-page",
-    pageId: id,
+    type: "new-file",
+    fileName: filename,
+    filePath: filePath,
     pageName: name,
-    filePath: filePath, // 📂 EKSACTONG LOKASYON SA ASSETS
     content: content,
     timestamp: new Date().toISOString(),
     synced: false
   });
   localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
-  // ✅ KUNG MAY INTERNET — I-SYNC AGAD SA ASSETS
+  // ✅ KUNG MAY INTERNET — I-UPLOAD AGAD
   if (navigator.onLine) {
     showStatus(`📤 Ipinapasa sa GitHub → ${filePath} ...`, "info");
-    const saved = await tryUploadToGitHub(id, filePath, content);
+    const saved = await tryUploadToGitHub(filePath, content, name);
     if (saved) {
-      markAsSynced(id);
-      showStatus(`✅ NAI-SAVE SA ASSETS: ${filePath}`, "success");
+      markAsSynced(filePath);
+      showStatus(`✅ NAI-SAVE: ${filePath}`, "success");
     } else {
-      showStatus(`⏳ Nakabinbin — gagamitin kapag online na: ${filePath}`, "warning");
+      showStatus(`⏳ Nakabinbin — pupunta sa: ${filePath}`, "warning");
     }
   } else {
-    showStatus(`📴 Walang internet — NAKABINBIN. Kapag online na: ${filePath}`, "info");
+    showStatus(`📴 Walang internet — NAKABINBIN: ${filePath}`, "info");
   }
 
   resetForm();
 }
 
-// ✅ TUNAY NA PAG-UPLOAD SA GITHUB ASSETS
-async function tryUploadToGitHub(pageId, filePath, content) {
+async function tryUploadToGitHub(filePath, content, messageTitle) {
   const encrypted = getEncryptedToken();
-  if (!encrypted) return false; // walang token — hindi pa pwede
+  if (!encrypted) return false;
 
   const password = getPassword();
   const realToken = decryptToken(encrypted, password);
-  if (!realToken) return false; // mali ang password o token
+  if (!realToken) return false;
 
   try {
-    // Kunin muna ang SHA kung mayroon na (para ma-update)
     let sha = "";
     try {
       const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
@@ -156,13 +191,12 @@ async function tryUploadToGitHub(pageId, filePath, content) {
       if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
     } catch {}
 
-    // I-upload/isulat sa ASSETS
     const body = {
-      message: `Bagong pahina: ${pageId}.html — mula sa Admin Panel`,
+      message: `Bagong file: ${filePath} — ${messageTitle}`,
       content: btoa(unescape(encodeURIComponent(content))),
       branch: BRANCH
     };
-    if (sha) body.sha = sha; // i-update kung mayroon na
+    if (sha) body.sha = sha;
 
     const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
       method: "PUT",
@@ -171,7 +205,7 @@ async function tryUploadToGitHub(pageId, filePath, content) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
-    });
+    };
 
     return res.ok;
   } catch (e) {
@@ -180,29 +214,35 @@ async function tryUploadToGitHub(pageId, filePath, content) {
   }
 }
 
-function markAsSynced(pageId) {
+function markAsSynced(filePath) {
   let list = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
   list = list.map(item => {
-    if (item.pageId === pageId) return { ...item, synced: true };
+    if (item.filePath === filePath) return { ...item, synced: true };
     return item;
   });
   localStorage.setItem(PENDING_KEY, JSON.stringify(list));
 }
 
 function resetForm() {
+  document.getElementById("filename").value = "";
   document.getElementById("page-name").value = "";
-  document.getElementById("page-id").value = "";
-  document.getElementById("page-content").value = "";
+  document.getElementById("file-content").value = "";
+  document.getElementById("location-select").value = "assets/pages/";
+  document.getElementById("custom-path").value = "";
+  updatePathHint();
 }
 
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
   el.className = `status ${cls}`;
-  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 8000);
+  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 10000);
 }
 
-window.onload = () => checkSession();
+window.onload = () => {
+  if (!checkSession()) return;
+  updatePathHint();
+};
 </script>
 </body>
 </html>
