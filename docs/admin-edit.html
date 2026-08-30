@@ -85,7 +85,9 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
   transition: all 0.2s;
 }
 .btn:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 .btn-primary { background: linear-gradient(90deg, #b91c1c, #dc2626); color: white; }
+.btn-primary.saving { background: #9ca3af; } /* ⏳ Habang nag-i-save — abo */
 .btn-secondary { background: #e5e7eb; color: #374151; }
 .status {
   padding: 14px 18px;
@@ -132,7 +134,7 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
     <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..."></textarea>
 
     <div class="btn-group">
-      <button class="btn btn-primary" onclick="saveContent()">💾 I-save</button>
+      <button id="save-btn" class="btn btn-primary" onclick="saveContent()">💾 I-save</button>
       <button class="btn btn-secondary" onclick="copyContent()">📋 Kopyahin</button>
       <button class="btn btn-secondary" onclick="previewContent()">👁️ I-preview</button>
       <button class="btn btn-secondary" onclick="clearCache()">🗑️ I-clear Cache</button>
@@ -263,7 +265,7 @@ async function loadFileContent() {
       if (res.ok) {
         const data = await res.json();
         currentSha = data.sha;
-        content = safeDecodeBase64(data.content); // ✅ LIGTAS — EMOJI HINDI SIRA!
+        content = safeDecodeBase64(data.content);
         localStorage.setItem(storageKey, content);
         showStatus(`✅ Mula sa GitHub: ${fullPath}`, "success");
       }
@@ -282,8 +284,14 @@ async function loadFileContent() {
 }
 
 async function saveContent() {
+  const saveBtn = document.getElementById("save-btn");
   const content = document.getElementById("content-editor").value;
   if (!currentFilename || !content.trim()) return showStatus("❌ Walang napiling file o walang laman", "error");
+
+  // ⏳ Habang nag-i-save — abo ang kulay at hindi pwedeng pindutin
+  saveBtn.disabled = true;
+  saveBtn.classList.add("saving");
+  saveBtn.textContent = "⏳ Nag-i-save...";
 
   const fullPath = currentFolder + currentFilename;
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
@@ -301,12 +309,18 @@ async function saveContent() {
   localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
 
   if (!navigator.onLine) {
+    saveBtn.disabled = false;
+    saveBtn.classList.remove("saving");
+    saveBtn.textContent = "💾 I-save";
     showStatus("✅ Nai-save lokal — I-sesync kapag may internet", "success");
     return;
   }
 
   const token = getDecryptedToken();
   if (!token) {
+    saveBtn.disabled = false;
+    saveBtn.classList.remove("saving");
+    saveBtn.textContent = "💾 I-save";
     showStatus("✅ Nai-save lokal — Token kailangan para sa GitHub", "warning");
     return;
   }
@@ -320,7 +334,7 @@ async function saveContent() {
       },
       body: JSON.stringify({
         message: `✏️ Na-edit: ${fullPath} — ${new Date().toLocaleString('tl-PH')}`,
-        content: safeEncodeContent(content), // ✅ PAREHO SA LUMANG PARAAN
+        content: safeEncodeContent(content),
         sha: currentSha,
         branch: BRANCH
       })
@@ -330,9 +344,18 @@ async function saveContent() {
     const result = await uploadRes.json();
     currentSha = result.commit.sha;
     markAsSynced(fullPath);
+
+    // ✅ PAG SUCCESS — BABALIK SA PULA ANG BUTTON, MENSAHE LANG ANG BERDE
+    saveBtn.disabled = false;
+    saveBtn.classList.remove("saving");
+    saveBtn.textContent = "💾 I-save";
     showStatus(`☁️✅ NAI-UPLOAD SA: assets/${fullPath}`, "success");
 
   } catch (e) {
+    // ❌ PAG MALI — BABALIK SA PULA ANG BUTTON
+    saveBtn.disabled = false;
+    saveBtn.classList.remove("saving");
+    saveBtn.textContent = "💾 I-save";
     showStatus(`⚠️ Nai-save lokal — GitHub: ${e.message}`, "warning");
   }
 }
