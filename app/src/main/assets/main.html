@@ -6,36 +6,6 @@
 <link rel="stylesheet" href="style.css">
 <title>Mga Ilegal na Bisyo — Edukasyon Laban sa Masamang Bisyo</title>
 
-<style>
-/* ---------- PULANG BILOG NA MAY NUMERO ---------- */
-.btn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  text-align: left;
-}
-.num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, #b91c1c, #dc2626);
-  color: white;
-  border-radius: 50%;
-  font-size: 13px;
-  font-weight: bold;
-  margin-right: 10px;
-  flex-shrink: 0;
-}
-.num.star {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
-}
-.txt {
-  flex: 1;
-}
-</style>
-
 <script>
 // ==================================================
 // ✅ TAMA NA ANG LOKASYON — assets/pages/ HINDI docs/
@@ -53,15 +23,12 @@ const VERSION_FILE_URL    = `https://raw.githubusercontent.com/${REPO_OWNER}/${R
 const GITHUB_API_PAGES_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages`;
 const PAGES_FOLDER = "pages/";
 
-// ✅ PUBLIKONG AYOS — mula sa GitHub
-const ORDER_FILE_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/app/src/main/assets/page-order.json`;
-
 const VERSION_CACHE_KEY = "bisyo_cached_version";
 const DEFAULT_VERSION   = "v1.0";
 
 const ORDER_KEY     = "bisyo_page_order";
-const VISIBLE_KEY   = "bisyo_page_visible";
 const ALL_PAGES_KEY  = "bisyo_all_pages";
+const HIDDEN_KEY     = "bisyo_page_visible";
 
 let foundApk = null, downloadUrl = null;
 let gotProgressFromApp = false;
@@ -96,32 +63,6 @@ const BASE_PAGES = [
 // ==================================================
 function isOnline() { return navigator.onLine; }
 function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
-
-// ==================================================
-// ✅ BASAHIN ANG PUBLIKONG AYOS — mula sa GitHub o lokal
-// ==================================================
-async function getPublicOrder() {
-  // Kapag online — basahin ang PUBLIKONG ayos mula sa GitHub
-  if (isOnline()) {
-    try {
-      const res = await fetch(ORDER_FILE_URL, { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        // I-save din sa lokal para magamit offline
-        localStorage.setItem(ORDER_KEY, JSON.stringify(data.order));
-        localStorage.setItem(VISIBLE_KEY, JSON.stringify(data.visible));
-        return { order: data.order, visibleSet: new Set(data.visible) };
-      }
-    } catch (e) {
-      console.log("Walang publiko ayos — gamit ang lokal", e);
-    }
-  }
-  // Kapag offline o walang publiko — gamitin ang lokal
-  return {
-    order: JSON.parse(localStorage.getItem(ORDER_KEY) || "null") || getAllPages().map(p=>p.id),
-    visibleSet: new Set(JSON.parse(localStorage.getItem(VISIBLE_KEY) || "[]"))
-  };
-}
 
 // ==================================================
 // 🔢 BERSYON — KUSANG KUKUHA
@@ -166,10 +107,29 @@ function getAllPages() {
   return list;
 }
 
+// ✅ BASAHIN ANG AYOS AT TINAGO MULA SA ADMIN-ORDER
+function getPageOrder() {
+  const s = localStorage.getItem(ORDER_KEY);
+  if (s) {
+    try {
+      const savedOrder = JSON.parse(s);
+      const allPages = getAllPages();
+      return savedOrder.filter(id => allPages.find(p => p.id === id));
+    } catch {}
+  }
+  return getAllPages().map(p => p.id);
+}
+function getVisibleSet() {
+  const s = localStorage.getItem(HIDDEN_KEY);
+  if (s) {
+    try { return new Set(JSON.parse(s)); } catch {}
+  }
+  return new Set(getAllPages().map(p => p.id));
+}
+
 // ✅ KUMAHIN NG MGA BAGONG PAHINA MULA SA GITHUB — KUNG ONLINE
 async function fetchPagesFromGitHub() {
   if (!isOnline()) return getAllPages();
-
   try {
     const res = await fetch(GITHUB_API_PAGES_URL, { cache: "no-store" });
     if (!res.ok) throw new Error("Hindi mabasa");
@@ -199,11 +159,12 @@ async function fetchPagesFromGitHub() {
 }
 
 // ==================================================
-// 🧩 BUUIN ANG MGA BUTON — SUNOD SA AYOS + HIDE/SHOW
+// 🧩 BUUIN ANG MGA BUTTON — SUNOD SA AYOS MULA SA ADMIN
 // ==================================================
 async function buildPageGrids() {
   const allPages = await fetchPagesFromGitHub();
-  const { order, visibleSet } = await getPublicOrder(); // ✅ PUBLIKONG AYOS
+  const order = getPageOrder();
+  const visible = getVisibleSet();
 
   const bisyoGrid = document.getElementById("bisyo-grid");
   const extraGrid = document.getElementById("extra-grid");
@@ -211,22 +172,17 @@ async function buildPageGrids() {
   extraGrid.innerHTML = "";
 
   order.forEach(pageId => {
+    if (!visible.has(pageId)) return; // ✅ Itinago sa Admin — laktawan
     const page = allPages.find(p => p.id === pageId);
     if (!page) return;
-    if (!visibleSet.has(pageId)) return;
 
     const container = page.group === "extra" ? extraGrid : bisyoGrid;
     const a = document.createElement("a");
     a.href = `${page.folder}${page.file}`;
     a.className = "btn";
     a.title = page.desc || "";
-    
-    // ✅ TAMA NA ANG KULAY — walang gumagamit na :contains()
-    const numClass = page.num ? "" : "star";
-    const numText = page.num || "✦";
-    
     a.innerHTML = `
-      <span class="num ${numClass}">${numText}</span>
+      <span class="num">${page.num || '✦'}</span>
       <span class="txt">${page.name}</span>
     `;
     container.appendChild(a);
@@ -351,7 +307,7 @@ async function startDownload() {
 // ==================================================
 window.onload = async function() {
   updateDownloadVisibility();
-  await buildPageGrids();
+  await buildPageGrids(); // ✅ Kusang ayon sa Admin-Order
   await updateVersionDisplay();
 
   if (isOnline()) {
@@ -369,9 +325,9 @@ window.onload = async function() {
   }
 };
 
-window.addEventListener("online", async () => {
+window.addEventListener("online", () => {
   updateDownloadVisibility();
-  await buildPageGrids(); // ✅ Kusang mag-a-update kapag bumalik ang internet
+  buildPageGrids();
 });
 window.addEventListener("offline", updateDownloadVisibility);
 </script>
@@ -383,8 +339,6 @@ window.addEventListener("offline", updateDownloadVisibility);
 <p>Proyekto ni Mark Jann Tampok — Edukasyon Laban sa Masamang Bisyo</p>
 </div>
 
-<!-- ✅ TINANGGAL ANG HARDCODED LISTAHAN — SCRIPT NA ANG GUMAGAWA NITO -->
-
 <div id="offline-note" class="offline-note hidden">
   <h2>📡 Walang Koneksyon sa Internet</h2>
   <p>Ang pag-download at pag-update ay hindi available habang walang internet. Ang iba pang bahagi ng aplikasyon ay gumagana pa rin nang walang koneksyon.</p>
@@ -393,18 +347,14 @@ window.addEventListener("offline", updateDownloadVisibility);
 <div id="download-section" class="download-section hidden">
   <div class="download-title">📤 Aplikasyon — Pag-update</div>
   <div class="download-sub">Kumpletong proyekto — gumagana nang walang internet</div>
-
   <button id="download-apk-btn" class="download-btn">🔍 Hinahanap ang APK...</button>
-
   <div id="progress-container" class="progress-container hidden">
     <div id="progress-bar" class="progress-bar"></div>
   </div>
   <div id="progress-text" class="progress-text hidden"></div>
-
   <div id="update-note" class="hidden">
     📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Tignan ang abiso sa itaas ng iyong telepono.
   </div>
-
   <div class="download-info">
     📦 Bersyon: <strong class="version-display">v1.0</strong> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
     📱 Kinakailangan: Android 7.0 (API 24) o mas bagong bersyon<br>
@@ -430,7 +380,6 @@ window.addEventListener("offline", updateDownloadVisibility);
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
   <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
-
   <h2>📋 Sakop ng Paksa</h2>
   <p>Lahat ng pahina ay kusang lumalabas dito — kabilang ang anumang bagong gagawin sa Admin Panel.</p>
   <ul>
@@ -438,12 +387,9 @@ window.addEventListener("offline", updateDownloadVisibility);
     <li><strong>Karagdagang Pahina:</strong> Aral mula sa Bibliya at iba pa</li>
     <li><strong>Bagong Pahina:</strong> Awtomatikong lalabas dito kapag isinama sa listahan sa Admin Panel</li>
   </ul>
-
   <div class="divider"></div>
-
   <h2>⚠️ Bakit Mahalagang Malaman Ito?</h2>
   <p>Ang bawat bisyo ay may tiyak na masamang dulot — hindi lamang sa katawan kundi pati sa kinabukasan ng tao at ng kanyang pamilya.</p>
-
   <h2>💡 Paano Gamitin ang Aplikasyon</h2>
   <ul>
     <li>Basahin ang bawat pahina nang dahan-dahan at unawain ang nilalaman</li>
@@ -456,6 +402,9 @@ window.addEventListener("offline", updateDownloadVisibility);
 
 <h3 class="section-title">📖 Mga Pahina — Basahin Dito</h3>
 <h4 class="section-subtitle">Mga Uri ng Bisyo</h4>
+
+<!-- ✅ DITO ILALAGAY NG ADMIN-ORDER.HTML ANG LISTAHAN -->
+<!-- AUTO-LIST-START -->
 <div class="grid" id="bisyo-grid">
   <div class="loading-text">Naglo-load...</div>
 </div>
@@ -464,6 +413,7 @@ window.addEventListener("offline", updateDownloadVisibility);
   <h4 class="section-subtitle">Karagdagang Impormasyon</h4>
   <div class="grid" id="extra-grid"></div>
 </div>
+<!-- AUTO-LIST-END -->
 
 <div class="admin-link">
   <a href="admin.html">⚙️ Admin Panel</a>
