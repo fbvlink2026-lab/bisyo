@@ -52,6 +52,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 .role-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:bold}
 .role-badge.full{background:#dcfce7;color:#166534}
 .role-badge.limited{background:#fef3c7;color:#92400e}
+.perm-note{font-size:13px;color:#6b7280;margin-top:6px;padding-left:4px;border-left:3px solid #3b82f6}
 </style>
 </head>
 <body>
@@ -91,7 +92,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
   <!-- 👤 CO-ADMIN — MAY LIMITADONG KAKAYAHAN -->
   <div class="card">
     <h2>👤 Mga Co-Admin — Limitadong Kakayahan</h2>
-    <p style="color:#6b7280;margin-bottom:14px">Magdagdag ng ibang admin — piliin kung anong mga pahina at gawain ang maaaring gamitin.</p>
+    <p style="color:#6b7280;margin-bottom:14px">Piliin kung anong bahagi ang maaaring baguhin. Ang <strong>Moderator</strong> ay pahina sa <code>assets/pages/</code> lamang ang maaaring pakialaman.</p>
 
     <!-- ✅ FORM: MAGDAGDAG NG CO-ADMIN -->
     <div style="background:#f9fafb;padding:16px;border-radius:12px;margin-bottom:16px">
@@ -103,30 +104,37 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 
       <label>🎯 Antas ng Pag-access:</label>
       <select id="coadmin-role" onchange="togglePermissionGrid()">
-        <option value="limited">🔵 Limitado — Pwede lang mag-edit ng nilalaman</option>
-        <option value="content-editor">🟡 Tagapamahala ng Nilalaman — Magdagdag at mag-edit</option>
-        <option value="full">🟢 Buong Pag-access — Tulad ng Pangunahing Admin</option>
+        <option value="moderator">🔵 Moderator — I-edit lamang sa <code>assets/pages/</code></option>
+        <option value="content-editor">🟡 Tagapamahala ng Nilalaman — Magdagdag at mag-edit sa <code>pages/</code></option>
+        <option value="full">🟢 Pangunahing Admin — Buong Pag-access</option>
       </select>
+
+      <!-- ✅ PALIWANAG SA ILALIM NG MODERATOR -->
+      <p id="role-desc" class="perm-note">🔵 Pahina ng nilalaman lamang — hindi mababago ang mga file sa ugat tulad ng style.css, main.html, atbp.</p>
 
       <!-- ✅ MGA TIYAK NA PAGPAPAHINTULOT -->
       <div id="perm-grid-wrap" class="hidden">
         <label>🔧 Mga Tiyak na Kakayahan:</label>
         <div class="perm-grid">
           <div class="perm-item">
-            <input type="checkbox" id="perm-edit" class="perm-check">
-            <label for="perm-edit">I-edit Nilalaman</label>
+            <input type="checkbox" id="perm-edit" class="perm-check" checked disabled>
+            <label for="perm-edit">I-edit Nilalaman (pages/ lang)</label>
           </div>
           <div class="perm-item">
             <input type="checkbox" id="perm-newpage" class="perm-check">
-            <label for="perm-newpage">Bagong Pahina</label>
+            <label for="perm-newpage">Bagong Pahina (pages/ lang)</label>
           </div>
           <div class="perm-item">
             <input type="checkbox" id="perm-order" class="perm-check">
-            <label for="perm-order">Ayusin Ayos</label>
+            <label for="perm-order">Ayusin Ayos ng Listahan</label>
           </div>
           <div class="perm-item">
             <input type="checkbox" id="perm-sync" class="perm-check">
             <label for="perm-sync">I-sync sa GitHub</label>
+          </div>
+          <div class="perm-item">
+            <input type="checkbox" id="perm-rootfiles" class="perm-check">
+            <label for="perm-rootfiles">I-edit File sa Ugat (assets/) ⚠️</label>
           </div>
           <div class="perm-item">
             <input type="checkbox" id="perm-password" class="perm-check">
@@ -145,7 +153,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <!-- ✅ LISTAHAN NG MGA CO-ADMIN -->
     <h3 style="font-size:16px;margin:20px 0 8px 0">📋 Kasalukuyang Co-Admin</h3>
     <div id="coadmin-list"></div>
-    <div id="no-coadmin" class="empty">Wala pang nakadagdag na Co-Admin</div>
+    <div id="no-coadmin" class="hidden">Wala pang nakadagdag na Co-Admin</div>
   </div>
 
   <!-- 🔑 PALITAN ANG PASSWORD — PANGUNAHING ADMIN LANG -->
@@ -211,8 +219,12 @@ const REMEMBER_LOGIN_KEY = "bisyo_remember_login";
 const CO_ADMIN_KEY = "bisyo_co_admins";
 const CFG_KEY = "bisyo_project_config";
 
+// ✅ MGA LANDAS — PARA SA PAGTUTUKOY KUNG SAAN PWEDENG MAGBAGO
+const ASSETS_PAGES = "app/src/main/assets/pages/";
+const ASSETS_ROOT = "app/src/main/assets/";
+
 // ==============================================
-// ✅ SESSION — TIGNAN KUNG CO-ADMIN BA O PANGUNAHING ADMIN
+// ✅ SESSION — TIGNAN KUNG ANTAS NG ADMIN
 // ==============================================
 let currentUser = null;
 function checkSession() {
@@ -243,19 +255,46 @@ function checkSession() {
     return false;
   }
 
-  // ✅ I-tago ang mga pahina na bawal sa limitadong co-admin
+  // ✅ I-APLAY ANG MGA LIMITASYON AYON SA ANTAS
   applyPermissions();
   return true;
 }
 
-// ✅ ITAGO ANG MGA HINDI PWEDENG GAMITIN AYON SA KAKAYAHAN
+// ✅ TIGNAN KUNG PWEDENG GALAWIN ANG FILE — GINAGAMIT SA ADMIN-EDIT, ADMIN-NEW-PAGE
+function canModifyFile(filePath) {
+  if (!currentUser) return false;
+  if (currentUser.isMainAdmin || currentUser.permissions?.editRootFiles) return true;
+
+  // 🔵 MODERATOR / CONTENT-EDITOR — pages/ LANG ANG PWEDENG GALAWIN
+  if (filePath.startsWith(ASSETS_PAGES) || filePath.startsWith("pages/")) {
+    return currentUser.permissions?.editContent !== false;
+  }
+
+  // ❌ LAHAT NG NASA UGAT — BAWAL SA MODERATOR
+  return false;
+}
+
+// ✅ ITAGO ANG MGA BAHAGING BAWAL SA LIMITADONG ADMIN
 function applyPermissions() {
   if (!currentUser || currentUser.isMainAdmin) return;
 
   const perms = currentUser.permissions || {};
-  // Itago ang palitan ng password at co-admin management kung walang pahintulot
+
+  // ❌ BAWAL: Palitan ang Password, Pamahalaan Co-Admin, at Config
   if (!perms.changePassword) {
-    document.querySelector(`h2:has(+ #current-pw)`).closest('.card').style.opacity = "0.5";
+    document.getElementById("current-pw").closest(".card").style.opacity = "0.5";
+    document.getElementById("pw-btn").disabled = true;
+  }
+  if (!perms.manageCoAdmin) {
+    document.getElementById("coadmin-name").closest(".card").querySelector(".co-admin-item").style.opacity = "0.5";
+    document.getElementById("add-coadmin-btn").disabled = true;
+  }
+  if (!perms.editRootFiles) {
+    // Ipakita ang babala sa itaas na bawal baguhin ang ugat
+    const note = document.createElement("div");
+    note.style = "background:#fef3c7;border-left:4px solid #f59e0b;padding:10px 14px;margin:0 16px 16px;border-radius:0 8px 8px 8px;color:#78350f";
+    note.innerHTML = "🔵 <strong>Moderator Mode:</strong> Pahina sa <code>assets/pages/</code> lamang ang maaaring i-edit. Ang mga file sa ugat tulad ng <code>style.css</code>, <code>main.html</code> ay hindi mababago.";
+    document.querySelector(".container").insertBefore(note, document.querySelector(".container").firstChild);
   }
 }
 
@@ -310,30 +349,32 @@ function saveCoAdmins(list) {
 function togglePermissionGrid() {
   const role = document.getElementById("coadmin-role").value;
   const wrap = document.getElementById("perm-grid-wrap");
-  if (role === "limited") {
+  const desc = document.getElementById("role-desc");
+
+  // ✅ IBAHIN ANG PALIWANAG AYON SA PINILING ANTAS
+  if (role === "moderator") {
+    desc.textContent = "🔵 Pahina ng nilalaman lamang — hindi mababago ang mga file sa ugat tulad ng style.css, main.html, atbp.";
     wrap.classList.add("hidden");
-    // Awtomatikong itakda ang mga pahintulot para sa Limitado
-    document.getElementById("perm-edit").checked = true;
-    document.getElementById("perm-newpage").checked = false;
-    document.getElementById("perm-order").checked = false;
-    document.getElementById("perm-sync").checked = false;
-    document.getElementById("perm-password").checked = false;
-    document.getElementById("perm-coadmin").checked = false;
   } else if (role === "content-editor") {
+    desc.textContent = "🟡 Pwede magdagdag at mag-edit sa pages/ — bawal pa rin ang mga file sa ugat.";
     wrap.classList.remove("hidden");
+    // Default para sa Content Editor
     document.getElementById("perm-edit").checked = true;
     document.getElementById("perm-newpage").checked = true;
-    document.getElementById("perm-order").checked = false;
+    document.getElementById("perm-order").checked = true;
     document.getElementById("perm-sync").checked = false;
+    document.getElementById("perm-rootfiles").checked = false; // ❌ BAWAL PA RIN
     document.getElementById("perm-password").checked = false;
     document.getElementById("perm-coadmin").checked = false;
   } else {
+    desc.textContent = "🟢 Buong Pag-access — Lahat ng file at setting ay maaaring baguhin.";
     wrap.classList.remove("hidden");
     // Full — lahat tsekado
     document.getElementById("perm-edit").checked = true;
     document.getElementById("perm-newpage").checked = true;
     document.getElementById("perm-order").checked = true;
     document.getElementById("perm-sync").checked = true;
+    document.getElementById("perm-rootfiles").checked = true; // ✅ PWEDENG UGAT
     document.getElementById("perm-password").checked = true;
     document.getElementById("perm-coadmin").checked = true;
   }
@@ -355,21 +396,46 @@ function addCoAdmin() {
 
   btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Idinadagdag...";
 
-  // ✅ KUMUHA NG MGA TIKAD NA PAGPAPAHINTULOT
-  const permissions = {
-    editContent: document.getElementById("perm-edit").checked,
-    createPage: document.getElementById("perm-newpage").checked,
-    reorderPages: document.getElementById("perm-order").checked,
-    syncGitHub: document.getElementById("perm-sync").checked,
-    changePassword: document.getElementById("perm-password").checked,
-    manageCoAdmin: document.getElementById("perm-coadmin").checked
-  };
+  // ✅ KUMUHA NG MGA TIKAD NA PAGPAPAHINTULOT — AYON SA ANTAS
+  let permissions = {};
+
+  if (role === "moderator") {
+    permissions = {
+      editContent: true,
+      createPage: false,
+      reorderPages: false,
+      syncGitHub: false,
+      editRootFiles: false, // ❌ HINDI PWEDENG UGAT
+      changePassword: false,
+      manageCoAdmin: false
+    };
+  } else if (role === "content-editor") {
+    permissions = {
+      editContent: true,
+      createPage: true,
+      reorderPages: true,
+      syncGitHub: false,
+      editRootFiles: false, // ❌ HINDI PWEDENG UGAT
+      changePassword: false,
+      manageCoAdmin: false
+    };
+  } else {
+    permissions = {
+      editContent: true,
+      createPage: true,
+      reorderPages: true,
+      syncGitHub: true,
+      editRootFiles: true, // ✅ PWEDENG UGAT
+      changePassword: true,
+      manageCoAdmin: true
+    };
+  }
 
   const list = getAllCoAdmins();
   list.push({
     id: Date.now(),
     name: name,
-    password: pass, // Sa totoong gamit — i-encrypt ito
+    password: pass,
     role: role,
     permissions: permissions,
     addedAt: new Date().toISOString()
@@ -383,7 +449,7 @@ function addCoAdmin() {
   setTimeout(() => {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "➕ Magdagdag ng Co-Admin";
     renderCoAdmins();
-    showStatus(`✅ Naidagdag: ${name} — Antas: ${role}`, "success");
+    showStatus(`✅ Naidagdag: ${name} — Antas: ${role === 'moderator' ? 'Moderator (pages/ lamang)' : role === 'content-editor' ? 'Tagapamahala ng Nilalaman' : 'Buong Pag-access'}`, "success");
   }, 600);
 }
 
@@ -412,9 +478,9 @@ function renderCoAdmins() {
   list.forEach(admin => {
     const roleClass = admin.role === "full" ? "full" : "limited";
     const roleText = {
-      limited: "Limitado — Mag-edit lang",
-      "content-editor": "Tagapamahala ng Nilalaman",
-      full: "Buong Pag-access"
+      moderator: "🔵 Moderator — pages/ lamang",
+      "content-editor": "🟡 Tagapamahala ng Nilalaman",
+      full: "🟢 Buong Pag-access"
     }[admin.role] || admin.role;
 
     container.innerHTML += `
@@ -499,7 +565,11 @@ function detectConfig() {
   detectedConfig = {
     meta: { projectName: projName, version: "1.0.0", detectedAt: new Date().toISOString() },
     repository: { owner, repo, branch: "main" },
-    paths: { assetsRoot: assets, pagesFolder: assets + "pages/" },
+    paths: {
+      assetsRoot: assets,
+      pagesFolder: assets + "pages/",
+      note: "Moderator: pagesFolder lamang ang maaaring baguhin"
+    },
     coAdminNote: "Listahan ng Co-Admin ay naka-save nang lokal — hindi isinasama sa config.json"
   };
 
@@ -508,7 +578,7 @@ function detectConfig() {
 
   setTimeout(() => {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "🔍 I-detect Lahat";
-    showStatus("✅ Na-detect", "success");
+    showStatus("✅ Na-detect — Moderator Mode: pages/ lamang", "success");
   }, 800);
 }
 
@@ -570,8 +640,8 @@ window.onload = () => {
 
   // ✅ I-tago ang ilang bahagi kung CO-ADMIN LANG
   if (!currentUser.isMainAdmin) {
-    document.querySelector(`label:has(+ #coadmin-name)`).closest('.card').style.opacity = "0.6";
-    document.querySelector(`h2:has(+ #current-pw)`).textContent = "🔑 Palitan ang Password — Bawal";
+    // Palitan ang pamagat ng palitan ng password
+    document.querySelector(`h2:has(+ #current-pw)`).innerHTML = "🔑 Palitan ang Password — Bawal sa Moderator";
     document.getElementById("pw-btn").disabled = true;
     document.getElementById("add-coadmin-btn").disabled = true;
   }
