@@ -63,6 +63,11 @@
   font-size: 14px;
   color: #78350f;
 }
+.note-green {
+  background: #f0fdf4;
+  border-left-color: #22c55e;
+  color: #166534;
+}
 .btn-group {
   display: flex;
   gap: 12px;
@@ -101,17 +106,26 @@
   border-color: #b91c1c;
   background: #fef2f2;
 }
-.image-upload-area img {
-  max-width: 200px;
-  max-height: 200px;
-  border-radius: 8px;
-  margin-top: 10px;
-  display: none;
-}
 .image-upload-area.has-image { padding:15px }
 .image-upload-area.has-image p { display:none }
 .preview-wrap { margin-top:12px;display:none }
 .preview-wrap img { max-width:180px;border-radius:8px;border:2px solid #e5e7eb }
+
+/* ✅ IMAGE SIZE OPTIONS */
+.size-option-card {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0;
+  border: 2px solid transparent;
+}
+.size-option-card.selected {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+.size-option-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.size-desc { font-size: 13px; color: #6b7280; margin-left: 28px; }
+.size-preview-info { font-size: 13px; color: #374151; margin-top: 8px; padding: 8px; background: #fff; border-radius: 6px; }
 </style>
 </head>
 <body>
@@ -146,6 +160,7 @@
       <option value="assets/pages/" selected>📂 [ASSETS] Pages — app/src/main/assets/pages/</option>
       <option disabled>────── 📱 RESOURCES ──────</option>
       <option value="res/drawable/">🖼️ [RES] Drawable — Mga Icon at Litrato</option>
+      <option value="res/mipmap-anydpi-v24/">🖼️ [RES] Icon — Mga Simbolo ng App</option>
       <option value="res/layout/">📐 [RES] Layout — Istruktura ng Pahina (.xml)</option>
       <option value="res/values/">🎨 [RES] Values — Kulay, Estilo, Teksto</option>
       <option value="custom">✏️ Ipasok ang sariling landas...</option>
@@ -161,7 +176,7 @@
     <!-- PANGALAN -->
     <label>Pangalan ng File:</label>
     <input type="text" id="filename" placeholder="Hal. index.html o icon_bisyo">
-    <div class="note">💡 Sa <code>res/drawable</code>: maliit na titik lang, numero at _ — walang puwang o malaking titik</div>
+    <div class="note">💡 Sa <code>res/drawable</code>: maliit na titik, numero at _ lamang — walang puwang o malaking titik</div>
 
     <!-- 📄 TEKSTO MODE -->
     <div id="text-mode-area">
@@ -182,14 +197,41 @@
     <div id="image-mode-area" style="display:none">
       <label>Pumili ng Imahe:</label>
       <div class="image-upload-area" id="image-drop" onclick="document.getElementById('image-file').click()">
-        <p style="font-size:16px;color:#4b5563">📤 I-tap o i-drag dito ang imahe<br><small>PNG, JPG, WebP, SVG — hanggang 1MB</small></p>
+        <p style="font-size:16px;color:#4b5563">📤 I-tap o i-drag dito ang imahe<br><small>PNG, JPG, WebP, SVG — hanggang 1MB pagkatapos paliitin</small></p>
         <input type="file" id="image-file" accept="image/*" style="display:none" onchange="imageSelected(this.files[0])">
         <div class="preview-wrap" id="image-preview">
           <img id="preview-img">
         </div>
       </div>
-      <div class="note" id="image-info" style="display:none;margin-top:12px">
-        ✅ Napili: <span id="img-name"></span> · <span id="img-size"></span>
+
+      <!-- ✅ BAGONG: PAGPILI NG SUKAT -->
+      <label>📐 Sukat ng Imahe:</label>
+      <div class="size-option-card selected" id="size-single" onclick="selectSizeMode('single')">
+        <div class="size-option-row">
+          <input type="radio" name="size-mode" checked>
+          <strong>🖼️ Isang Bersyon — Orihinal / Pinaliit</strong>
+        </div>
+        <div class="size-desc">Isang file lang — awtomatikong pinaliliit kung lalampas sa 1MB</div>
+      </div>
+
+      <div class="size-option-card" id="size-android" onclick="selectSizeMode('android')">
+        <div class="size-option-row">
+          <input type="radio" name="size-mode">
+          <strong>📱 5 Sukat para sa Android</strong>
+        </div>
+        <div class="size-desc">Awtomatikong gagawing: mdpi · hdpi · xhdpi · xxhdpi · xxxhdpi</div>
+        <div class="size-preview-info" id="sizes-preview" style="display:none">
+          📂 <strong>Lokasyon:</strong> res/drawable-mdpi/ , res/drawable-hdpi/ , res/drawable-xhdpi/ , res/drawable-xxhdpi/ , res/drawable-xxxhdpi/
+        </div>
+      </div>
+
+      <!-- ✅ BAGONG: IMPORMASYON TUNGKOL SA LAKI NG FILE -->
+      <div class="note note-green" id="resize-note" style="display:none">
+        ✅ Awtomatikong pinaliliit — kahit malaki ang orihinal, ibabawas sa kalidad hanggang umabot sa 1MB o mas mababa.
+      </div>
+
+      <div class="note" id="image-info" style="margin-top:12px;display:none">
+        ✅ Napili: <span id="img-name"></span> · <span id="img-size"></span> · <span id="img-resize-status"></span>
       </div>
     </div>
 
@@ -210,9 +252,96 @@ const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 
-let currentMode = "text"; // "text" o "image"
+const MAX_FILE_SIZE = 1024 * 1024; // ✅ 1MB limit pagkatapos paliitin
+
+let currentMode = "text";
 let contentType = "content";
-let selectedImage = null; // {blob, base64, type}
+let selectedImage = null;
+let sizeMode = "single"; // ✅ "single" o "android"
+
+// ✅ PALITAN ANG PAGPILI NG SUKAT
+function selectSizeMode(mode) {
+  sizeMode = mode;
+  document.getElementById("size-single").classList.toggle("selected", mode === "single");
+  document.getElementById("size-android").classList.toggle("selected", mode === "android");
+  document.querySelector("#size-single input").checked = (mode === "single");
+  document.querySelector("#size-android input").checked = (mode === "android");
+  document.getElementById("sizes-preview").style.display = mode === "android" ? "block" : "none";
+}
+
+// ✅ PAGPALIIT NG IMAHE — KAHIT 5MB+ AY GAGAWANG 1MB
+async function resizeImage(file, maxSizeBytes = MAX_FILE_SIZE) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = function() {
+      let width = img.width;
+      let height = img.height;
+      let quality = 0.92;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // ✅ Unang bawas: Sukat
+      const maxPixels = 2000 * 2000;
+      if (width * height > maxPixels) {
+        const ratio = Math.sqrt(maxPixels / (width * height));
+        width = Math.floor(width * ratio);
+        height = Math.floor(height * ratio);
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // ✅ Pangalawang bawas: Kalidad hanggang umabot sa 1MB
+      function tryCompress(q) {
+        canvas.toBlob(
+          blob => {
+            if (!blob) return resolve({ blob: null, base64: "", width, height, quality: q });
+            if (blob.size <= maxSizeBytes || q <= 0.08) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                resolve({
+                  blob,
+                  base64: reader.result.split(',')[1],
+                  dataUrl: reader.result,
+                  width, height,
+                  quality: q,
+                  originalSize: file.size,
+                  finalSize: blob.size,
+                  shrunk: blob.size < file.size
+                });
+              };
+              reader.readAsDataURL(blob);
+            } else {
+              tryCompress(Math.max(0.08, q - 0.08));
+            }
+          },
+          "image/jpeg",
+          q
+        );
+      }
+      tryCompress(quality);
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ✅ GUMAGAWA NG 5 SUKAT PARA SA ANDROID
+function generateAndroidVariants(resized) {
+  const densities = [
+    { name: "mdpi",  scale: 0.75, folder: "drawable-mdpi/" },
+    { name: "hdpi",  scale: 1.0,  folder: "drawable-hdpi/" },
+    { name: "xhdpi", scale: 1.5,  folder: "drawable-xhdpi/" },
+    { name: "xxhdpi",scale: 2.0,  folder: "drawable-xxhdpi/" },
+    { name: "xxxhdpi", scale: 3.0, folder: "drawable-xxxhdpi/" }
+  ];
+
+  return densities.map(d => {
+    const w = Math.round(resized.width * d.scale);
+    const h = Math.round(resized.height * d.scale);
+    return { ...d, width: w, height: h, base64: resized.base64 };
+  });
+}
 
 // ✅ TOTOONG MENSAHE NG ERROR
 function explainStatusCode(status) {
@@ -226,7 +355,6 @@ function explainStatusCode(status) {
   return explanations[status] || `⚠️ HTTP ${status} — Subukan muli mamaya.`;
 }
 
-// ✅ LIGTAS NA PAG-ENCODE
 function safeEncodeContent(text) {
   return btoa(unescape(encodeURIComponent(text)));
 }
@@ -241,7 +369,6 @@ function checkSession() {
   return true;
 }
 
-// ✅ PALITAN ANG TEKSTO O IMAHE MODE
 function switchMode(mode) {
   currentMode = mode;
   document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
@@ -252,7 +379,7 @@ function switchMode(mode) {
   if (mode === "text") {
     desc.innerHTML = "📄 <strong>Teksto / Code:</strong> HTML, CSS, JS, TXT — lahat na nakasulat na teksto.";
   } else {
-    desc.innerHTML = "🖼️ <strong>Imahe / Icon:</strong> Diretsong i-upload papuntang <code>res/drawable/</code> — awtomatikong gagawing base64 at ia-upload sa GitHub.";
+    desc.innerHTML = "🖼️ <strong>Imahe / Icon:</strong> Pumili ng isa o awtomatikong 5 sukat para Android — pinaliliit hanggang 1MB bago i-upload.";
   }
   selectedImage = null;
 }
@@ -271,12 +398,7 @@ function updatePathHint() {
     hint.style.display = "block";
     customLabel.style.display = "none";
     customInput.style.display = "none";
-    let fullPath;
-    if (sel.startsWith("res/")) {
-      fullPath = `app/src/main/${sel}`;
-    } else {
-      fullPath = `app/src/main/${sel}`;
-    }
+    let fullPath = `app/src/main/${sel}`;
     hint.innerHTML = `📂 Pupunta sa: <code>${fullPath}</code>`;
   }
 }
@@ -291,41 +413,39 @@ function getFullPath() {
   return `app/src/main/${sel}`;
 }
 
-// ✅ PAGBASA NG IMAHE → BASE64
-function imageSelected(file) {
+// ✅ BAGONG PAGBASA NG IMAHE — MAY PAGPALIIIT
+async function imageSelected(file) {
   if (!file) return;
-  if (file.size > 1024 * 1024) {
-    return showStatus("❌ Masyadong malaki — hanggang 1MB lang ang pwede", "error");
+
+  document.getElementById("img-name").textContent = file.name;
+  document.getElementById("img-size").textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+  document.getElementById("image-info").style.display = "block";
+
+  // ✅ PALIITIN AGAD — KAHIT MALAKI ANG FILE
+  selectedImage = await resizeImage(file);
+
+  // ✅ Ipakita kung pinaliit
+  const statusEl = document.getElementById("img-resize-status");
+  if (selectedImage.shrunk) {
+    statusEl.textContent = `✅ Pinaliit: ${(selectedImage.originalSize/1024/1024).toFixed(2)}MB → ${(selectedImage.finalSize/1024).toFixed(1)}KB`;
+    document.getElementById("resize-note").style.display = "block";
+  } else {
+    statusEl.textContent = "✅ Sakto — hindi kailangang paliitin";
+    document.getElementById("resize-note").style.display = "none";
   }
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    selectedImage = {
-      blob: file,
-      dataUrl: e.target.result,
-      base64: e.target.result.split(',')[1],
-      type: file.type,
-      name: file.name
-    };
+  // ✅ I-preview
+  document.getElementById("preview-img").src = selectedImage.dataUrl;
+  document.getElementById("image-preview").style.display = "block";
+  document.getElementById("image-drop").classList.add("has-image");
 
-    // ✅ I-preview
-    document.getElementById("preview-img").src = selectedImage.dataUrl;
-    document.getElementById("image-preview").style.display = "block";
-    document.getElementById("image-drop").classList.add("has-image");
-    document.getElementById("img-name").textContent = file.name;
-    document.getElementById("img-size").textContent = (file.size / 1024).toFixed(1) + " KB";
-    document.getElementById("image-info").style.display = "block";
-
-    // ✅ Awtong ilagay ang pangalan kung wala pa
-    if (!document.getElementById("filename").value) {
-      let autoName = file.name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9._-]/g, "_");
-      document.getElementById("filename").value = autoName;
-    }
-  };
-  reader.readAsDataURL(file);
+  // ✅ Awtong ilagay ang pangalan
+  if (!document.getElementById("filename").value) {
+    let autoName = file.name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9._-]/g, "_");
+    document.getElementById("filename").value = autoName.replace(/\.(jpg|jpeg|png|webp|svg)$/i, ".png");
+  }
 }
 
-// ✅ TEKSTO — URI NG NILALAMAN
 function switchContentType(type) {
   contentType = type;
   document.querySelectorAll(".type-tab").forEach(t => t.classList.toggle("active", t.dataset.type === type));
@@ -367,7 +487,7 @@ function decryptToken(encrypted, password) {
   } catch { return ""; }
 }
 
-// ✅ PANGUNAHING PAGLIPAT — TEKSTO O IMAHE
+// ✅ PANGUNAHING PAGLIPAT
 async function createFile() {
   const btn = document.getElementById("create-btn");
   btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Nag-i-save...";
@@ -378,7 +498,6 @@ async function createFile() {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
     return showStatus("❌ Ilagay ang pangalan at lokasyon", "error");
   }
-  const filePath = folderPath + filename;
 
   // ✅ IMAHE MODE
   if (currentMode === "image") {
@@ -386,7 +505,24 @@ async function createFile() {
       btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
       return showStatus("❌ Pumili muna ng imahe", "error");
     }
-    return finishCreate(filePath, selectedImage.base64, true, btn);
+
+    // ✅ KUNG 5 SUKAT PARA SA ANDROID
+    if (sizeMode === "android") {
+      const variants = generateAndroidVariants(selectedImage);
+      showStatus(`📐 5 Sukat — Mdpi hanggang Xxxhdpi...`, "info");
+      let okCount = 0;
+      for (const v of variants) {
+        const fp = `app/src/main/res/${v.folder}${filename}`;
+        if (await finishCreateOne(fp, v.base64, true, null)) okCount++;
+      }
+      showStatus(`✅ ${okCount}/5 Nai-upload sa res/drawable-*`, "success");
+      resetForm();
+      btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+      return;
+    }
+
+    // ✅ ISANG LANG — DIRETSONG I-UPLOAD
+    return finishCreate(folderPath + filename, selectedImage.base64, true, btn);
   }
 
   // ✅ TEKSTO MODE
@@ -395,26 +531,48 @@ async function createFile() {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
     return showStatus("❌ Walang laman ang file", "error");
   }
-  const encoded = safeEncodeContent(content);
-  return finishCreate(filePath, encoded, false, btn);
+  return finishCreate(folderPath + filename, safeEncodeContent(content), false, btn);
 }
 
-// ✅ TUNAY NA PAG-UPLOAD
+// ✅ PAG-UPLOAD NG ISANG FILE
+async function finishCreateOne(filePath, fileContentBase64, isBinary, btnRef) {
+  const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
+  pending.push({ filePath, content: fileContentBase64, isBinary, timestamp: new Date().toISOString(), synced: false });
+  localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+
+  if (!navigator.onLine) return false;
+  const token = decryptToken(getEncryptedToken(), getPassword());
+  if (!token) return false;
+
+  try {
+    let sha = "";
+    try {
+      const c = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
+        headers: { Authorization: `token ${token}` }
+      });
+      if (c.ok) sha = (await c.json()).sha;
+    } catch {}
+
+    const body = { message: `🖼️ Imahe: ${filename}`, content: fileContentBase64, branch: BRANCH };
+    if (sha) body.sha = sha;
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
+      method: "PUT",
+      headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    return res.ok;
+  } catch { return false; }
+}
+
 async function finishCreate(filePath, fileContentBase64, isBinary, btn) {
   const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
-  pending.push({
-    filePath,
-    content: fileContentBase64,
-    isBinary,
-    timestamp: new Date().toISOString(),
-    synced: false
-  });
+  pending.push({ filePath, content: fileContentBase64, isBinary, timestamp: new Date().toISOString(), synced: false });
   localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
   if (!navigator.onLine) {
     showStatus(`📴 Nai-save lokal — ${filePath}`, "info");
     resetForm();
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    if (btn) { btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB"; }
     return;
   }
 
@@ -422,7 +580,7 @@ async function finishCreate(filePath, fileContentBase64, isBinary, btn) {
   if (!token) {
     showStatus("⚠️ Walang Token — Nai-save lamang lokal", "warning");
     resetForm();
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    if (btn) { btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB"; }
     return;
   }
 
@@ -436,9 +594,7 @@ async function finishCreate(filePath, fileContentBase64, isBinary, btn) {
     } catch {}
 
     const body = {
-      message: currentMode==="image" 
-        ? `🖼️ Imahe: ${filename}` 
-        : `📄 Bagong File: ${filePath}`,
+      message: currentMode==="image" ? `🖼️ Imahe: ${filePath}` : `📄 Bagong File: ${filePath}`,
       content: fileContentBase64,
       branch: BRANCH
     };
@@ -459,7 +615,7 @@ async function finishCreate(filePath, fileContentBase64, isBinary, btn) {
   }
 
   resetForm();
-  btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+  if (btn) { btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB"; }
 }
 
 function markAsSynced(path) {
@@ -475,8 +631,11 @@ function resetForm() {
   document.getElementById("custom-path").value = "";
   document.getElementById("image-preview").style.display = "none";
   document.getElementById("image-info").style.display = "none";
+  document.getElementById("resize-note").style.display = "none";
   document.getElementById("image-drop").classList.remove("has-image");
   selectedImage = null;
+  sizeMode = "single";
+  selectSizeMode("single");
   updatePathHint();
   switchMode("text");
   switchContentType("content");
