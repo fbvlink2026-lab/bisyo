@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>✏️ I-edit ang Nilalaman</title>
+<title>✏️ I-edit ang File</title>
 <style>
 select {
   width: 100%;
@@ -119,7 +119,6 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
   <h1>✏️ I-edit ang File</h1>
   <p class="subtitle" id="page-hint">Pumili ng lokasyon at file — kabilang ang mga nasa ugat ng assets/</p>
 
-  <!-- ✅ PUMILI NG LOKASYON — ROOT o PAGES/ -->
   <label for="folder-select">📁 Lokasyon:</label>
   <select id="folder-select" onchange="folderChanged()">
     <option value="">— Pumili ng folder —</option>
@@ -136,8 +135,10 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
     <label id="editor-label">📝 Nilalaman:</label>
     <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..."></textarea>
 
+    <!-- ✅ NADAGDAG NA: 📋 KOPYAHIN NA BUTTON -->
     <div class="btn-group">
       <button class="btn btn-primary" onclick="saveContent()">💾 I-save</button>
+      <button class="btn btn-secondary" onclick="copyContent()">📋 Kopyahin</button>
       <button class="btn btn-secondary" onclick="previewContent()">👁️ I-preview</button>
       <button class="btn btn-secondary" onclick="clearCache()">🗑️ I-clear Cache</button>
     </div>
@@ -153,11 +154,11 @@ const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 
-// ✅ AYON SA PLANO — ASSETS/ ANG PINAGMULAN! docs/ = KOPYA LANG
+// ✅ AYON SA PLANO — assets/ ANG PINAGMULAN! docs/ = KOPYA LANG
 const ASSETS_ROOT = "app/src/main/assets/";
 const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_ROOT}`;
 
-let currentFolder = ""; // "" = root, "pages/" = pages folder
+let currentFolder = "";
 let currentFilename = "";
 let currentSha = null;
 
@@ -186,7 +187,6 @@ function getDecryptedToken() {
   } catch { return null; }
 }
 
-// ✅ NAGBAGO ANG FOLDER — ILISTA ANG MGA FILE DYAN
 async function folderChanged() {
   currentFolder = document.getElementById("folder-select").value;
   document.getElementById("file-select").innerHTML = `<option value="">— Naglo-load —</option>`;
@@ -200,7 +200,6 @@ async function folderChanged() {
   await loadFileList();
 }
 
-// ✅ ILISTA ANG LAHAT NG FILE SA KASALUKUYANG FOLDER
 async function loadFileList() {
   const select = document.getElementById("file-select");
   try {
@@ -231,7 +230,6 @@ async function loadFileList() {
   }
 }
 
-// ✅ NAPILI ANG FILE — BASAHIN ANG LAMAN
 async function fileSelected() {
   currentFilename = document.getElementById("file-select").value;
   if (!currentFilename) {
@@ -244,7 +242,6 @@ async function fileSelected() {
   await loadFileContent();
 }
 
-// ✅ BASAHIN ANG LAMAN NG FILE
 async function loadFileContent() {
   const editorArea = document.getElementById("editor-area");
   const editor = document.getElementById("content-editor");
@@ -285,18 +282,15 @@ async function loadFileContent() {
   document.getElementById("page-hint").innerHTML = `✅ <strong>${fullPath}</strong>`;
 }
 
-// ✅ I-SAVE — SA TAMANG LUGAR SA ASSETS/
 async function saveContent() {
   const content = document.getElementById("content-editor").value;
-  if (!currentFilename || content === null) return showStatus("❌ Walang napiling file o walang laman", "error");
+  if (!currentFilename || !content.trim()) return showStatus("❌ Walang napiling file o walang laman", "error");
 
   const fullPath = currentFolder + currentFilename;
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
 
-  // 💾 Lokal — agad
   localStorage.setItem(storageKey, content);
 
-  // ⏳ Nakabinbin — para sa sync
   const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
   pending.push({
     id: Date.now(),
@@ -308,7 +302,6 @@ async function saveContent() {
   });
   localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
 
-  // ☁️ Diretsong i-upload kung may internet
   if (!navigator.onLine) {
     showStatus("✅ Nai-save lokal — I-sesync kapag may internet", "success");
     return;
@@ -320,7 +313,6 @@ async function saveContent() {
     return;
   }
 
-  // ✅ I-upload sa TAMANG LUGAR — assets/...
   try {
     const uploadRes = await fetch(GITHUB_API_BASE + fullPath, {
       method: "PUT",
@@ -337,26 +329,32 @@ async function saveContent() {
     });
 
     if (!uploadRes.ok) throw new Error(`HTTP ${uploadRes.status}`);
-    
-    // I-update ang SHA
     const result = await uploadRes.json();
     currentSha = result.commit.sha;
-
-    // Markahin na naka-sync
     markAsSynced(fullPath);
-
     showStatus(`☁️✅ NAI-UPLOAD SA: assets/${fullPath}`, "success");
-    showStatus("⚙️ Ang build ay kopyahin ito papuntang docs/ — hindi mo na kailangang hawakan ang docs/", "info");
 
   } catch (e) {
     showStatus(`⚠️ Nai-save lokal — GitHub: ${e.message}`, "warning");
   }
 }
 
-function markAsSynced(path) {
-  const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
-  pending.forEach(p => { if (p.path === path) p.synced = true; });
-  localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
+// ✅ BAGONG KAKAYAHAN — KOPYAHIN ANG LAMAN AGAD!
+function copyContent() {
+  const content = document.getElementById("content-editor").value;
+  if (!content.trim()) return alert("Walang laman na kopyahin!");
+  
+  navigator.clipboard.writeText(content)
+    .then(() => {
+      showStatus("📋✅ NAKOPYAHIN NA SA IMBAKAN NG TEKSTO!", "success");
+    })
+    .catch(() => {
+      // Para sa lumang browser o kung tinanggihan ang pahintulot
+      const editor = document.getElementById("content-editor");
+      editor.select();
+      document.execCommand("copy");
+      showStatus("📋✅ NAKOPYAHIN NA!", "success");
+    });
 }
 
 function previewContent() {
@@ -376,6 +374,12 @@ function clearCache() {
   loadFileContent();
 }
 
+function markAsSynced(path) {
+  const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
+  pending.forEach(p => { if (p.path === path) p.synced = true; });
+  localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
+}
+
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
@@ -384,10 +388,8 @@ function showStatus(txt, cls) {
   setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 8000);
 }
 
-// ✅ PAGBUKAS
 window.onload = () => {
   if (!checkSession()) return;
-  // Kung galing sa link: ?file=...
   const params = new URLSearchParams(window.location.search);
   const fileParam = params.get('file');
   if (fileParam) {
