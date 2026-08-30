@@ -6,6 +6,35 @@
 <link rel="stylesheet" href="style.css">
 <title>Mga Ilegal na Bisyo — Edukasyon Laban sa Masamang Bisyo</title>
 
+<!-- ✅ KAILANGANG ESTILO — PULANG BILOG NA MAY NUMERO -->
+<style>
+/* ---------- PULANG BILOG NA NUMERO ---------- */
+.btn {
+  position: relative;
+}
+.num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  color: white;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: bold;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.txt {
+  flex: 1;
+}
+/* Kung walang numero — iba ang kulay */
+.num:contains("✦") {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+</style>
+
 <script>
 // ==================================================
 // ✅ TAMA NA ANG LOKASYON — assets/pages/ HINDI docs/
@@ -21,7 +50,7 @@ const VERSION_FILE_URL    = `https://raw.githubusercontent.com/${REPO_OWNER}/${R
 
 // ✅ MGA PAHINA — assets/pages/ ANG TAMA
 const GITHUB_API_PAGES_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages`;
-const PAGES_FOLDER = "pages/"; // ✅ Sa loob ng App: assets/pages/ | Sa Website: pages/
+const PAGES_FOLDER = "pages/";
 
 const VERSION_CACHE_KEY = "bisyo_cached_version";
 const DEFAULT_VERSION   = "v1.0";
@@ -122,7 +151,7 @@ function getPageOrder() {
 
 // ✅ KUMAHIN NG MGA BAGONG PAHINA MULA SA GITHUB — KUNG ONLINE
 async function fetchPagesFromGitHub() {
-  if (!isOnline()) return getAllPages(); // ✅ OFFLINE: gamitin lokal na listahan
+  if (!isOnline()) return getAllPages();
 
   try {
     const res = await fetch(GITHUB_API_PAGES_URL, { cache: "no-store" });
@@ -168,8 +197,6 @@ async function buildPageGrids() {
   order.forEach(pageId => {
     const page = allPages.find(p => p.id === pageId);
     if (!page) return;
-
-    // ✅ Kung itinago sa Admin — huwag ipakita
     if (!visibleSet.has(pageId)) return;
 
     const container = page.group === "extra" ? extraGrid : bisyoGrid;
@@ -303,12 +330,9 @@ async function startDownload() {
 // ==================================================
 window.onload = async function() {
   updateDownloadVisibility();
-
-  // ✅ BUUIN ANG LISTAHAN — ONLINE man o OFFLINE
   await buildPageGrids();
   await updateVersionDisplay();
 
-  // ✅ HANAPIN ANG APK — KUNG ONLINE
   if (isOnline()) {
     const btn = document.getElementById("download-apk-btn");
     const note = document.getElementById("update-note");
@@ -326,7 +350,7 @@ window.onload = async function() {
 
 window.addEventListener("online", () => {
   updateDownloadVisibility();
-  buildPageGrids(); // ✅ Muling ilista kapag bumalik ang internet
+  buildPageGrids();
 });
 window.addEventListener("offline", updateDownloadVisibility);
 </script>
@@ -338,28 +362,7 @@ window.addEventListener("offline", updateDownloadVisibility);
 <p>Proyekto ni Mark Jann Tampok — Edukasyon Laban sa Masamang Bisyo</p>
 </div>
 
-<!-- ✅ DAPAT MAY ITO SA LOOB — KAILANGAN NG ADMIN-ORDER PARA MAUPDATE -->
-<!-- AUTO-LIST-START -->
-<a href="pages/alak.html" class="menu-btn">Alak</a>
-<a href="pages/aral-sa-bibliya.html" class="menu-btn">Aral Sa Bibliya</a>
-<a href="pages/cocaine.html" class="menu-btn">Cocaine</a>
-<a href="pages/ecstasy.html" class="menu-btn">Ecstasy</a>
-<a href="pages/heroin.html" class="menu-btn">Heroin</a>
-<a href="pages/ibang-sugal.html" class="menu-btn">Ibang Sugal</a>
-<a href="pages/inhalants.html" class="menu-btn">Inhalants</a>
-<a href="pages/internet-laro.html" class="menu-btn">Internet Laro</a>
-<a href="pages/ketamine.html" class="menu-btn">Ketamine</a>
-<a href="pages/labis-pagkain.html" class="menu-btn">Labis Pagkain</a>
-<a href="pages/lsd.html" class="menu-btn">Lsd</a>
-<a href="pages/marijuana.html" class="menu-btn">Marijuana</a>
-<a href="pages/pag-aabuso-gamot.html" class="menu-btn">Pag Aabuso Gamot</a>
-<a href="pages/shabu.html" class="menu-btn">Shabu</a>
-<a href="pages/sigarilyo.html" class="menu-btn">Sigarilyo</a>
-<a href="pages/sugal.html" class="menu-btn">Sugal</a>
-<a href="pages/tinuturok-gamot.html" class="menu-btn">Tinuturok Gamot</a>
-<a href="pages/tuklaw.html" class="menu-btn">Tuklaw</a>
-<a href="pages/vaping.html" class="menu-btn">Vaping</a>
-<!-- AUTO-LIST-END -->
+<!-- ✅ TINANGGAL ANG HARDCODED LISTAHAN — SCRIPT NA ANG GUMAGAWA NITO -->
 
 <div id="offline-note" class="offline-note hidden">
   <h2>📡 Walang Koneksyon sa Internet</h2>
