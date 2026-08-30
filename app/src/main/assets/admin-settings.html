@@ -73,7 +73,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 .copyright-preview .footer-copy{padding:12px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:10px}
 </style>
 </head>
-<body><div class="nav-bar">
+<body>
+
+<div class="nav-bar">
   <a href="admin.html">🏠 Dashboard</a>
   <a href="admin-order.html">🔢 Ayusin Ayos</a>
   <a href="admin-edit.html">✏️ I-edit</a>
@@ -107,7 +109,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 
   <!-- 📄 KARAPATANG-ARI -->
   <div class="card">
-    <h2>📄 Karapatan at May-ari ng App</h2>
+    <h2>📄 Karapatang-ari at May-ari ng App</h2>
     <p style="color:#6b7280;margin-bottom:14px">Ilagay nang isang beses — awtomatikong ilalagay sa ilalim ng bawat pahina ng nilalaman.</p>
 
     <label>👤 Pangalan ng May-ari / Lumikha:</label>
@@ -120,7 +122,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <input type="text" id="copy-extra" placeholder="Lahat ng Karapatan ay Nakareserba" oninput="updateCopyrightPreview()">
 
     <div class="check-row">
-      <input type="checkbox" id="copy-auto-insert" checked="">
+      <input type="checkbox" id="copy-auto-insert" checked>
       <label for="copy-auto-insert">✅ Awtomatikong ilagay sa ilalim ng bawat bagong pahina</label>
     </div>
 
@@ -161,7 +163,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
         <label>🔧 Mga Tiyak na Kakayahan:</label>
         <div class="perm-grid">
           <div class="perm-item">
-            <input type="checkbox" id="perm-edit" class="perm-check" checked="" disabled="">
+            <input type="checkbox" id="perm-edit" class="perm-check" checked disabled>
             <label for="perm-edit">I-edit Nilalaman (pages/ lang)</label>
           </div>
           <div class="perm-item">
@@ -229,7 +231,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <input type="text" id="cfg-assets" value="app/src/main/assets/">
 
     <label>📄 config.json — Lalabas:</label>
-    <div class="config-preview" id="config-json">Nagdi-detect...</div>
+    <div class="config-preview" id="config-json">Naglo-detect...</div>
 
     <div class="btn-group" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
       <button id="detect-btn" class="btn btn-secondary" onclick="detectConfig()">🔍 I-detect</button>
@@ -251,10 +253,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <button id="logout-btn" class="btn btn-secondary" onclick="doLogout()">🚪 Logout</button>
   </div>
 
-  <div id="status-msg" class="status info" style="display: none;">✅ Kinuha mula sa GitHub — napalitan ang laman</div>
+  <div id="status-msg" class="status"></div>
 </div>
 
-
+<script>
 const SESSION_KEY = "bisyo_admin_session";
 const SESSION_DURATION_KEY = "bisyo_session_duration";
 const REMEMBER_LOGIN_KEY = "bisyo_remember_login";
@@ -273,13 +275,13 @@ const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}
 window.getCopyrightNotice = function() {
   const info = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"owner":"May-ari","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba","autoInsert":true}');
   if (info.autoInsert === false) return "";
-  return `\n© ${info.year} ${info.owner} — ${info.extra}\n`;
+  return `\n<footer style="text-align:center;padding:16px;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:32px">© ${info.year} ${info.owner} — ${info.extra}</footer>\n`;
 };
 
 window.appendCopyrightIfNeeded = function(content) {
   const info = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"autoInsert":true}');
   if (info.autoInsert === false) return content;
-  if (content.includes("©") &amp;&amp; content.includes("Karapatan")) return content;
+  if (content.includes("©") && content.includes("Karapatan")) return content;
   const footer = getCopyrightNotice();
   if (content.includes("</body>")) {
     return content.replace("</body>", `${footer}</body>`);
