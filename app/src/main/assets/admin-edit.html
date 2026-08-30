@@ -97,10 +97,6 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 .status.success { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
 .status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
 .status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
-.folder-group {
-  display: flex; gap: 12px; flex-wrap: wrap;
-}
-.folder-group label { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -135,7 +131,6 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
     <label id="editor-label">📝 Nilalaman:</label>
     <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..."></textarea>
 
-    <!-- ✅ NADAGDAG NA: 📋 KOPYAHIN NA BUTTON -->
     <div class="btn-group">
       <button class="btn btn-primary" onclick="saveContent()">💾 I-save</button>
       <button class="btn btn-secondary" onclick="copyContent()">📋 Kopyahin</button>
@@ -154,7 +149,6 @@ const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 
-// ✅ AYON SA PLANO — assets/ ANG PINAGMULAN! docs/ = KOPYA LANG
 const ASSETS_ROOT = "app/src/main/assets/";
 const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_ROOT}`;
 
@@ -162,7 +156,20 @@ let currentFolder = "";
 let currentFilename = "";
 let currentSha = null;
 
-// === SESSION ===
+// ✅ LIGTAS NA PAGBASA — HINDI NAKAKASIRA NG EMOJI AT UNICODE
+function safeDecodeBase64(base64) {
+  try {
+    return decodeURIComponent(escape(atob(base64)));
+  } catch {
+    return atob(base64);
+  }
+}
+
+// ✅ LIGTAS NA PAG-ENCODE — PAREHO SA LUMANG SISTEMA
+function safeEncodeContent(text) {
+  return btoa(unescape(encodeURIComponent(text)));
+}
+
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
   if (!s || Date.now() > JSON.parse(s).expiresAt) {
@@ -172,6 +179,7 @@ function checkSession() {
   }
   return true;
 }
+
 function getDecryptedToken() {
   const encrypted = localStorage.getItem("bisyo_encrypted_token");
   const s = sessionStorage.getItem(SESSION_KEY);
@@ -196,7 +204,6 @@ async function folderChanged() {
     document.getElementById("file-select").innerHTML = `<option value="">📴 Walang internet</option>`;
     return;
   }
-
   await loadFileList();
 }
 
@@ -208,22 +215,17 @@ async function loadFileList() {
     const files = await res.json();
     
     select.innerHTML = `<option value="">— Pumili ng file —</option>`;
-    
-    files
-      .filter(f => f.type === "file")
-      .sort((a,b) => a.name.localeCompare(b.name))
-      .forEach(f => {
-        let icon = "📄";
-        if (f.name.endsWith(".html")) icon = "📄";
-        else if (f.name.endsWith(".css")) icon = "🎨";
-        else if (f.name.endsWith(".js")) icon = "⚙️";
-        else if (f.name.endsWith(".txt")) icon = "📝";
-        else if (f.name.endsWith(".md")) icon = "📋";
-        select.innerHTML += `<option value="${f.name}">${icon} ${f.name}</option>`;
-      });
-
+    files.filter(f => f.type === "file")
+         .sort((a,b) => a.name.localeCompare(b.name))
+         .forEach(f => {
+           let icon = "📄";
+           if (f.name.endsWith(".html")) icon = "📄";
+           else if (f.name.endsWith(".css")) icon = "🎨";
+           else if (f.name.endsWith(".js")) icon = "⚙️";
+           else if (f.name.endsWith(".txt")) icon = "📝";
+           select.innerHTML += `<option value="${f.name}">${icon} ${f.name}</option>`;
+         });
     showStatus(`✅ Nabasa: ${files.length} file sa ${currentFolder || 'assets/'}`, "info");
-    
   } catch(e) {
     select.innerHTML = `<option value="">❌ Nabigo: ${e.message}</option>`;
     showStatus(`❌ Hindi mabasa: ${e.message}`, "error");
@@ -237,7 +239,6 @@ async function fileSelected() {
     document.getElementById("page-hint").textContent = "Pumili muna ng file";
     return;
   }
-
   document.getElementById("page-hint").innerHTML = `✅ <strong>${currentFolder}${currentFilename}</strong> — binubuksan...`;
   await loadFileContent();
 }
@@ -245,7 +246,6 @@ async function fileSelected() {
 async function loadFileContent() {
   const editorArea = document.getElementById("editor-area");
   const editor = document.getElementById("content-editor");
-  
   editorArea.style.display = "block";
   editor.value = "";
   editor.classList.add("loading");
@@ -255,7 +255,6 @@ async function loadFileContent() {
   const online = navigator.onLine;
   const fullPath = currentFolder + currentFilename;
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
-
   currentSha = null;
 
   if (online) {
@@ -264,7 +263,7 @@ async function loadFileContent() {
       if (res.ok) {
         const data = await res.json();
         currentSha = data.sha;
-        content = atob(data.content);
+        content = safeDecodeBase64(data.content); // ✅ LIGTAS — EMOJI HINDI SIRA!
         localStorage.setItem(storageKey, content);
         showStatus(`✅ Mula sa GitHub: ${fullPath}`, "success");
       }
@@ -288,7 +287,6 @@ async function saveContent() {
 
   const fullPath = currentFolder + currentFilename;
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
-
   localStorage.setItem(storageKey, content);
 
   const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
@@ -322,7 +320,7 @@ async function saveContent() {
       },
       body: JSON.stringify({
         message: `✏️ Na-edit: ${fullPath} — ${new Date().toLocaleString('tl-PH')}`,
-        content: btoa(unescape(encodeURIComponent(content))),
+        content: safeEncodeContent(content), // ✅ PAREHO SA LUMANG PARAAN
         sha: currentSha,
         branch: BRANCH
       })
@@ -339,17 +337,14 @@ async function saveContent() {
   }
 }
 
-// ✅ BAGONG KAKAYAHAN — KOPYAHIN ANG LAMAN AGAD!
+// ✅ KOPYAHIN — BAGONG BUTTON
 function copyContent() {
   const content = document.getElementById("content-editor").value;
   if (!content.trim()) return alert("Walang laman na kopyahin!");
   
   navigator.clipboard.writeText(content)
-    .then(() => {
-      showStatus("📋✅ NAKOPYAHIN NA SA IMBAKAN NG TEKSTO!", "success");
-    })
+    .then(() => showStatus("📋✅ NAKOPYAHIN NA SA IMBAKAN NG TEKSTO!", "success"))
     .catch(() => {
-      // Para sa lumang browser o kung tinanggihan ang pahintulot
       const editor = document.getElementById("content-editor");
       editor.select();
       document.execCommand("copy");
