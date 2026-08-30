@@ -125,8 +125,21 @@
 .size-preview-info { font-size: 13px; color: #374151; margin-top: 8px; padding: 8px; background: #fff; border-radius: 6px; }
 </style>
 </head>
-<body>
+<body><!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>➕ Bagong File / Imahe — Sa Assets at Res</title>
 
+<!-- ==================================================
+     🧩 WIDGET SYSTEM — IISANG PINAGMULAN LANG
+     Huwag na ulitin ang nav-bar sa bawat pahina!
+     ================================================== -->
+<script>
+window.WIDGETS = {
+  "nav-bar": `
 <div class="nav-bar">
   <a href="admin.html">🏠 Dashboard</a>
   <a href="admin-order.html">🔢 Ayusin Ayos</a>
@@ -136,6 +149,180 @@
   <a href="setup-token.html">🔧 Token</a>
   <a href="admin-settings.html">⚙️ Setting</a>
 </div>
+  `.trim()
+};
+
+// AWTOMATIKONG PALITAN ANG WIDGET MARKER → BUONG CODE
+function expandWidgets(html) {
+  if (!html) return html;
+  let result = html;
+  for (const [name, code] of Object.entries(window.WIDGETS)) {
+    const marker = `<!-- WIDGET:${name} -->`;
+    result = result.split(marker).join(code);
+  }
+  return result;
+}
+</script>
+
+<style>
+.btn-primary:disabled,
+.btn-primary.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.form-card {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  max-width: 700px;
+  margin: 20px auto;
+}
+.form-card h1 {
+  font-size: 22px;
+  color: #b91c1c;
+  margin-bottom: 8px;
+}
+.form-card label {
+  display: block;
+  font-weight: bold;
+  margin: 18px 0 6px;
+  color: #374151;
+}
+.form-card input,
+.form-card select,
+.form-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+}
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  outline: none;
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
+}
+.form-card textarea {
+  min-height: 200px;
+  resize: vertical;
+  line-height: 1.6;
+}
+.note {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  padding: 10px 14px;
+  margin-top: 6px;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+  color: #78350f;
+}
+.note-green {
+  background: #f0fdf4;
+  border-left-color: #22c55e;
+  color: #166534;
+}
+.note-info {
+  background: #eff6ff;
+  border-left-color: #3b82f6;
+  color: #1e40af;
+}
+.btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.status {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin: 20px 0 0;
+  display: none;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.status.success { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
+.status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
+.status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
+
+.mode-tabs { display:flex;gap:8px;margin:16px 0 }
+.mode-tab { padding:10px 14px;border-radius:8px;background:#f3f4f6;cursor:pointer;font-weight:bold;color:#4b5563;border:2px solid transparent }
+.mode-tab.active { background:#fef2f2;color:#b91c1c;border-color:#b91c1c }
+.mode-desc { font-size:14px;color:#6b7280;margin-bottom:12px;padding:10px;background:#f9fafb;border-radius:8px }
+
+.type-tabs { display:flex;gap:8px;margin:8px 0 16px 0 }
+.type-tab { padding:8px 12px;border-radius:6px;background:#f3f4f6;cursor:pointer;font-weight:bold;color:#4b5563;border:2px solid transparent }
+.type-tab.active { background:#fef2f2;color:#b91c1c;border-color:#b91c1c }
+
+/* ==================================================
+   🎨 VISUAL EDITOR — WYSIWYG
+   ================================================== */
+.visual-toolbar {
+  display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;padding:8px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb
+}
+.visual-toolbar button {
+  padding:6px 10px;border:none;background:white;border-radius:4px;cursor:pointer;font-weight:bold
+}
+.visual-toolbar button:hover {background:#fef2f2}
+#visual-editor {
+  border:2px solid #b91c1c;
+  border-radius:10px;
+  padding:20px;
+  min-height:220px;
+  outline:none;
+  background:white
+}
+
+.image-upload-area {
+  border: 3px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 10px 0;
+}
+.image-upload-area:hover, .image-upload-area.highlight {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+.image-upload-area.has-image { padding:15px }
+.image-upload-area.has-image p { display:none }
+.preview-wrap { margin-top:12px;display:none }
+.preview-wrap img { max-width:180px;border-radius:8px;border:2px solid #e5e7eb }
+
+.size-option-card {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0;
+  border: 2px solid transparent;
+}
+.size-option-card.selected {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+.size-option-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.size-desc { font-size: 13px; color: #6b7280; margin-left: 28px; }
+.size-preview-info { font-size: 13px; color: #374151; margin-top: 8px; padding: 8px; background: #fff; border-radius: 6px; }
+
+.autosave-indicator {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+  height: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- ✅ WIDGET — IISANG LINYA LANG, HINDI NA BUONG NAV-BAR -->
+<!-- WIDGET:nav-bar -->
 
 <div class="container">
   <div class="form-card">
@@ -143,6 +330,7 @@
 
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="text" onclick="switchMode('text')">📄 Teksto / Code</div>
+      <div class="mode-tab" data-mode="visual" onclick="switchMode('visual')">🎨 Visual Editor ✨</div>
       <div class="mode-tab" data-mode="image" onclick="switchMode('image')">🖼️ Imahe / Icon</div>
     </div>
     <div class="mode-desc" id="mode-desc">
@@ -150,7 +338,7 @@
     </div>
 
     <label>📂 Lokasyon:</label>
-    <select id="location-select" onchange="updatePathHint()">
+    <select id="location-select" onchange="updatePathHint(); suggestExtension()">
       <option value="assets/">📂 [ASSETS] Ugat — app/src/main/assets/</option>
       <option value="assets/pages/" selected>📂 [ASSETS] Pages — app/src/main/assets/pages/</option>
       <option disabled>────── 📱 RESOURCES ──────</option>
@@ -162,19 +350,21 @@
     </select>
 
     <label id="custom-path-label" style="display:none">✏️ Sariling Landas:</label>
-    <input type="text" id="custom-path" placeholder="Hal. assets/template/" style="display:none">
+    <input type="text" id="custom-path" placeholder="Hal. assets/template/" style="display:none" oninput="saveDraft()">
 
     <p id="path-hint" style="margin:8px 0 16px 0;color:#6b7280;font-size:14px">
       📂 Pupunta sa: <code>app/src/main/assets/pages/</code>
     </p>
 
     <label>Pangalan ng File:</label>
-    <input type="text" id="filename" placeholder="Hal. index.html o icon_bisyo">
-    <div class="note">💡 Sa <code>res/drawable</code>: maliit na titik, numero at _ lamang — walang puwang o malaking titik</div>
+    <input type="text" id="filename" placeholder="Hal. index.html o icon_bisyo" oninput="validateFilename(); saveDraft()">
+    <div class="note" id="filename-note">💡 Sa <code>res/drawable</code>: maliit na titik, numero at _ lamang — walang puwang o malaking titik</div>
+    <div class="note note-info" id="ext-note" style="display:none">💡 Awtomatikong idinagdag ang tamang extension</div>
 
+    <!-- ✅ TEKSTO MODE -->
     <div id="text-mode-area">
       <label>Uri ng Nilalaman:</label>
-      <div class="type-tabs" style="display:flex;gap:8px;margin:8px 0 16px 0">
+      <div class="type-tabs">
         <div class="type-tab active" data-type="content" onclick="switchContentType('content')">📝 Pahina ng Nilalaman</div>
         <div class="type-tab" data-type="blank" onclick="switchContentType('blank')">📄 Walang Laman</div>
         <div class="type-tab" data-type="full" onclick="switchContentType('full')">⚙️ Buong HTML</div>
@@ -183,12 +373,45 @@
         📝 <strong>Pahina ng Nilalaman:</strong> Isulat lang ang laman — awtomatikong isasama sa tamang disenyo.
       </div>
       <label>Nilalaman:</label>
-      <textarea id="file-content" placeholder="Isulat dito ang nilalaman..."></textarea>
+      <textarea id="file-content" placeholder="Isulat dito ang nilalaman..." oninput="saveDraft()"></textarea>
+      <div class="autosave-indicator" id="autosave-status">✅ Naka-save sa lokal</div>
     </div>
 
+    <!-- ✅ VISUAL EDITOR MODE — BAGONG DAGDAG -->
+    <div id="visual-mode-area" style="display:none">
+      <label>🎨 Direktang Pag-edit — I-click at baguhin agad!</label>
+      <div class="visual-toolbar">
+        <button onclick="execCmd('bold')"><b>B</b></button>
+        <button onclick="execCmd('italic')"><i>I</i></button>
+        <button onclick="execCmd('underline')"><u>U</u></button>
+        <button onclick="execCmd('strikeThrough')"><s>S</s></button>
+        <span style="color:#ccc;padding:0 4px">|</span>
+        <button onclick="execCmd('insertUnorderedList')">• List</button>
+        <button onclick="execCmd('insertOrderedList')">1. List</button>
+        <span style="color:#ccc;padding:0 4px">|</span>
+        <button onclick="formatBlock('h2')">H2</button>
+        <button onclick="formatBlock('h3')">H3</button>
+        <button onclick="formatBlock('p')">Talata</button>
+        <span style="color:#ccc;padding:0 4px">|</span>
+        <button onclick="insertLink()">🔗 Link</button>
+        <button onclick="insertImage()">🖼️ Imahe</button>
+      </div>
+      <div id="visual-editor" contenteditable="true" oninput="syncVisualToText()">
+        <h2>Pamagat ng Paksa</h2>
+        <p>I-click at simulan ang pagbabago dito... Hindi mo kailangang alam ang HTML!</p>
+      </div>
+      <textarea id="file-content-visual" style="display:none"></textarea>
+      <div class="autosave-indicator">✅ Naka-save — i-type lang</div>
+    </div>
+
+    <!-- ✅ IMAHE MODE -->
     <div id="image-mode-area" style="display:none">
       <label>Pumili ng Imahe:</label>
-      <div class="image-upload-area" id="image-drop" onclick="document.getElementById('image-file').click()">
+      <div class="image-upload-area" id="image-drop" 
+        onclick="document.getElementById('image-file').click()"
+        ondragover="event.preventDefault(); this.classList.add('highlight')"
+        ondragleave="this.classList.remove('highlight')"
+        ondrop="event.preventDefault(); this.classList.remove('highlight'); handleFileSelect(event.dataTransfer.files)">
         <p style="font-size:16px;color:#4b5563">📤 I-tap o i-drag dito ang imahe<br><small>PNG, JPG, WebP — hanggang 1MB pagkatapos paliitin</small></p>
         <input type="file" id="image-file" accept="image/*" style="display:none" onchange="handleFileSelect(this.files)">
         <div class="preview-wrap" id="image-preview">
@@ -200,34 +423,30 @@
       <div class="size-option-card selected" id="size-single" onclick="selectSizeMode('single')">
         <div class="size-option-row">
           <input type="radio" name="size-mode" id="r-single" checked>
-          <label for="r-single" style="margin:0;cursor:pointer"><strong>🖼️ Isang Bersyon — Orihinal / Pinaliit</strong></label>
+          <label for="r-single" style="margin:0;cursor:pointer"><strong>🖼️ Isang Bersyon</strong></label>
         </div>
-        <div class="size-desc">Isang file lang — awtomatikong pinaliliit kung lalampas sa 1MB</div>
+        <div class="size-desc">Isang file — awtomatikong pinaliliit</div>
       </div>
-
       <div class="size-option-card" id="size-android" onclick="selectSizeMode('android')">
         <div class="size-option-row">
           <input type="radio" name="size-mode" id="r-android">
           <label for="r-android" style="margin:0;cursor:pointer"><strong>📱 5 Sukat para sa Android</strong></label>
         </div>
-        <div class="size-desc">Awtomatikong gagawing: mdpi · hdpi · xhdpi · xxhdpi · xxxhdpi</div>
+        <div class="size-desc">mdpi · hdpi · xhdpi · xxhdpi · xxxhdpi</div>
         <div class="size-preview-info" id="sizes-preview" style="display:none">
-          📂 <strong>Lokasyon:</strong> res/drawable-mdpi/ , res/drawable-hdpi/ , res/drawable-xhdpi/ , res/drawable-xxhdpi/ , res/drawable-xxxhdpi/
+          📂 res/drawable-*/
         </div>
       </div>
-
-      <div class="note note-green" id="resize-note" style="display:none">
-        ✅ Awtomatikong pinaliliit — kahit malaki ang orihinal, ibabawas sa kalidad hanggang umabot sa 1MB o mas mababa.
-      </div>
-
+      <div class="note note-green" id="resize-note" style="display:none">✅ Pinaliliit hanggang 1MB</div>
       <div class="note" id="image-info" style="margin-top:12px;display:none">
-        ✅ Napili: <span id="img-name"></span> · <span id="img-size"></span> · <span id="img-resize-status"></span>
+        ✅ Napili: <span id="img-name"></span> · <span id="img-size"></span>
       </div>
     </div>
 
     <div class="btn-group">
       <button id="create-btn" class="btn btn-primary" onclick="createFile()">✅ I-SAVE SA GITHUB</button>
       <button class="btn btn-secondary" onclick="resetForm()">↩️ Linisin</button>
+      <button class="btn btn-secondary" onclick="loadDraft()">📂 Ibalik</button>
     </div>
 
     <div id="status-msg" class="status"></div>
@@ -238,6 +457,7 @@
 const SESSION_KEY = "bisyo_admin_session";
 const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
 const PENDING_KEY = "bisyo_offline_changes";
+const DRAFT_KEY = "bisyo_newfile_draft";
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
@@ -245,10 +465,97 @@ const MAX_FILE_SIZE = 1024 * 1024;
 
 let currentMode = "text";
 let contentType = "content";
-let selectedImage = null; // ✅ Siguradong laging may halaga kapag napili
+let selectedImage = null;
 let sizeMode = "single";
 
-// ✅ AYUS: TINANGGAL ANG DOUBLE CHECK — SIGURADONG TAMA ANG PAG-SET
+// ==================================================
+// 🎨 VISUAL EDITOR FUNCTIONS — DIREKTANG PAGBABAGO
+// ==================================================
+function execCmd(cmd, val=null) {
+  document.execCommand(cmd, false, val);
+  document.getElementById("visual-editor").focus();
+  syncVisualToText();
+}
+function formatBlock(tag) {
+  execCmd('formatBlock', `<${tag}>`);
+}
+function insertLink() {
+  const url = prompt("Ipasok ang URL:");
+  if (url) execCmd('createLink', url);
+}
+function insertImage() {
+  const url = prompt("Ipasok ang lokasyon ng imahe:");
+  if (url) execCmd('insertImage', url);
+}
+function syncVisualToText() {
+  // Kopyahin ang laman mula sa visual editor papunta sa textarea
+  const visual = document.getElementById("visual-editor");
+  const hidden = document.getElementById("file-content-visual");
+  if (visual && hidden) hidden.value = visual.innerHTML;
+}
+
+// ==================================================
+// 💾 AUTO-SAVE
+// ==================================================
+function saveDraft() {
+  const contentVal = currentMode === "visual"
+    ? document.getElementById("visual-editor")?.innerHTML || ""
+    : document.getElementById("file-content")?.value || "";
+
+  const draft = {
+    mode: currentMode,
+    location: document.getElementById("location-select").value,
+    customPath: document.getElementById("custom-path").value,
+    filename: document.getElementById("filename").value,
+    contentType: contentType,
+    content: contentVal,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if (!raw) { showStatus("📂 Walang nakabinbin", "info"); return; }
+  try {
+    const d = JSON.parse(raw);
+    switchMode(d.mode || "text");
+    document.getElementById("location-select").value = d.location || "assets/pages/";
+    updatePathHint();
+    if (d.location === "custom") document.getElementById("custom-path").value = d.customPath || "";
+    document.getElementById("filename").value = d.filename || "";
+    switchContentType(d.contentType || "content");
+    if (d.mode === "visual") {
+      document.getElementById("visual-editor").innerHTML = d.content || "";
+    } else {
+      document.getElementById("file-content").value = d.content || "";
+    }
+    showStatus("📂 Naibalik!", "success");
+  } catch { showStatus("❌ Hindi mabasa", "error"); }
+}
+
+function validateFilename() {
+  const loc = document.getElementById("location-select").value;
+  const el = document.getElementById("filename");
+  let name = el.value;
+  if (loc.startsWith("res/")) name = name.toLowerCase().replace(/[^a-z0-9_]/g, "_");
+  else name = name.replace(/\s+/g, "-").replace(/[^\w.\-]/g, "_");
+  el.value = name;
+  saveDraft();
+}
+
+function suggestExtension() {
+  const loc = document.getElementById("location-select").value;
+  const el = document.getElementById("filename");
+  if (el.value && !el.value.includes(".")) {
+    let ext = ".html";
+    if (loc.startsWith("res/drawable/")) ext = ".png";
+    else if (loc.startsWith("res/layout/") || loc.startsWith("res/values/")) ext = ".xml";
+    el.value += ext;
+    document.getElementById("ext-note").style.display = "block";
+  }
+}
+
 function selectSizeMode(mode) {
   sizeMode = mode;
   document.getElementById("size-single").classList.toggle("selected", mode === "single");
@@ -258,54 +565,34 @@ function selectSizeMode(mode) {
   document.getElementById("sizes-preview").style.display = mode === "android" ? "block" : "none";
 }
 
-// ✅ PAGPALIIT NG IMAHE
 async function resizeImage(file, maxSizeBytes = MAX_FILE_SIZE) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = function() {
-      let width = img.width;
-      let height = img.height;
-      let quality = 0.92;
+      let width = img.width, height = img.height, quality = 0.92;
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-
       const maxPixels = 2000 * 2000;
       if (width * height > maxPixels) {
         const ratio = Math.sqrt(maxPixels / (width * height));
         width = Math.floor(width * ratio);
         height = Math.floor(height * ratio);
       }
-
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = width; canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
-
       function tryCompress(q) {
-        canvas.toBlob(
-          blob => {
-            if (!blob) return resolve(null);
-            if (blob.size <= maxSizeBytes || q <= 0.08) {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                resolve({
-                  blob,
-                  base64: reader.result.split(',')[1],
-                  dataUrl: reader.result,
-                  width, height,
-                  quality: q,
-                  originalSize: file.size,
-                  finalSize: blob.size,
-                  shrunk: blob.size < file.size
-                });
-              };
-              reader.readAsDataURL(blob);
-            } else {
-              tryCompress(Math.max(0.08, q - 0.08));
-            }
-          },
-          "image/jpeg",
-          q
-        );
+        canvas.toBlob(blob => {
+          if (!blob) return resolve(null);
+          if (blob.size <= maxSizeBytes || q <= 0.08) {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve({
+              blob, base64: reader.result.split(',')[1], dataUrl: reader.result,
+              width, height, quality: q, originalSize: file.size,
+              finalSize: blob.size, shrunk: blob.size < file.size
+            });
+            reader.readAsDataURL(blob);
+          } else tryCompress(Math.max(0.08, q - 0.08));
+        }, "image/png", q);
       }
       tryCompress(quality);
     };
@@ -313,74 +600,55 @@ async function resizeImage(file, maxSizeBytes = MAX_FILE_SIZE) {
   });
 }
 
-function generateAndroidVariants(resized) {
+function generateAndroidVariants(r) {
   return [
-    { name: "mdpi",  scale: 0.75, folder: "drawable-mdpi/" },
-    { name: "hdpi",  scale: 1.0,  folder: "drawable-hdpi/" },
-    { name: "xhdpi", scale: 1.5,  folder: "drawable-xhdpi/" },
-    { name: "xxhdpi",scale: 2.0,  folder: "drawable-xxhdpi/" },
-    { name: "xxxhdpi", scale: 3.0, folder: "drawable-xxxhdpi/" }
-  ].map(d => ({
-    ...d,
-    width: Math.round(resized.width * d.scale),
-    height: Math.round(resized.height * d.scale),
-    base64: resized.base64
-  }));
+    {name:"mdpi",scale:0.75,folder:"drawable-mdpi/"},
+    {name:"hdpi",scale:1.0,folder:"drawable-hdpi/"},
+    {name:"xhdpi",scale:1.5,folder:"drawable-xhdpi/"},
+    {name:"xxhdpi",scale:2.0,folder:"drawable-xxhdpi/"},
+    {name:"xxxhdpi",scale:3.0,folder:"drawable-xxxhdpi/"}
+  ].map(d => ({...d, base64: r.base64}));
 }
 
-function explainStatusCode(status) {
-  return {
-    401: "🔑 Walang pahintulot — Kailangan ng Token.",
-    403: "⚠️ Limitasyon — Naubos na ang kahilingan o kulang ang pahintulot ng Token.",
-    404: "📂 Hindi Natagpuan — Hindi umiiral ang landas.",
-    422: "⚠️ Hindi Tinatanggap — Maaaring may katulad na file na o mali ang datos.",
-    0: "📴 Walang Koneksyon — Nai-save lokal, isesync kapag may internet."
-  }[status] || `⚠️ HTTP ${status} — Subukan muli mamaya.`;
+function explainStatusCode(s) {
+  return {401:"🔑 Kailangan ng Token",403:"⚠️ Walang pahintulot",404:"📂 Hindi natagpuan",422:"⚠️ Mali ang datos",0:"📴 Nai-save lokal"}[s]||`⚠️ HTTP ${s}`;
 }
-
-function safeEncodeContent(text) {
-  return btoa(unescape(encodeURIComponent(text)));
-}
-
+function safeEncodeContent(t) { return btoa(unescape(encodeURIComponent(t))); }
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
   if (!s || Date.now() > JSON.parse(s).expiresAt) {
     alert("Nakalipas na ang session — mag-login muli");
-    location.href = "admin.html";
-    return false;
+    location.href = "admin.html"; return false;
   }
   return true;
 }
 
+// ==================================================
+// ✅ PALITAN ANG EDITOR MODE
+// ==================================================
 function switchMode(mode) {
   currentMode = mode;
   document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
+
   document.getElementById("text-mode-area").style.display = mode === "text" ? "block" : "none";
+  document.getElementById("visual-mode-area").style.display = mode === "visual" ? "block" : "none";
   document.getElementById("image-mode-area").style.display = mode === "image" ? "block" : "none";
 
-  document.getElementById("mode-desc").innerHTML = mode === "text"
-    ? "📄 <strong>Teksto / Code:</strong> HTML, CSS, JS, TXT — lahat na nakasulat na teksto."
-    : "🖼️ <strong>Imahe / Icon:</strong> Pumili ng isa o awtomatikong 5 sukat para Android — pinaliliit hanggang 1MB bago i-upload.";
+  const desc = document.getElementById("mode-desc");
+  if (mode === "text") desc.innerHTML = "📄 <strong>Teksto / Code:</strong> I-edit ang HTML code direkta.";
+  else if (mode === "visual") desc.innerHTML = "🎨 <strong>Visual Editor:</strong> I-click at baguhin direkta — parang Word!";
+  else desc.innerHTML = "🖼️ <strong>Imahe:</strong> Pumili ng litrato o icon.";
+  saveDraft();
 }
 
 function updatePathHint() {
   const sel = document.getElementById("location-select").value;
   const hint = document.getElementById("path-hint");
-  const customLabel = document.getElementById("custom-path-label");
-  const customInput = document.getElementById("custom-path");
-
-  if (sel === "custom") {
-    hint.style.display = "none";
-    customLabel.style.display = "block";
-    customInput.style.display = "block";
-  } else {
-    hint.style.display = "block";
-    customLabel.style.display = "none";
-    customInput.style.display = "none";
-    hint.innerHTML = `📂 Pupunta sa: <code>app/src/main/${sel}</code>`;
-  }
+  const cLabel = document.getElementById("custom-path-label");
+  const cInput = document.getElementById("custom-path");
+  if (sel === "custom") { hint.style.display="none"; cLabel.style.display="block"; cInput.style.display="block"; }
+  else { hint.style.display="block"; cLabel.style.display="none"; cInput.style.display="none"; hint.innerHTML = `📂 Pupunta sa: <code>app/src/main/${sel}</code>`; }
 }
-
 function getFullPath() {
   const sel = document.getElementById("location-select").value;
   if (sel === "custom") {
@@ -389,49 +657,171 @@ function getFullPath() {
   }
   return `app/src/main/${sel}`;
 }
-
-// ✅ AYUS: TAMA NA ANG PAGTATALA NG NAPILING IMAHE
 async function handleFileSelect(files) {
-  if (!files || !files[0]) return;
-  const file = files[0];
-
-  document.getElementById("img-name").textContent = file.name;
-  document.getElementById("img-size").textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+  if (!files||!files[0]) return;
+  const f = files[0];
+  document.getElementById("img-name").textContent = f.name;
+  document.getElementById("img-size").textContent = (f.size/1024/1024).toFixed(2)+" MB";
   document.getElementById("image-info").style.display = "block";
-
-  selectedImage = await resizeImage(file); // ✅ SIGURADONG NAKA-SAVE SA VARIABL
-
-  if (!selectedImage) {
-    showStatus("❌ Hindi mabasa ang imahe", "error");
-    return;
-  }
-
-  // ✅ Ipakita ang pinaliit na impormasyon
-  document.getElementById("img-resize-status").textContent = selectedImage.shrunk
-    ? `✅ Pinaliit: ${(selectedImage.originalSize/1024/1024).toFixed(2)}MB → ${(selectedImage.finalSize/1024).toFixed(1)}KB`
-    : "✅ Sakto — hindi kailangang paliitin";
-  document.getElementById("resize-note").style.display = selectedImage.shrunk ? "block" : "none";
-
-  // ✅ I-preview
+  document.getElementById("image-drop").classList.remove("highlight");
+  selectedImage = await resizeImage(f);
+  if (!selectedImage) return showStatus("❌ Hindi mabasa", "error");
   document.getElementById("preview-img").src = selectedImage.dataUrl;
   document.getElementById("image-preview").style.display = "block";
   document.getElementById("image-drop").classList.add("has-image");
-
-  // ✅ Awtong pangalan
   if (!document.getElementById("filename").value) {
-    document.getElementById("filename").value = file.name
-      .toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9._-]/g, "_")
-      .replace(/\.(jpg|jpeg|webp)$/i, ".png");
+    document.getElementById("filename").value = f.name.toLowerCase().replace(/\s+/g,"_").replace(/[^a-z0-9._-]/g,"_");
   }
 }
-
 function switchContentType(type) {
   contentType = type;
   document.querySelectorAll(".type-tab").forEach(t => t.classList.toggle("active", t.dataset.type === type));
-  document.getElementById("file-content").value =
-    type === "content" ? `<h2>Pamagat</h2>\n<p>Nilalaman dito...</p>` :
-    type === "blank" ? "" :
-    `<!DOCTYPE html>\n<html lang="tl">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<link rel="stylesheet" href="style.css">\n<title>Pamagat</title>\n</head>\n<body>\n<h1>Pamagat</h1>\n<p>Nilalaman...</p>\n</body>\n</html>`;
+  const desc = document.getElementById("type-desc");
+  if (type === "content") {
+    desc.innerHTML = "📝 Laman lang — awtomatikong ilalagay sa tamang disenyo.";
+    document.getElementById("file-content").value = `<h2>Pamagat</h2>\n<p>Ilagay ang nilalaman dito...</p>`;
+  } else if (type === "blank") {
+    desc.innerHTML = "📄 Walang laman — simula mula sa simula.";
+    document.getElementById("file-content").value = "";
+  } else {
+    desc.innerHTML = "⚙️ Buong HTML — kasama na ang Widget marker!";
+    document.getElementById("file-content").value = `<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>Pamagat</title>
+</head>
+<body>
+
+<!-- WIDGET:nav-bar -->
+
+<div class="container">
+  <h1>Pamagat</h1>
+  <p>Nilalaman dito...</p>
+</div>
+
+</body>
+</html>`;
+  }
+  saveDraft();
+}
+function getEncryptedToken() { return localStorage.getItem(TOKEN_STORAGE_KEY)||""; }
+function getPassword() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  return s ? JSON.parse(s).password : "";
+}
+function decryptToken(enc, pwd) {
+  try {
+    let d = atob(enc), r = "";
+    for (let i=0; i<d.length; i++) r += String.fromCharCode(d.charCodeAt(i) ^ pwd.charCodeAt(i % pwd.length));
+    return r;
+  } catch { return ""; }
+}
+
+// ==================================================
+// ✅ I-SAVE — BAGO I-UPLOAD → PALAWAKIN ANG WIDGET
+// ==================================================
+async function createFile() {
+  const btn = document.getElementById("create-btn");
+  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Sinasave...";
+
+  const filename = document.getElementById("filename").value.trim();
+  const folderPath = getFullPath();
+  if (!filename || !folderPath) {
+    showStatus("❌ Ilagay ang pangalan at lokasyon", "error");
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    return;
+  }
+
+  // 🖼️ IMAHE
+  if (currentMode === "image") {
+    if (!selectedImage) { showStatus("❌ Pumili muna ng imahe", "error"); resetBtn(); return; }
+    if (sizeMode === "android") {
+      const variants = generateAndroidVariants(selectedImage);
+      let ok = 0;
+      for (const v of variants) if (await uploadOne(`app/src/main/res/${v.folder}${filename}`, v.base64)) ok++;
+      showStatus(`✅ ${ok}/5 Nai-upload`, "success");
+    } else {
+      await uploadOne(folderPath + filename, selectedImage.base64);
+    }
+    resetForm(); resetBtn(); return;
+  }
+
+  // 📄 TEKSTO o 🎨 VISUAL
+  let content = currentMode === "visual"
+    ? document.getElementById("visual-editor").innerHTML
+    : document.getElementById("file-content").value;
+
+  if (!content.trim()) { showStatus("❌ Walang laman", "error"); resetBtn(); return; }
+
+  // ✅ MAHALAGA: Palawakin ang Widget bago i-upload
+  content = expandWidgets(content);
+
+  await uploadOne(folderPath + filename, safeEncodeContent(content));
+  resetForm(); resetBtn();
+
+  function resetBtn() { btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB"; }
+}
+
+async function uploadOne(filePath, b64) {
+  const pending = JSON.parse(localStorage.getItem(PENDING_KEY)||"[]");
+  pending.push({filePath,content:b64,timestamp:new Date().toISOString(),synced:false});
+  localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+
+  if (!navigator.onLine) { showStatus(`📴 Nai-save lokal — ${filePath}`, "info"); return true; }
+
+  const token = decryptToken(getEncryptedToken(), getPassword());
+  if (!token) { showStatus("⚠️ Walang Token — nai-save lokal", "warning"); return true; }
+
+  try {
+    let sha = "";
+    try {
+      const c = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {headers:{Authorization:`token ${token}`}});
+      if (c.ok) sha = (await c.json()).sha;
+    } catch {}
+
+    const body = {message:`📄 Bagong File: ${filePath}`, content:b64, branch:BRANCH};
+    if (sha) body.sha = sha;
+
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
+      method:"PUT",
+      headers:{Authorization:`token ${token}`,"Content-Type":"application/json"},
+      body:JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(explainStatusCode(res.status));
+    showStatus(`✅ Nai-upload: ${filePath}`, "success");
+    return true;
+  } catch(e) { showStatus(`⚠️ Nai-save lokal — ${e.message}`, "warning"); return true; }
+}
+
+function resetForm() {
+  document.getElementById("filename").value = "";
+  document.getElementById("file-content").value = "";
+  document.getElementById("visual-editor").innerHTML = "<h2>Pamagat</h2><p>Simulan dito...</p>";
+  document.getElementById("location-select").value = "assets/pages/";
+  document.getElementById("custom-path").value = "";
+  selectedImage = null;
+  sizeMode = "single"; selectSizeMode("single");
+  updatePathHint();
+  switchMode("text");
+  switchContentType("content");
+  localStorage.removeItem(DRAFT_KEY);
+  showStatus("↩️ Nilinisan", "info");
+}
+
+function showStatus(txt, cls) {
+  const el = document.getElementById("status-msg");
+  el.textContent = txt; el.className = `status ${cls}`; el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 12000);
+}
+
+window.onload = () => { if (!checkSession()) return; updatePathHint(); };
+</script>
+</body>
+</html>
+</body>\n</html>`;
 }
 
 function getEncryptedToken() { return localStorage.getItem(TOKEN_STORAGE_KEY) || ""; }
