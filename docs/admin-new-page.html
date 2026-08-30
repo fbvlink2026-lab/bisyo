@@ -5,6 +5,82 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
 <title>➕ Bagong File / Pahina — Sa Assets</title>
+<style>
+/* ✅ PARA MAGING ABO ANG BUTTON HABANG GINAGAWA */
+.btn-primary:disabled,
+.btn-primary.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.form-card {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  max-width: 700px;
+  margin: 20px auto;
+}
+.form-card h1 {
+  font-size: 22px;
+  color: #b91c1c;
+  margin-bottom: 8px;
+}
+.form-card label {
+  display: block;
+  font-weight: bold;
+  margin: 18px 0 6px;
+  color: #374151;
+}
+.form-card input,
+.form-card select,
+.form-card textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+}
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  outline: none;
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
+}
+.form-card textarea {
+  min-height: 200px;
+  resize: vertical;
+  line-height: 1.6;
+}
+.note {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  padding: 10px 14px;
+  margin-top: 6px;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+  color: #78350f;
+}
+.btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.status {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin: 20px 0 0;
+  display: none;
+  font-weight: 500;
+}
+.status.success { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
+.status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
+.status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
+</style>
 </head>
 <body>
 
@@ -22,7 +98,6 @@
   <div class="form-card">
     <h1>➕ Gumawa ng Bagong File sa Assets</h1>
 
-    <!-- ✅ PAGPILI NG LOKASYON -->
     <div class="note">
       📂 Pumili ng lokasyon — sa ugat ng <code>assets/</code> o sa loob ng <code>assets/pages/</code>
     </div>
@@ -53,7 +128,7 @@
 <p>Isulat dito ang buong nilalaman...</p>"></textarea>
 
     <div class="btn-group">
-      <button class="btn btn-primary" onclick="createFile()">✅ I-SAVE SA ASSETS</button>
+      <button id="create-btn" class="btn btn-primary" onclick="createFile()">✅ I-SAVE SA ASSETS</button>
       <button class="btn btn-secondary" onclick="resetForm()">↩️ Linisin</button>
     </div>
 
@@ -69,6 +144,11 @@ const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 const BASE_PATH = "app/src/main/";
+
+// ✅ LIGTAS NA PAG-ENCODE — PAREHO SA LAHAT NG PAHINA
+function safeEncodeContent(text) {
+  return btoa(unescape(encodeURIComponent(text)));
+}
 
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
@@ -128,23 +208,32 @@ function decryptToken(encrypted, password) {
 }
 
 async function createFile() {
+  const btn = document.getElementById("create-btn");
+
+  // ⏳ SIMULA — Abo ang buton
+  btn.disabled = true;
+  btn.classList.add("saving");
+  btn.textContent = "⏳ Gumagawa...";
+
   const filename = document.getElementById("filename").value.trim();
   const name = document.getElementById("page-name").value.trim() || filename;
   let content = document.getElementById("file-content").value;
 
-  // ✅ PAGTITIWALA
-  if (!filename) return showStatus("❌ Ilagay ang pangalan ng file", "error");
+  if (!filename) {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA ASSETS";
+    return showStatus("❌ Ilagay ang pangalan ng file", "error");
+  }
   if (!content) content = `<!-- ${name} -->\n<p>Ilagay ang nilalaman dito...</p>`;
 
-  // ✅ KUMPLETONG LOKASYON
   const folderPath = getFullPath();
-  if (!folderPath) return showStatus("❌ Ilagay ang sariling landas", "error");
+  if (!folderPath) {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA ASSETS";
+    return showStatus("❌ Ilagay ang sariling landas", "error");
+  }
   const filePath = folderPath + filename;
 
-  // ✅ I-SAVE AGAD SA LOKAL
   localStorage.setItem(`bisyo_file_${filePath}`, content);
 
-  // ✅ IHANDA PARA SA GITHUB
   const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
   pending.push({
     type: "new-file",
@@ -157,7 +246,6 @@ async function createFile() {
   });
   localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
-  // ✅ KUNG MAY INTERNET — I-UPLOAD AGAD
   if (navigator.onLine) {
     showStatus(`📤 Ipinapasa sa GitHub → ${filePath} ...`, "info");
     const saved = await tryUploadToGitHub(filePath, content, name);
@@ -170,6 +258,11 @@ async function createFile() {
   } else {
     showStatus(`📴 Walang internet — NAKABINBIN: ${filePath}`, "info");
   }
+
+  // ✅ TAPOS NA — BALIK SA PULA
+  btn.disabled = false;
+  btn.classList.remove("saving");
+  btn.textContent = "✅ I-SAVE SA ASSETS";
 
   resetForm();
 }
@@ -193,7 +286,7 @@ async function tryUploadToGitHub(filePath, content, messageTitle) {
 
     const body = {
       message: `Bagong file: ${filePath} — ${messageTitle}`,
-      content: btoa(unescape(encodeURIComponent(content))),
+      content: safeEncodeContent(content), // ✅ LIGTAS — WALANG SIRANG EMOJI
       branch: BRANCH
     };
     if (sha) body.sha = sha;
@@ -205,7 +298,7 @@ async function tryUploadToGitHub(filePath, content, messageTitle) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
-    };
+    });
 
     return res.ok;
   } catch (e) {
@@ -236,6 +329,7 @@ function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
   el.className = `status ${cls}`;
+  el.style.display = "block";
   setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 10000);
 }
 
