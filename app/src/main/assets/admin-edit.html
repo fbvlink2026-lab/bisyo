@@ -87,7 +87,7 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 .btn:hover { transform: translateY(-1px); }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 .btn-primary { background: linear-gradient(90deg, #b91c1c, #dc2626); color: white; }
-.btn-primary.saving { background: #9ca3af; } /* ⏳ Habang nag-i-save — abo */
+.btn-primary.saving { background: #9ca3af; }
 .btn-secondary { background: #e5e7eb; color: #374151; }
 .status {
   padding: 14px 18px;
@@ -147,6 +147,7 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 <script>
 const SESSION_KEY = "bisyo_admin_session";
 const STORAGE_KEY_PREFIX = "bisyo_file_content_";
+const EDITOR_STATE_KEY = "bisyo_editor_state"; // ✅ PAGTATAGO NG ESTADO
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
@@ -197,10 +198,46 @@ function getDecryptedToken() {
   } catch { return null; }
 }
 
+// ✅ I-SAVE ANG ESTADO — KAPAG NAGPALIT NG PAGPIPILIAN
+function saveEditorState() {
+  localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({
+    folder: currentFolder,
+    filename: currentFilename
+  }));
+}
+
+// ✅ IBALIK ANG ESTADO — PAGKABUKAS / PAGKAREFRESH
+async function restoreEditorState() {
+  try {
+    const saved = localStorage.getItem(EDITOR_STATE_KEY);
+    if (!saved) return false;
+    const state = JSON.parse(saved);
+    
+    // Ibalik ang folder
+    document.getElementById("folder-select").value = state.folder;
+    currentFolder = state.folder;
+    
+    // I-load ang listahan ng file at ibalik ang napiling file
+    await loadFileList();
+    document.getElementById("file-select").value = state.filename;
+    currentFilename = state.filename;
+    
+    if (currentFilename) {
+      await fileSelected();
+    }
+    return true;
+  } catch(e) {
+    console.log("Hindi maibalik ang estado:", e);
+    return false;
+  }
+}
+
 async function folderChanged() {
   currentFolder = document.getElementById("folder-select").value;
   document.getElementById("file-select").innerHTML = `<option value="">— Naglo-load —</option>`;
   document.getElementById("editor-area").style.display = "none";
+  
+  saveEditorState(); // ✅ I-save agad ang pagbabago
   
   if (!navigator.onLine) {
     document.getElementById("file-select").innerHTML = `<option value="">📴 Walang internet</option>`;
@@ -236,6 +273,8 @@ async function loadFileList() {
 
 async function fileSelected() {
   currentFilename = document.getElementById("file-select").value;
+  saveEditorState(); // ✅ I-save agad ang napiling file
+  
   if (!currentFilename) {
     document.getElementById("editor-area").style.display = "none";
     document.getElementById("page-hint").textContent = "Pumili muna ng file";
@@ -288,7 +327,6 @@ async function saveContent() {
   const content = document.getElementById("content-editor").value;
   if (!currentFilename || !content.trim()) return showStatus("❌ Walang napiling file o walang laman", "error");
 
-  // ⏳ Habang nag-i-save — abo ang kulay at hindi pwedeng pindutin
   saveBtn.disabled = true;
   saveBtn.classList.add("saving");
   saveBtn.textContent = "⏳ Nag-i-save...";
@@ -345,14 +383,12 @@ async function saveContent() {
     currentSha = result.commit.sha;
     markAsSynced(fullPath);
 
-    // ✅ PAG SUCCESS — BABALIK SA PULA ANG BUTTON, MENSAHE LANG ANG BERDE
     saveBtn.disabled = false;
     saveBtn.classList.remove("saving");
     saveBtn.textContent = "💾 I-save";
     showStatus(`☁️✅ NAI-UPLOAD SA: assets/${fullPath}`, "success");
 
   } catch (e) {
-    // ❌ PAG MALI — BABALIK SA PULA ANG BUTTON
     saveBtn.disabled = false;
     saveBtn.classList.remove("saving");
     saveBtn.textContent = "💾 I-save";
@@ -360,7 +396,6 @@ async function saveContent() {
   }
 }
 
-// ✅ KOPYAHIN — BAGONG BUTTON
 function copyContent() {
   const content = document.getElementById("content-editor").value;
   if (!content.trim()) return alert("Walang laman na kopyahin!");
@@ -406,23 +441,29 @@ function showStatus(txt, cls) {
   setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 8000);
 }
 
-window.onload = () => {
+window.onload = async function() {
   if (!checkSession()) return;
-  const params = new URLSearchParams(window.location.search);
-  const fileParam = params.get('file');
-  if (fileParam) {
-    const parts = fileParam.split('/');
-    if (parts.length > 1) {
-      currentFolder = parts.slice(0,-1).join('/') + '/';
-    } else {
-      currentFolder = "";
-    }
-    currentFilename = parts.pop();
-    document.getElementById("folder-select").value = currentFolder;
-    loadFileList().then(() => {
+  
+  // ✅ UNANG HAKBANG: Ibalik ang nakaraang pagpili
+  const restored = await restoreEditorState();
+  
+  // ✅ Kung walang na-save na estado — tignan ang URL param (tulad ng dati)
+  if (!restored) {
+    const params = new URLSearchParams(window.location.search);
+    const fileParam = params.get('file');
+    if (fileParam) {
+      const parts = fileParam.split('/');
+      if (parts.length > 1) {
+        currentFolder = parts.slice(0,-1).join('/') + '/';
+      } else {
+        currentFolder = "";
+      }
+      currentFilename = parts.pop();
+      document.getElementById("folder-select").value = currentFolder;
+      await loadFileList();
       document.getElementById("file-select").value = currentFilename;
-      fileSelected();
-    });
+      await fileSelected();
+    }
   }
 };
 </script>
