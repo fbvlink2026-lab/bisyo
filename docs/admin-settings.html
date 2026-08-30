@@ -107,7 +107,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 
   <!-- 📄 KARAPATANG-ARI -->
   <div class="card">
-    <h2>📄 Karapatang-ari at May-ari ng App</h2>
+    <h2>📄 Karapatan at May-ari ng App</h2>
     <p style="color:#6b7280;margin-bottom:14px">Ilagay nang isang beses — awtomatikong ilalagay sa ilalim ng bawat pahina ng nilalaman.</p>
 
     <label>👤 Pangalan ng May-ari / Lumikha:</label>
@@ -120,7 +120,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <input type="text" id="copy-extra" placeholder="Lahat ng Karapatan ay Nakareserba" oninput="updateCopyrightPreview()">
 
     <div class="check-row">
-      <input type="checkbox" id="copy-auto-insert" checked>
+      <input type="checkbox" id="copy-auto-insert" checked="">
       <label for="copy-auto-insert">✅ Awtomatikong ilagay sa ilalim ng bawat bagong pahina</label>
     </div>
 
@@ -161,7 +161,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
         <label>🔧 Mga Tiyak na Kakayahan:</label>
         <div class="perm-grid">
           <div class="perm-item">
-            <input type="checkbox" id="perm-edit" class="perm-check" checked disabled>
+            <input type="checkbox" id="perm-edit" class="perm-check" checked="" disabled="">
             <label for="perm-edit">I-edit Nilalaman (pages/ lang)</label>
           </div>
           <div class="perm-item">
@@ -251,7 +251,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <button id="logout-btn" class="btn btn-secondary" onclick="doLogout()">🚪 Logout</button>
   </div>
 
-  <div id="status-msg" class="status"></div>
+  <div id="status-msg" class="status info" style="display: none;">✅ Kinuha mula sa GitHub — napalitan ang laman</div>
 </div>
 
 
@@ -279,7 +279,7 @@ window.getCopyrightNotice = function() {
 window.appendCopyrightIfNeeded = function(content) {
   const info = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"autoInsert":true}');
   if (info.autoInsert === false) return content;
-  if (content.includes("©") && content.includes("Karapatan")) return content;
+  if (content.includes("©") &amp;&amp; content.includes("Karapatan")) return content;
   const footer = getCopyrightNotice();
   if (content.includes("</body>")) {
     return content.replace("</body>", `${footer}</body>`);
