@@ -13,10 +13,11 @@
 .admin-header h1 {
   font-size: 20px;
   color: white !important;
+  margin: 0 0 4px 0;
 }
 .admin-header p {
-  font-size: 13px;
-  opacity: .85;
+  font-size: 14px;
+  opacity: 0.9;
   margin-top: 3px;
   color: white !important;
 }
@@ -40,7 +41,8 @@
 
 .input,
 input[type="text"],
-input[type="password"] {
+input[type="password"],
+select {
   width: 100%;
   padding: 12px 14px;
   border: 2px solid #e5e7eb;
@@ -51,9 +53,11 @@ input[type="password"] {
 }
 .input:focus,
 input[type="text"]:focus,
-input[type="password"]:focus {
+input[type="password"]:focus,
+select:focus {
   outline: none;
   border-color: #b91c1c;
+  box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
 }
 
 .error {
@@ -76,21 +80,44 @@ input[type="password"]:focus {
   font-weight: 600;
   color: #1e40af;
 }
-.session-setting input {
-  width: 90px;
+.session-setting input,
+.session-setting select {
+  width: auto;
+  max-width: 180px;
   padding: 8px 10px;
   border-radius: 6px;
   border: 2px solid #e5e7eb;
   font-size: 16px;
   text-align: center;
+  margin: 0;
 }
-.session-setting input:focus {
+.session-setting input:focus,
+.session-setting select:focus {
   outline: none;
   border-color: #3b82f6;
 }
 .session-setting small {
   color: #6b7280;
   font-size: 13px;
+}
+
+/* ---------- CHECKBOX ROW — TANDAAN AKO ---------- */
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+.check-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+.check-row label {
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
 }
 
 /* ---------- PANEL AT KARD NG ADMIN ---------- */
@@ -130,11 +157,14 @@ input[type="password"]:focus {
 .last-saved { font-size: 13px; font-weight: normal; color: #6b7280; }
 
 /* ---------- KATAYUAN / STATUS BARS ---------- */
+.status-line,
 .status-bar {
   display: flex;
   gap: 14px;
   align-items: center;
-  font-size: 13px;
+  font-size: 14px;
+  padding: 10px 16px;
+  flex-wrap: wrap;
 }
 .status-dot {
   width: 12px;
@@ -172,6 +202,8 @@ input[type="password"]:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .page-item:hover {
   border-color: #b91c1c;
@@ -190,6 +222,99 @@ input[type="password"]:focus {
   color: #000;
   padding: 1px 6px;
   border-radius: 10px;
+}
+
+/* ---------- GRID MENU — DASHBOARD ---------- */
+.grid-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.menu-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 12px;
+  background: white;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #374151;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: all 0.2s;
+}
+.menu-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.menu-btn span:first-child { font-size: 28px; }
+
+/* ---------- NAVIGATION BAR — ADMIN ---------- */
+.nav-bar {
+  background: #1f2937;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-bar a {
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.nav-bar a:hover,
+.nav-bar a.active {
+  background: #b91c1c;
+}
+
+/* ---------- BUTTONS — PANGKALAHATANG ESTILO ---------- */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  color: white;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(185,28,28,0.2);
+}
+.btn-primary:disabled,
+.btn-primary.saving {
+  background: #9ca3af;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+.btn-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
 }
 
 /* ---------- TEMPLATES ---------- */
@@ -241,11 +366,13 @@ input[type="password"]:focus {
   border: none;
   background: #e5e7eb;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .editor-toolbar button:hover {
   background: #d1d5db;
 }
-textarea#editor {
+textarea#editor,
+textarea {
   width: 100%;
   min-height: 320px;
   padding: 14px;
@@ -254,14 +381,15 @@ textarea#editor {
   font-size: 15px;
   line-height: 1.6;
   font-family: monospace;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.2s;
   background: #fff;
+  resize: vertical;
 }
-textarea#editor:focus {
+textarea:focus {
   outline: none;
   border-color: #b91c1c;
 }
-textarea#editor.unsaved {
+textarea.unsaved {
   border-color: #f59e0b;
   background: #fffbeb;
 }
@@ -279,7 +407,9 @@ textarea#editor.unsaved {
   border-radius: 8px;
   white-space: pre-wrap;
   line-height: 1.5;
+  display: none;
 }
+.status.show { display: block; }
 .status.success  { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
 .status.error    { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
 .status.info     { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
@@ -289,6 +419,53 @@ textarea#editor.unsaved {
 .warning { color: #d97706; }
 .info { color: #2563eb; }
 .error-text { color: #dc2626; }
+
+/* ---------- ROLE INDICATOR — CO-ADMIN ---------- */
+.role-indicator {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+.role-main { background: #dcfce7; color: #166534; }
+.role-coadmin { background: #fef3c7; color: #92400e; }
+.locked {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(30%);
+}
+
+/* ---------- CO-ADMIN LIST ---------- */
+.co-admin-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.co-admin-info { flex: 1; min-width: 180px; }
+.co-admin-name { font-weight: bold; color: #1f2937; }
+.co-admin-role { font-size: 13px; color: #6b7280; }
+.perm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+.perm-item {
+  background: #f3f4f6;
+  padding: 8px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.perm-item label { margin: 0; font-weight: normal; font-size: 14px; }
 
 /* ---------- MODAL / POPUP ---------- */
 .modal {
@@ -349,6 +526,8 @@ textarea#editor.unsaved {
   border-radius: 6px;
   margin-bottom: 6px;
   font-size: 14px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .pending-sync-btn {
   padding: 4px 10px;
@@ -370,41 +549,48 @@ textarea#editor.unsaved {
   margin-left: 4px;
 }
 
-/* ---------- ADMIN-SPECIFIC ICONS ---------- */
-.icon-login::before{content:"🔑";margin-right:4px}
-.icon-session::before{content:"⏰";margin-right:4px}
-.icon-remember::before{content:"💾";margin-right:4px}
-.icon-locked::before{content:"🔒";margin-right:4px}
-.icon-folder::before{content:"📁";margin-right:4px}
-.icon-cache::before{content:"🗑️";margin-right:4px}
-.icon-clear::before{content:"✕";margin-right:4px}
-.icon-refresh::before{content:"🔄";margin-right:4px}
-.icon-password::before{content:"🔐";margin-right:4px}
-.icon-logout::before{content:"🚪";margin-right:4px}
-.icon-pending::before{content:"⏳";margin-right:4px}
-.icon-edit::before{content:"✏️";margin-right:4px}
-.icon-save::before{content:"💾";margin-right:4px}
-.icon-preview::before{content:"👁️";margin-right:4px}
-.icon-lock::before{content:"🔒";margin-right:4px}
-.icon-close::before{content:"✕";margin-right:4px}
-.icon-ok::before{content:"✓";margin-right:4px}
-.icon-warning::before{content:"⚠️";margin-right:4px}
-.icon-info-note::before{content:"ℹ️";margin-right:4px}
-.icon-h2::before{content:"H2 ";font-weight:bold}
-.icon-h3::before{content:"H3 ";font-weight:bold}
-.icon-p::before{content:"P ";font-weight:bold}
-.icon-b::before{content:"B ";font-weight:bold}
-.icon-i::before{content:"I ";font-style:italic}
-.icon-ul::before{content:"• ";font-weight:bold}
-.icon-hr::before{content:"— "}
-.icon-admin-page::before{content:"👤 ";margin-right:4px}
-.icon-setup-page::before{content:"🔧 ";margin-right:4px}
-.icon-style-page::before{content:"🎨 ";margin-right:4px}
+/* ---------- HIDDEN UTILITY ---------- */
+.hidden { display: none !important; }
+.empty {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* ---------- ADMIN-SPECIFIC ICONS — GAMIT ANG CSS PARA HINDI MASIRA SA PATCHING ---------- */
+.icon-login::before      { content: "🔑"; margin-right: 4px; }
+.icon-session::before     { content: "⏰"; margin-right: 4px; }
+.icon-remember::before    { content: "💾"; margin-right: 4px; }
+.icon-locked::before      { content: "🔒"; margin-right: 4px; }
+.icon-folder::before      { content: "📁"; margin-right: 4px; }
+.icon-cache::before       { content: "🗑️"; margin-right: 4px; }
+.icon-clear::before       { content: "✕"; margin-right: 4px; }
+.icon-refresh::before     { content: "🔄"; margin-right: 4px; }
+.icon-password::before    { content: "🔐"; margin-right: 4px; }
+.icon-logout::before      { content: "🚪"; margin-right: 4px; }
+.icon-pending::before      { content: "⏳"; margin-right: 4px; }
+.icon-edit::before         { content: "✏️"; margin-right: 4px; }
+.icon-save::before         { content: "💾"; margin-right: 4px; }
+.icon-preview::before      { content: "👁️"; margin-right: 4px; }
+.icon-lock::before         { content: "🔒"; margin-right: 4px; }
+.icon-close::before        { content: "✕"; margin-right: 4px; }
+.icon-ok::before           { content: "✓"; margin-right: 4px; }
+.icon-warning::before      { content: "⚠️"; margin-right: 4px; }
+.icon-info-note::before    { content: "ℹ️"; margin-right: 4px; }
+.icon-admin-page::before   { content: "👤"; margin-right: 4px; }
+.icon-setup-page::before   { content: "🔧"; margin-right: 4px; }
+.icon-style-page::before   { content: "🎨"; margin-right: 4px; }
 
 /* ---------- PAGKAKAPUTOL SA MOBILE ---------- */
 @media (max-width: 480px) {
   .page-list { grid-template-columns: 1fr; }
-  .top-bar { flex-direction: column; align-items: flex-start; }
+  .top-bar,
+  .status-line { flex-direction: column; align-items: flex-start; }
+  textarea,
   textarea#editor { min-height: 200px; }
   .editor-toolbar button { font-size: 13px; padding: 5px 10px; }
+  .grid-menu { grid-template-columns: repeat(2, 1fr); }
+  .btn-group { flex-direction: column; }
+  .btn { width: 100%; }
 }
