@@ -27,6 +27,7 @@ const VERSION_CACHE_KEY = "bisyo_cached_version";
 const DEFAULT_VERSION   = "v1.0";
 
 const ORDER_KEY     = "bisyo_page_order";
+const VISIBLE_KEY   = "bisyo_page_visible";
 const ALL_PAGES_KEY  = "bisyo_all_pages";
 
 let foundApk = null, downloadUrl = null;
@@ -152,11 +153,12 @@ async function fetchPagesFromGitHub() {
 }
 
 // ==================================================
-// 🧩 BUUIN ANG MGA BUTON — SUNOD SA AYOS
+// 🧩 BUUIN ANG MGA BUTON — SUNOD SA AYOS + HIDE/SHOW
 // ==================================================
 async function buildPageGrids() {
   const allPages = await fetchPagesFromGitHub();
   const order = getPageOrder();
+  const visibleSet = new Set(JSON.parse(localStorage.getItem(VISIBLE_KEY) || "[]"));
 
   const bisyoGrid = document.getElementById("bisyo-grid");
   const extraGrid = document.getElementById("extra-grid");
@@ -168,8 +170,7 @@ async function buildPageGrids() {
     if (!page) return;
 
     // ✅ Kung itinago sa Admin — huwag ipakita
-    const hiddenPages = JSON.parse(localStorage.getItem("bisyo_hidden_pages") || "[]");
-    if (hiddenPages.includes(pageId)) return;
+    if (!visibleSet.has(pageId)) return;
 
     const container = page.group === "extra" ? extraGrid : bisyoGrid;
     const a = document.createElement("a");
@@ -337,6 +338,10 @@ window.addEventListener("offline", updateDownloadVisibility);
 <p>Proyekto ni Mark Jann Tampok — Edukasyon Laban sa Masamang Bisyo</p>
 </div>
 
+<!-- ✅ DAPAT MAY ITO SA LOOB — KAILANGAN NG ADMIN-ORDER PARA MAUPDATE -->
+<!-- AUTO-LIST-START -->
+<!-- AUTO-LIST-END -->
+
 <div id="offline-note" class="offline-note hidden">
   <h2>📡 Walang Koneksyon sa Internet</h2>
   <p>Ang pag-download at pag-update ay hindi available habang walang internet. Ang iba pang bahagi ng aplikasyon ay gumagana pa rin nang walang koneksyon.</p>
@@ -423,4 +428,3 @@ window.addEventListener("offline", updateDownloadVisibility);
 
 </body>
 </html>
-
