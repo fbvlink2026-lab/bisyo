@@ -133,9 +133,7 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 </head>
 <body>
 
-<script>
-window.WIDGETS = {
-  "nav-bar": `
+<!-- ✅ DIRETSONG ILAGAY ANG NAVIGATION — HINDI NAKA-DEPENDE SA WIDGET -->
 <div class="nav-bar">
   <a href="admin.html">🏠 Dashboard</a>
   <a href="admin-order.html">🔢 Ayusin Ayos</a>
@@ -145,21 +143,6 @@ window.WIDGETS = {
   <a href="setup-token.html">🔧 Token</a>
   <a href="admin-settings.html">⚙️ Setting</a>
 </div>
-  `.trim()
-};
-
-function expandWidgets(html) {
-  if (!html) return html;
-  let result = html;
-  for (const [name, code] of Object.entries(window.WIDGETS)) {
-    const marker = `<!-- WIDGET:${name} -->`;
-    result = result.split(marker).join(code);
-  }
-  return result;
-}
-</script>
-
-<!-- WIDGET:nav-bar -->
 
 <div class="container">
   <h1>✏️ I-edit ang File</h1>
@@ -255,6 +238,10 @@ let editMode = "full";
 let currentTheme = "light";
 let originalFullContent = "";
 
+function expandWidgets(html) {
+  if (!html) return html;
+  return html;
+}
 function safeDecodeBase64(b64) {
   try { return decodeURIComponent(escape(atob(b64))); }
   catch { return atob(b64); }
@@ -342,7 +329,6 @@ function formatBlock(tag) { execCmd('formatBlock', `<${tag}>`); }
 function insertLink() { const u=prompt("Ipasok ang URL:"); if(u)execCmd('createLink',u); }
 function insertImage() { const u=prompt("Ipasok ang URL ng imahe:"); if(u)execCmd('insertImage',u); }
 function syncVisualToText() {
-  // ✅ Kopyahin mula Visual → Textarea bago lumipat
   if (editMode === "visual") {
     document.getElementById("content-editor").value = document.getElementById("visual-editor").innerHTML;
   }
@@ -352,15 +338,14 @@ function syncVisualToText() {
 function extractContentForEdit() {
   if (!originalFullContent) return;
   let extracted = "";
-  const expanded = expandWidgets(originalFullContent);
-  const mainMatch = expanded.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-  const articleMatch = expanded.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-  const bodyMatch = expanded.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const mainMatch = originalFullContent.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+  const articleMatch = originalFullContent.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+  const bodyMatch = originalFullContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
 
   if (mainMatch) extracted = mainMatch[1];
   else if (articleMatch) extracted = articleMatch[1];
   else if (bodyMatch) extracted = bodyMatch[1].replace(/<\/?(head|script|style|nav|header|footer)[^>]*>/gi, '');
-  else extracted = expanded;
+  else extracted = originalFullContent;
 
   document.getElementById("content-editor").value = extracted.trim();
 }
