@@ -141,6 +141,7 @@
   <p style="font-size:14px;color:#6b7280;margin:4px 0 12px">
     ✅ May tsek = LALABAS &nbsp;|&nbsp; ☐ Walang tsek = NAKATAGO
   </p>
+  <!-- ✅ DAPAT LUMABAS AGAD — HINDI NAKATAGO -->
   <div id="order-list">
     <p style="color:#6b7280;padding:20px;text-align:center">Naglo-load...</p>
   </div>
@@ -227,13 +228,25 @@ function getFileIcon(name) {
   return '📁';
 }
 
+// ✅ INAYOS — SIGURADONG LUMABAS ANG LISTAHAN AGAD
 function loadCurrentList() {
+  // 1. Kunin mula sa lokal na imbakan
   const storedOrder = localStorage.getItem(ORDER_KEY);
   const storedVisible = localStorage.getItem(VISIBLE_KEY);
 
-  if (storedOrder) try { currentOrder = JSON.parse(storedOrder); } catch { currentOrder = []; }
-  if (storedVisible) try { visibleSet = new Set(JSON.parse(storedVisible)); } catch { visibleSet = new Set(); }
+  currentOrder = [];
+  visibleSet = new Set();
 
+  if (storedOrder) {
+    try { currentOrder = JSON.parse(storedOrder); } 
+    catch (e) { console.warn("Maling format ng order:", e); currentOrder = []; }
+  }
+  if (storedVisible) {
+    try { visibleSet = new Set(JSON.parse(storedVisible)); } 
+    catch (e) { console.warn("Maling format ng visible:", e); visibleSet = new Set(); }
+  }
+
+  // ✅ 2. SIGURADONG IRERENDER — KAHIT WALANG LAMAN
   renderCurrentList();
 }
 
@@ -241,23 +254,28 @@ function renderCurrentList() {
   const list = document.getElementById("order-list");
   list.innerHTML = "";
 
+  // ✅ KUNG WALANG LAMAN — IPALIT ANG MENSAHE HINDI WALA LANG
   if (!currentOrder.length) {
-    list.innerHTML = `<p style="color:#6b7280;padding:20px;text-align:center">Walang pahina pa sa listahan.<br>Pindutin ang <strong>SURIIN MULI</strong> sa itaas para magdagdag.</p>`;
+    list.innerHTML = `<p style="color:#6b7280;padding:20px;text-align:center">
+      Walang pahina pa sa listahan.<br>
+      Pindutin ang <strong>🔄 SURIIN MULI</strong> sa itaas para makita at magdagdag ng mga pahina.
+    </p>`;
     return;
   }
 
+  // ✅ KUNG MAY LAMAN — IPALABAS LAHAT
   currentOrder.forEach((id, idx) => {
     const shown = visibleSet.has(id);
     list.innerHTML += `
       <div class="order-row ${shown?'':'hidden-from-main'}">
         <input type="checkbox" class="show-hide-cb" ${shown?'checked':''} onchange="toggleVisible('${id}', this.checked)">
         <span class="order-pos">${idx+1}</span>
-        <div class="order-name">${getFileIcon(id)} ${formatName(id)}
+        <div class="order-name">
+          ${getFileIcon(id)} ${formatName(id)}
           <span class="order-path">📁 ${id.includes('/')?id.split('/')[0]:'assets/'}</span>
         </div>
         <button class="btn" onclick="move(${idx},-1)" ${idx===0?'disabled':''}>⬆️</button>
         <button class="btn" onclick="move(${idx},1)" ${idx===currentOrder.length-1?'disabled':''}>⬇️</button>
-        <!-- ✅ INAYOS ANG EDIT — TAMA NA ANG LOKASYON NG FILE -->
         <button class="btn" onclick="goEdit('${id}')" title="I-edit ang pahina">✏️</button>
         <button class="btn" onclick="removeFromList('${id}')" title="Alisin sa listahan">🗑️</button>
       </div>`;
@@ -341,10 +359,10 @@ function renderNewPages() {
       <div class="order-row new-item">
         <input type="checkbox" class="show-hide-cb" id="new-${page.id}" onchange="toggleAddPage('${page.id}', this.checked)">
         <span class="order-pos">🆕</span>
-        <div class="order-name">${getFileIcon(page.file)} ${page.name}
+        <div class="order-name">
+          ${getFileIcon(page.file)} ${page.name}
           <span class="order-path">📁 ${page.folder || 'assets/'}</span>
         </div>
-        <!-- ✅ MAY EDIT BUTTON DIN SA MGA BAGONG PAHINA -->
         <button class="btn" onclick="goEdit('${page.id}')" title="I-edit ang pahina">✏️</button>
       </div>`;
   });
@@ -380,9 +398,7 @@ function move(i, dir) {
   renderCurrentList();
 }
 
-// ✅ INAYOS ANG PAGPASA NG TAMANG LOKASYON SA ADMIN-EDIT.HTML
 function goEdit(filePath) {
-  // ✅ Diretso sa admin-edit.html kasama ang tamang lokasyon ng file
   location.href = `admin-edit.html?file=${encodeURIComponent(filePath)}`;
 }
 
@@ -481,7 +497,7 @@ function showStatus(txt, cls) {
 window.onload = () => {
   if (!checkSession()) return;
   updateSyncStatus();
-  loadCurrentList();
+  loadCurrentList(); // ✅ SIGURADONG TINATAWAG — LALABAS AGAD ANG LISTAHAN
 };
 </script>
 </body>
