@@ -118,6 +118,7 @@
 // ==============================================
 // ✅ GITHUB ANG DATABASE — WALANG HARDCODED!
 // ✅ KAYA NA ANG assets/ AT LAHAT NG SUBFOLDERS
+// ✅ LIGTAS SA EMOJI — GINAMIT ANG PAREHONG PAMAMARAAN
 // ==============================================
 const ORDER_KEY = "bisyo_page_order";
 const VISIBLE_KEY = "bisyo_page_visible";
@@ -127,19 +128,22 @@ const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 
-// ✅ TAMA AYON SA PLANO — assets/ ANG PINAGMULAN
 const ASSETS_ROOT = "app/src/main/assets/";
 const MAIN_HTML_PATH = ASSETS_ROOT + "main.html";
 
-// ✅ LAHAT NG FOLDER NA BABASAHIN — MADAGDAG KUNG KAILANGAN
-const SCAN_FOLDERS = [
-  "",           // 📂 assets/ ROOT — main.html, atbp.
-  "pages/"      // 📂 assets/pages/ — mga nilalaman
-];
+const SCAN_FOLDERS = [ "", "pages/" ];
 
 let allPages = [];
 
-// === SESSION ===
+// ✅ PAREHONG LIGTAS NA PAGBASA — WALANG SIRANG EMOJI!
+function safeDecodeBase64(base64) {
+  try {
+    return decodeURIComponent(escape(atob(base64)));
+  } catch {
+    return atob(base64);
+  }
+}
+
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
   if (!s || Date.now() > JSON.parse(s).expiresAt) {
@@ -170,9 +174,6 @@ function getToken() {
   return decryptToken(getEncryptedToken(), getPassword());
 }
 
-// ==================================================
-// ✅ BASAHIN MULA SA LAHAT NG FOLDER — assets/ + pages/
-// ==================================================
 async function loadFromGitHub() {
   if (!navigator.onLine) {
     showStatus("📴 Walang internet — hindi mabasa ang GitHub", "warning");
@@ -188,12 +189,11 @@ async function loadFromGitHub() {
   allPages = [];
 
   try {
-    // ✅ BASAHIN ANG LAHAT NG TINUKOY NA FOLDER
     for (const folder of SCAN_FOLDERS) {
       const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_ROOT}${folder}?ref=${BRANCH}`, {
         headers: { "Authorization": `token ${token}` }
       });
-      if (!res.ok) continue; // laktawan kung walang laman o hindi umiiral
+      if (!res.ok) continue;
       const files = await res.json();
 
       files.forEach(file => {
@@ -204,20 +204,17 @@ async function loadFromGitHub() {
             .replace(/\b\w/g, l => l.toUpperCase());
 
           allPages.push({
-            id: id,           // ✅ kasama ang folder: "pages/alak" o "main"
+            id: id,
             name: nameFromFile,
             file: file.name,
-            folder: folder,   // ✅ aling folder nanggaling
-            path: folder + file.name, // ✅ buong landas
-            desc: folder ? `Nasa: assets/${folder}` : "Nasa: assets/"
+            folder: folder,
+            path: folder + file.name
           });
         }
       });
     }
 
-    // ✅ I-UPDATE ANG AYOS — bagong pahina = idadagdag
     updateOrderWithNewPages();
-
     document.getElementById("load-status").textContent = `✅ ${allPages.length} pahina`;
     showStatus(`✅ Nabasa mula sa GitHub: ${allPages.length} pahina`, "success");
     render();
@@ -231,14 +228,12 @@ async function loadFromGitHub() {
 function updateOrderWithNewPages() {
   let order = getOrder();
   const visible = getVisibleSet();
-  
   allPages.forEach(page => {
     if (!order.includes(page.id)) {
       order.push(page.id);
       visible.add(page.id);
     }
   });
-  
   localStorage.setItem(ORDER_KEY, JSON.stringify(order));
   localStorage.setItem(VISIBLE_KEY, JSON.stringify([...visible]));
 }
@@ -261,7 +256,6 @@ function getOrder() {
   return allPages.map(p => p.id);
 }
 
-// === ✅ RENDER — KASAMA ANG FOLDER SA PAGPAPAKITA ===
 function render() {
   const list = document.getElementById("order-list");
   const order = getOrder();
@@ -296,7 +290,6 @@ function render() {
   });
 }
 
-// ✅ DUMIDIRETSO SA ADMIN-EDIT — KASAMA ANG TAMANG LANDAS
 function goEdit(filePath) {
   location.href = `admin-edit.html?file=${encodeURIComponent(filePath)}`;
 }
@@ -325,7 +318,6 @@ function saveOrder() {
   showStatus("✅ Nai-save sa LOKAL", "success");
 }
 
-// === ☁️ I-SAVE SA GITHUB — I-UPDATE ANG MAIN.HTML ===
 async function saveToGitHub() {
   if (!navigator.onLine) return showStatus("📴 Walang internet", "error");
   const token = getToken();
@@ -339,7 +331,9 @@ async function saveToGitHub() {
     });
     if (!getRes.ok) throw new Error(`Hindi makuha ang main.html`);
     const fileData = await getRes.json();
-    const htmlContent = atob(fileData.content);
+
+    // ✅ GINAMIT ANG LIGTAS NA PAGBASA — HINDI NA SISIRA ANG EMOJI SA MAIN.HTML!
+    const htmlContent = safeDecodeBase64(fileData.content);
 
     const order = getOrder();
     const visible = getVisibleSet();
@@ -348,7 +342,6 @@ async function saveToGitHub() {
       if (!visible.has(id)) return;
       const p = allPages.find(x => x.id === id);
       if (!p) return;
-      // ✅ Tamang landas: kung nasa pages/ → "pages/filename.html", kung nasa root → "filename.html"
       const linkHref = p.folder ? `${p.folder}${p.file}` : p.file;
       newListHTML += `<a href="${linkHref}" class="menu-btn">${p.name}</a>\n`;
     });
