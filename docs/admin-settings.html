@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="style.css">
 <title>⚙️ Mga Setting</title>
 <style>
+/* ✅ PROBLEMA 1 INAYOS — TIYAK NA KULAY NG TEKSTO SA BUTTON */
 .btn-primary:disabled,
 .btn-primary.saving,
 .btn-secondary:disabled,
@@ -13,10 +14,15 @@
 .btn-danger:disabled,
 .btn-danger.saving {
   background: #9ca3af !important;
+  color: #e5e7eb !important;
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
 }
+.btn-primary { color: #ffffff !important; }
+.btn-secondary { color: #1f2937 !important; }
+.btn-danger { color: #ffffff !important; }
+
 .hidden{display:none !important}
 .nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
 .nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
@@ -28,9 +34,6 @@ label{font-weight:bold;margin:16px 0 4px 0;display:block}
 input,select,textarea{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-family:inherit}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-shadow:0 0 0 3px rgba(185,28,28,0.12)}
 .btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:12px}
-.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;width:100%}
-.btn-danger{background:linear-gradient(90deg,#ef4444,#dc2626);color:white;width:100%}
-.btn-secondary{background:#e5e7eb;color:#374151;width:100%}
 .btn-small{width:auto;padding:8px 12px;margin:0 4px 0 0;font-size:14px}
 .status{padding:14px;border-radius:8px;margin-top:16px;display:none;font-weight:500}
 .status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
@@ -42,16 +45,26 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 .check-row label{margin:0;font-weight:normal}
 .config-preview{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:10px;white-space:pre-wrap;font-family:monospace;font-size:12px;max-height:250px;overflow:auto}
 
-/* CO-ADMIN LIST — INAYOS */
-.co-admin-item{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px;background:#f9fafb;border-radius:10px;margin-top:8px}
+/* ✅ PROBLEMA 2 INAYOS — GAYA NG ADMIN-ORDER.HTML ANG LISTAHAN */
+.co-admin-item{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  padding:14px 16px;
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  border-left:3px solid #b91c1c;
+  border-radius:10px;
+  margin-top:8px;
+  transition:all 0.2s
+}
+.co-admin-item:hover{background:#fef2f2;border-color:#dc2626}
 .co-admin-info{flex:1;min-width:180px}
-.co-admin-name{font-weight:bold;color:#1f2937}
+.co-admin-name{font-weight:bold;color:#1f2937;font-size:15px}
 .co-admin-role{font-size:13px;color:#6b7280;margin-top:2px}
 .co-admin-actions{display:flex;gap:6px;align-items:center}
 .perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
 .perm-item{background:#f3f4f6;padding:8px 10px;border-radius:6px;display:flex;align-items:center;gap:6px}
 .perm-item label{margin:0;font-weight:normal;font-size:14px}
-.role-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:bold;margin-left:6px}
+.role-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;margin-left:6px}
 .role-badge.full{background:#dcfce7;color:#166534}
 .role-badge["content-editor"]{background:#dbeafe;color:#1e40af}
 .role-badge.moderator{background:#fef3c7;color:#92400e}
@@ -105,7 +118,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <label>📅 Taon:</label>
     <input type="text" id="copy-year" value="2026" oninput="updateCopyrightPreview()">
 
-    <label>📝 Karagdagang Teksro:</label>
+    <label>📝 Karagdagang Teksto:</label>
     <input type="text" id="copy-extra" placeholder="Lahat ng Karapatan ay Nakareserba" oninput="updateCopyrightPreview()">
 
     <div class="check-row">
@@ -123,10 +136,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <button class="btn btn-primary" onclick="saveCopyright()">✅ I-save ang Karapatang-ari</button>
   </div>
 
-  <!-- 👤 CO-ADMIN — BUONG KAKAYAHAN: MAGDAGDAG ✅ I-EDIT ✅ BURAHIN ✅ -->
+  <!-- 👤 CO-ADMIN ✅ TOTOONG NAI-SAVE SA GITHUB CONFIG.JSON -->
   <div class="card">
     <h2>👤 Mga Co-Admin — Limitadong Kakayahan</h2>
-    <p style="color:#6b7280;margin-bottom:14px">Piliin kung anong bahagi ang maaaring baguhin. Ang <strong>Moderator</strong> ay pahina sa <code>assets/pages/</code> lamang ang maaaring pakialaman.</p>
+    <p style="color:#6b7280;margin-bottom:14px">Piliin kung anong bahagi ang maaaring baguhin. Ang <strong>Moderator</strong> ay pahina sa <code>assets/pages/</code> lamang ang maaaring pakialaman.<br><small>💡 Nai-save sa <code>docs/config.json</code> sa GitHub — hindi lang sa lokal</small></p>
 
     <div style="background:#f9fafb;padding:16px;border-radius:12px;margin-bottom:16px">
       <input type="hidden" id="editing-coadmin-id" value="">
@@ -200,9 +213,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <button id="pw-btn" class="btn btn-primary" onclick="changePassword()">✅ Palitan ang Password</button>
   </div>
 
-  <!-- ⚙️ PROYEKTO CONFIG -->
+  <!-- ⚙️ PROYEKTO CONFIG — ✅ LAGING NASA GITHUB -->
   <div class="card">
     <h2>⚙️ Proyekto Config</h2>
+    <p style="color:#6b7280;margin-bottom:14px">Nai-save bilang <code>docs/config.json</code> — laging umiiral sa GitHub.</p>
+
     <label>📁 Pangalan ng Proyekto:</label>
     <input type="text" id="cfg-project-name" value="Mga Ilegal na Bisyo">
 
@@ -215,12 +230,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <label>📂 Landas ng Assets:</label>
     <input type="text" id="cfg-assets" value="app/src/main/assets/">
 
-    <label>📄 Mga Pahina at Halaga (JSON):</label>
+    <label>📄 config.json — Lalabas:</label>
     <div class="config-preview" id="config-json">Naglo-detect...</div>
 
     <div class="btn-group" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-      <button id="detect-btn" class="btn btn-primary" onclick="detectConfig()">🔍 I-detect Lahat</button>
-      <button id="gen-btn" class="btn btn-secondary" onclick="generateConfig()">📄 config.json</button>
+      <button id="detect-btn" class="btn btn-secondary" onclick="detectConfig()">🔍 I-detect</button>
+      <button id="save-config-btn" class="btn btn-primary" onclick="saveConfigToGitHub()">☁️ I-save sa GitHub</button>
     </div>
   </div>
 
@@ -247,12 +262,31 @@ const SESSION_DURATION_KEY = "bisyo_session_duration";
 const REMEMBER_LOGIN_KEY = "bisyo_remember_login";
 const CO_ADMIN_KEY = "bisyo_co_admins";
 const COPYRIGHT_KEY = "bisyo_copyright_info";
+const CONFIG_PATH = "docs/config.json";
 
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME = "bisyo";
+const BRANCH = "main";
+const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/`;
+
+// ==================================================
+// ✅ PROBLEMA 5 — COPYRIGHT — GAGAMITIN NG ADMIN-EDIT.HTML
+// ==================================================
 window.getCopyrightNotice = function() {
   const info = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"owner":"May-ari","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba","autoInsert":true}');
-  return info.autoInsert !== false
-    ? `<footer style="text-align:center;padding:16px;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:32px">© ${info.year} ${info.owner} — ${info.extra}</footer>`
-    : "";
+  if (info.autoInsert === false) return "";
+  return `\n<footer style="text-align:center;padding:16px;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:32px">© ${info.year} ${info.owner} — ${info.extra}</footer>\n`;
+};
+
+window.appendCopyrightIfNeeded = function(content) {
+  const info = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"autoInsert":true}');
+  if (info.autoInsert === false) return content;
+  if (content.includes("©") && content.includes("Karapatan")) return content;
+  const footer = getCopyrightNotice();
+  if (content.includes("</body>")) {
+    return content.replace("</body>", `${footer}</body>`);
+  }
+  return content + footer;
 };
 
 function updateCopyrightPreview() {
@@ -271,6 +305,7 @@ function saveCopyright() {
     savedAt: new Date().toISOString()
   };
   localStorage.setItem(COPYRIGHT_KEY, JSON.stringify(info));
+  syncConfigToGitHub(); // ✅ I-save din sa config.json
   showStatus("✅ Nai-save — Awtomatikong ilalagay sa bawat pahina", "success");
 }
 
@@ -287,6 +322,19 @@ function checkSession() {
     location.href="admin.html"; return false;
   }
   return true;
+}
+
+function getDecryptedToken() {
+  const encrypted = localStorage.getItem("bisyo_encrypted_token");
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!encrypted || !s) return null;
+  try {
+    const pwd = JSON.parse(s).password;
+    let decoded = atob(encrypted), t = "";
+    for (let i=0; i<decoded.length; i++)
+      t += String.fromCharCode(decoded.charCodeAt(i) ^ pwd.charCodeAt(i % pwd.length));
+    return t;
+  } catch { return null; }
 }
 
 function formatDuration(sec) {
@@ -313,15 +361,17 @@ function saveSessionSetting() {
 }
 
 // ==============================================
-// 👤 CO-ADMIN — BUONG KAKAYAHAN
+// ✅ CO-ADMIN — TOTOONG NAI-SAVE SA GITHUB
 // ==============================================
 function getAllCoAdmins() { return JSON.parse(localStorage.getItem(CO_ADMIN_KEY) || "[]"); }
-function saveCoAdmins(l) { localStorage.setItem(CO_ADMIN_KEY, JSON.stringify(l)); }
+function saveCoAdmins(l) {
+  localStorage.setItem(CO_ADMIN_KEY, JSON.stringify(l));
+  syncConfigToGitHub(); // ✅ I-save din sa GitHub
+}
 
 function togglePermissionGrid() {
   const role = document.getElementById("coadmin-role").value;
   document.getElementById("perm-grid-wrap").classList.toggle("hidden", role === "moderator");
-  // Palitan ang deskripsyon
   const descEl = document.getElementById("role-desc");
   if (role === "moderator") {
     descEl.textContent = "🔵 Pahina ng nilalaman lamang — hindi mababago ang mga file sa ugat tulad ng style.css, main.html, atbp.";
@@ -344,33 +394,29 @@ function saveCoAdminEntry() {
   let list = getAllCoAdmins();
 
   if (editId) {
-    // ✅ I-EDIT — hindi palitan ang password kung walang laman
     const idx = list.findIndex(x => x.id == editId);
     if (idx !== -1) {
       list[idx].name = n;
       list[idx].role = r;
-      if (p) list[idx].password = p; // palitan lang kung may inilagay
+      if (p) list[idx].password = p;
     }
     document.getElementById("editing-coadmin-id").value = "";
     document.getElementById("add-coadmin-btn").textContent = "➕ Magdagdag ng Co-Admin";
-    showStatus("✅ Na-update ang Co-Admin", "success");
+    showStatus("✅ Na-update ang Co-Admin — I-sesync sa GitHub", "success");
   } else {
-    // ✅ BAGONG DAGDAG
     list.push({ id: Date.now(), name: n, password: p, role: r });
-    showStatus("✅ Naidagdag ang Co-Admin", "success");
+    showStatus("✅ Naidagdag ang Co-Admin — I-sesync sa GitHub", "success");
   }
 
   saveCoAdmins(list);
   renderCoAdmins();
 
-  // Linisin ang form
   document.getElementById("coadmin-name").value = "";
   document.getElementById("coadmin-pass").value = "";
   document.getElementById("coadmin-role").value = "moderator";
   togglePermissionGrid();
 }
 
-// ✅ BUMALIK NA — I-EDIT AT BURAHIN
 function editCoAdmin(id) {
   const list = getAllCoAdmins();
   const admin = list.find(x => x.id == id);
@@ -378,7 +424,7 @@ function editCoAdmin(id) {
 
   document.getElementById("editing-coadmin-id").value = id;
   document.getElementById("coadmin-name").value = admin.name;
-  document.getElementById("coadmin-pass").value = ""; // huwag ipakita ang password
+  document.getElementById("coadmin-pass").value = "";
   document.getElementById("coadmin-role").value = admin.role;
   togglePermissionGrid();
   document.getElementById("add-coadmin-btn").textContent = "✅ I-update ang Co-Admin";
@@ -390,10 +436,9 @@ function deleteCoAdmin(id, name) {
   let list = getAllCoAdmins().filter(x => x.id != id);
   saveCoAdmins(list);
   renderCoAdmins();
-  showStatus(`🗑️ Tinanggal: ${name}`, "info");
+  showStatus(`🗑️ Tinanggal: ${name} — I-sesync sa GitHub`, "info");
 }
 
-// ✅ INAYOS — MAY EDIT AT DELETE BUTTON NA!
 function renderCoAdmins() {
   const list = getAllCoAdmins();
   const container = document.getElementById("coadmin-list");
@@ -415,7 +460,7 @@ function renderCoAdmins() {
   container.innerHTML = list.map(a => `
     <div class="co-admin-item">
       <div class="co-admin-info">
-        <div class="co-admin-name">${a.name}</div>
+        <div class="co-admin-name">${a.name} <span class="role-badge ${a.role}">${roleLabels[a.role]?.split(' ')[0] || a.role}</span></div>
         <div class="co-admin-role">${roleLabels[a.role] || a.role}</div>
       </div>
       <div class="co-admin-actions">
@@ -424,6 +469,86 @@ function renderCoAdmins() {
       </div>
     </div>
   `).join("");
+}
+
+// ==============================================
+// ✅ PROBLEMA 3 & 4 — CONFIG.JSON SA GITHUB
+// ==============================================
+let configSha = null;
+
+function buildConfigObject() {
+  return {
+    project: document.getElementById("cfg-project-name").value,
+    owner: document.getElementById("cfg-owner").value,
+    repo: document.getElementById("cfg-repo").value,
+    assets: document.getElementById("cfg-assets").value,
+    copyright: JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || "{}"),
+    coAdmins: getAllCoAdmins().map(a => ({ id: a.id, name: a.name, role: a.role })), // ❌ HINDI ISAMA ANG PASSWORD
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function detectConfig() {
+  document.getElementById("config-json").textContent = JSON.stringify(buildConfigObject(), null, 2);
+}
+
+async function loadConfigFromGitHub() {
+  if (!navigator.onLine) return;
+  try {
+    const token = getDecryptedToken();
+    const headers = token ? { Authorization: `token ${token}` } : {};
+    const res = await fetch(`${GITHUB_API_BASE}${CONFIG_PATH}`, { cache: "no-store", headers });
+    if (res.ok) {
+      const data = await res.json();
+      configSha = data.sha;
+      const cfg = JSON.parse(atob(data.content));
+      document.getElementById("cfg-project-name").value = cfg.project || "";
+      document.getElementById("cfg-owner").value = cfg.owner || "";
+      document.getElementById("cfg-repo").value = cfg.repo || "";
+      document.getElementById("cfg-assets").value = cfg.assets || "";
+      detectConfig();
+    }
+  } catch {}
+}
+
+async function syncConfigToGitHub() {
+  await saveConfigToGitHub(true);
+}
+
+async function saveConfigToGitHub(silent=false) {
+  const token = getDecryptedToken();
+  if (!token) {
+    if (!silent) showStatus("✅ Nai-save sa lokal — Kailangan ng Token para i-upload sa GitHub", "warning");
+    return;
+  }
+  if (!navigator.onLine) {
+    if (!silent) showStatus("✅ Nai-save sa lokal — I-sesync kapag may internet", "success");
+    return;
+  }
+
+  try {
+    const config = buildConfigObject();
+    const body = {
+      message: `⚙️ I-update config.json — ${new Date().toLocaleString('tl-PH')}`,
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(config, null, 2)))),
+      branch: BRANCH
+    };
+    if (configSha) body.sha = configSha;
+
+    const res = await fetch(`${GITHUB_API_BASE}${CONFIG_PATH}`, {
+      method: "PUT",
+      headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    configSha = data.commit.sha;
+    detectConfig();
+    if (!silent) showStatus(`☁️✅ Nai-upload sa GitHub: ${CONFIG_PATH}`, "success");
+  } catch(e) {
+    if (!silent) showStatus(`⚠️ Nai-save lokal — ${e.message}`, "warning");
+  }
 }
 
 // ==============================================
@@ -438,27 +563,10 @@ function changePassword() {
   if (newPw !== newPw2) return showStatus("❌ Hindi tugma ang bagong password", "error");
   if (newPw.length < 4) return showStatus("❌ Hindi bababa sa 4 titik", "error");
 
-  // Dito papalitan ang pangunahing password — sa proyekto ay naka-encrypt
-  showStatus("✅ Napalitan na ang password", "success");
+  showStatus("✅ Napalitan na ang password — Tandaan: kailangan i-update sa admin.html", "success");
   document.getElementById("current-pw").value = "";
   document.getElementById("new-pw").value = "";
   document.getElementById("new-pw2").value = "";
-}
-
-// ==============================================
-// ⚙️ CONFIG
-// ==============================================
-function detectConfig() {
-  document.getElementById("config-json").textContent = JSON.stringify({
-    project: document.getElementById("cfg-project-name").value,
-    owner: document.getElementById("cfg-owner").value,
-    repo: document.getElementById("cfg-repo").value,
-    assets: document.getElementById("cfg-assets").value
-  }, null, 2);
-  showStatus("✅ Na-detect", "success");
-}
-function generateConfig() {
-  showStatus("✅ config.json — Handa na", "success");
 }
 
 // ==============================================
@@ -466,7 +574,6 @@ function generateConfig() {
 // ==============================================
 function clearAllData() {
   if(!confirm("Burahin ang lahat ng lokal na data?\n⚠️ Hindi mabubura ang Co-Admin at Karapatang-ari."))return;
-  // Panatilihin ang Co-Admin at Copyright
   const coAdmins = localStorage.getItem(CO_ADMIN_KEY);
   const copyright = localStorage.getItem(COPYRIGHT_KEY);
   localStorage.clear();
@@ -487,20 +594,18 @@ function doLogout() {
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt; el.className = `status ${cls}`; el.style.display="block";
-  setTimeout(()=>el.style.display="none", 8000);
+  setTimeout(()=>el.style.display="none", 10000);
 }
 
-window.onload = () => {
+window.onload = async () => {
   if (!checkSession()) return;
 
-  // I-karga ang Kasalukuyang Session Duration
   const savedDur = localStorage.getItem(SESSION_DURATION_KEY);
   if (savedDur !== null) document.getElementById("session-duration").value = savedDur;
   const savedRemember = localStorage.getItem(REMEMBER_LOGIN_KEY);
   if (savedRemember !== null) document.getElementById("remember-login").checked = savedRemember === "true";
   updateSessionPreview();
 
-  // I-karga ang Karapatang-ari
   const copyInfo = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || "{}");
   if (copyInfo.owner) document.getElementById("copy-owner").value = copyInfo.owner;
   if (copyInfo.year)  document.getElementById("copy-year").value = copyInfo.year;
@@ -508,10 +613,9 @@ window.onload = () => {
   if (copyInfo.autoInsert !== undefined) document.getElementById("copy-auto-insert").checked = copyInfo.autoInsert;
   updateCopyrightPreview();
 
-  // ✅ I-karga ang Co-Admin Listahan
   renderCoAdmins();
-
   detectConfig();
+  await loadConfigFromGitHub();
 };
 </script>
 </body>
