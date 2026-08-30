@@ -6,11 +6,13 @@
 <link rel="stylesheet" href="style.css">
 <title>Mga Ilegal na Bisyo — Edukasyon Laban sa Masamang Bisyo</title>
 
-<!-- ✅ KAILANGANG ESTILO — PULANG BILOG NA MAY NUMERO -->
 <style>
-/* ---------- PULANG BILOG NA NUMERO ---------- */
+/* ---------- PULANG BILOG NA MAY NUMERO ---------- */
 .btn {
   position: relative;
+  display: flex;
+  align-items: center;
+  text-align: left;
 }
 .num {
   display: inline-flex;
@@ -26,12 +28,11 @@
   margin-right: 10px;
   flex-shrink: 0;
 }
+.num.star {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+}
 .txt {
   flex: 1;
-}
-/* Kung walang numero — iba ang kulay */
-.num:contains("✦") {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
 }
 </style>
 
@@ -51,6 +52,9 @@ const VERSION_FILE_URL    = `https://raw.githubusercontent.com/${REPO_OWNER}/${R
 // ✅ MGA PAHINA — assets/pages/ ANG TAMA
 const GITHUB_API_PAGES_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages`;
 const PAGES_FOLDER = "pages/";
+
+// ✅ PUBLIKONG AYOS — mula sa GitHub
+const ORDER_FILE_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/app/src/main/assets/page-order.json`;
 
 const VERSION_CACHE_KEY = "bisyo_cached_version";
 const DEFAULT_VERSION   = "v1.0";
@@ -92,6 +96,32 @@ const BASE_PAGES = [
 // ==================================================
 function isOnline() { return navigator.onLine; }
 function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
+
+// ==================================================
+// ✅ BASAHIN ANG PUBLIKONG AYOS — mula sa GitHub o lokal
+// ==================================================
+async function getPublicOrder() {
+  // Kapag online — basahin ang PUBLIKONG ayos mula sa GitHub
+  if (isOnline()) {
+    try {
+      const res = await fetch(ORDER_FILE_URL, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        // I-save din sa lokal para magamit offline
+        localStorage.setItem(ORDER_KEY, JSON.stringify(data.order));
+        localStorage.setItem(VISIBLE_KEY, JSON.stringify(data.visible));
+        return { order: data.order, visibleSet: new Set(data.visible) };
+      }
+    } catch (e) {
+      console.log("Walang publiko ayos — gamit ang lokal", e);
+    }
+  }
+  // Kapag offline o walang publiko — gamitin ang lokal
+  return {
+    order: JSON.parse(localStorage.getItem(ORDER_KEY) || "null") || getAllPages().map(p=>p.id),
+    visibleSet: new Set(JSON.parse(localStorage.getItem(VISIBLE_KEY) || "[]"))
+  };
+}
 
 // ==================================================
 // 🔢 BERSYON — KUSANG KUKUHA
@@ -136,19 +166,6 @@ function getAllPages() {
   return list;
 }
 
-// ✅ BASAHIN ANG AYOS MULA SA ADMIN-ORDER.HTML
-function getPageOrder() {
-  const s = localStorage.getItem(ORDER_KEY);
-  if (s) {
-    try {
-      const savedOrder = JSON.parse(s);
-      const allPages = getAllPages();
-      return savedOrder.filter(id => allPages.find(p => p.id === id));
-    } catch {}
-  }
-  return getAllPages().map(p => p.id);
-}
-
 // ✅ KUMAHIN NG MGA BAGONG PAHINA MULA SA GITHUB — KUNG ONLINE
 async function fetchPagesFromGitHub() {
   if (!isOnline()) return getAllPages();
@@ -186,8 +203,7 @@ async function fetchPagesFromGitHub() {
 // ==================================================
 async function buildPageGrids() {
   const allPages = await fetchPagesFromGitHub();
-  const order = getPageOrder();
-  const visibleSet = new Set(JSON.parse(localStorage.getItem(VISIBLE_KEY) || "[]"));
+  const { order, visibleSet } = await getPublicOrder(); // ✅ PUBLIKONG AYOS
 
   const bisyoGrid = document.getElementById("bisyo-grid");
   const extraGrid = document.getElementById("extra-grid");
@@ -204,8 +220,13 @@ async function buildPageGrids() {
     a.href = `${page.folder}${page.file}`;
     a.className = "btn";
     a.title = page.desc || "";
+    
+    // ✅ TAMA NA ANG KULAY — walang gumagamit na :contains()
+    const numClass = page.num ? "" : "star";
+    const numText = page.num || "✦";
+    
     a.innerHTML = `
-      <span class="num">${page.num || '✦'}</span>
+      <span class="num ${numClass}">${numText}</span>
       <span class="txt">${page.name}</span>
     `;
     container.appendChild(a);
@@ -348,9 +369,9 @@ window.onload = async function() {
   }
 };
 
-window.addEventListener("online", () => {
+window.addEventListener("online", async () => {
   updateDownloadVisibility();
-  buildPageGrids();
+  await buildPageGrids(); // ✅ Kusang mag-a-update kapag bumalik ang internet
 });
 window.addEventListener("offline", updateDownloadVisibility);
 </script>
