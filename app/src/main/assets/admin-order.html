@@ -190,11 +190,12 @@ function updateSyncStatus() {
   }
 }
 
+// ✅ INAYOS: HINDI NA HUMIHINTO ANG PAGBASA NG LISTAHAN KAHIT WALANG SESSION
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
   if (!s || Date.now() > JSON.parse(s).expiresAt) {
-    alert("Nakalipas na ang session — mag-login muli");
-    location.href = "admin.html";
+    // ❌ HUWAG NANG I-REDIRECT AGAD — babala lang
+    console.warn("Session wala o lipas na — limitadong kakayahan lang");
     return false;
   }
   return true;
@@ -228,9 +229,9 @@ function getFileIcon(name) {
   return '📁';
 }
 
-// ✅ INAYOS — SIGURADONG LUMABAS ANG LISTAHAN AGAD
+// ✅ SIGURADONG LUMABAS — KAHIT WALANG SESSION
 function loadCurrentList() {
-  // 1. Kunin mula sa lokal na imbakan
+  console.log("📂 Binabasa ang listahan...");
   const storedOrder = localStorage.getItem(ORDER_KEY);
   const storedVisible = localStorage.getItem(VISIBLE_KEY);
 
@@ -246,7 +247,7 @@ function loadCurrentList() {
     catch (e) { console.warn("Maling format ng visible:", e); visibleSet = new Set(); }
   }
 
-  // ✅ 2. SIGURADONG IRERENDER — KAHIT WALANG LAMAN
+  console.log("✅ Listahan nabasa:", currentOrder);
   renderCurrentList();
 }
 
@@ -254,16 +255,14 @@ function renderCurrentList() {
   const list = document.getElementById("order-list");
   list.innerHTML = "";
 
-  // ✅ KUNG WALANG LAMAN — IPALIT ANG MENSAHE HINDI WALA LANG
   if (!currentOrder.length) {
     list.innerHTML = `<p style="color:#6b7280;padding:20px;text-align:center">
-      Walang pahina pa sa listahan.<br>
+      📭 Walang pahina pa sa listahan.<br>
       Pindutin ang <strong>🔄 SURIIN MULI</strong> sa itaas para makita at magdagdag ng mga pahina.
     </p>`;
     return;
   }
 
-  // ✅ KUNG MAY LAMAN — IPALABAS LAHAT
   currentOrder.forEach((id, idx) => {
     const shown = visibleSet.has(id);
     list.innerHTML += `
@@ -288,6 +287,8 @@ function formatName(id) {
 }
 
 async function scanGitHub() {
+  const hasSession = checkSession();
+  
   const btn = document.getElementById("load-btn");
   btn.disabled = true;
   btn.textContent = "⏳ Sinusuri...";
@@ -298,6 +299,13 @@ async function scanGitHub() {
     btn.disabled = false;
     btn.textContent = "🔄 SURIIN MULI";
     showStatus("📴 Walang internet — hindi makakabasa ng bagong pahina", "warning");
+    return;
+  }
+
+  if (!hasSession) {
+    btn.disabled = false;
+    btn.textContent = "🔄 SURIIN MULI";
+    showStatus("❌ Kailangan mag-login muna para makabasa sa GitHub", "error");
     return;
   }
 
@@ -414,6 +422,8 @@ function removeFromList(id) {
 }
 
 async function saveToBoth() {
+  const hasSession = checkSession();
+  
   const btn = document.getElementById("save-btn");
   btn.disabled = true;
   btn.textContent = "⏳ Isinasave...";
@@ -425,6 +435,13 @@ async function saveToBoth() {
     btn.disabled = false;
     btn.textContent = "💾 ☁️ I-SAVE SA LAHAT";
     showStatus("✅ NAI-SAVE LOKAL LANG — ise-save sa GitHub kapag may internet na uli", "warning");
+    return;
+  }
+
+  if (!hasSession) {
+    btn.disabled = false;
+    btn.textContent = "💾 ☁️ I-SAVE SA LAHAT";
+    showStatus("✅ NAI-SAVE LOKAL — mag-login muna para ma-upload sa GitHub", "warning");
     return;
   }
 
@@ -495,9 +512,16 @@ function showStatus(txt, cls) {
 }
 
 window.onload = () => {
-  if (!checkSession()) return;
+  // ✅ UNANG-UNA: I-LOAD ANG LISTAHAN — HINDI HIHINTAY SA SESSION
+  loadCurrentList();
+  
+  // ✅ TAPOS: SURIIN ANG SESSION
+  const hasSession = checkSession();
   updateSyncStatus();
-  loadCurrentList(); // ✅ SIGURADONG TINATAWAG — LALABAS AGAD ANG LISTAHAN
+  
+  if (!hasSession) {
+    showStatus("⚠️ Walang aktibong session — makakakita ka lang ng listahan, hindi makakapag-save sa GitHub", "warning");
+  }
 };
 </script>
 </body>
