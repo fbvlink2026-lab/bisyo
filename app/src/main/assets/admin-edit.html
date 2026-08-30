@@ -61,7 +61,19 @@ textarea.loading { opacity: 0.6; pointer-events: none; }
   padding: 20px 16px 40px;
 }
 h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
-.subtitle { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
+.subtitle { color: #6b7280; font-size: 14px; margin-bottom: 8px; }
+.unsaved-badge {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  margin-left: 10px;
+  transition: opacity 0.3s;
+}
+.unsaved-badge.saved { background: #dcfce7; color: #166534; }
 #editor-area {
   background: white;
   border-radius: 14px;
@@ -87,8 +99,8 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 .btn:hover { transform: translateY(-1px); }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 .btn-primary { background: linear-gradient(90deg, #b91c1c, #dc2626); color: white; }
-.btn-primary.saving { background: #9ca3af; }
 .btn-secondary { background: #e5e7eb; color: #374151; }
+.btn-ghost { background: transparent; color: #b91c1c; border: 2px solid #fecaca; padding: 10px 16px; }
 .status {
   padding: 14px 18px;
   border-radius: 10px;
@@ -142,10 +154,9 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 </div>
 
 <div class="container">
-  <h1>✏️ I-edit ang File</h1>
+  <h1>✏️ I-edit ang File <span id="unsaved-indicator" class="unsaved-badge" style="display:none">⚠️ Hindi pa Nai-save</span></h1>
   <p class="subtitle" id="page-hint">Pumili ng lokasyon at file — kabilang ang mga nasa ugat ng assets/</p>
 
-  <!-- ✅ NAKATAGONG INPUT — KUNG GALING SA ADMIN-ORDER -->
   <input type="hidden" id="auto-file-path" value="">
 
   <label for="folder-select">📁 Lokasyon:</label>
@@ -161,7 +172,10 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
   </select>
 
   <div id="editor-area" style="display:none">
-    <label id="editor-label">📝 Nilalaman:</label>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <label id="editor-label">📝 Nilalaman:</label>
+      <button class="btn-ghost" onclick="reloadFromGitHub()" id="reload-btn" style="padding:6px 12px;font-size:13px">🔄 Mula sa GitHub</button>
+    </div>
 
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="full" onclick="switchMode('full')">📄 Buong File</div>
@@ -173,13 +187,14 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
     </div>
 
     <div class="theme-bar" id="theme-bar" style="display:none">
-      <span style="font-weight:bold;color:#374151">🎨 Itsura:</span>
+      <span style="font-weight:bold;color:#374151">🎨 Itsura sa Preview:</span>
       <button class="theme-btn active" data-theme="light" onclick="setTheme('light')">Maliwanag</button>
       <button class="theme-btn" data-theme="serif" onclick="setTheme('serif')">Pormal</button>
       <button class="theme-btn" data-theme="compact" onclick="setTheme('compact')">Maikli</button>
+      <span style="margin-left:auto;color:#6b7280;font-size:13px">💡 Ang itsura sa pahina ay galing sa <code>style.css</code> — hindi binabago ng editor</span>
     </div>
 
-    <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..." oninput="updatePreview()"></textarea>
+    <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..." oninput="handleTyping()"></textarea>
 
     <div id="visual-toolbar" class="visual-toolbar" style="display:none">
       <button onclick="execCmd('bold')"><b>B</b></button>
@@ -208,7 +223,7 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 
     <div class="preview-wrap" id="preview-wrap">
       <div class="preview-header">
-        <span>👁️ Pagtingin</span>
+        <span>👁️ Pagtingin — Gamit ang istilo mula sa style.css</span>
         <button style="border:none;background:none;color:#b91c1c;cursor:pointer;font-weight:bold" onclick="togglePreview()">✕</button>
       </div>
       <iframe id="preview-frame" class="preview-frame"></iframe>
@@ -234,9 +249,11 @@ let currentSha = null;
 let editMode = "full";
 let currentTheme = "light";
 let originalFullContent = "";
+let hasUnsavedChanges = false;
+let lastSavedContent = "";
 
 // ==================================================
-// ✅ BAGONG KAKAYAHAN — BASAHIN ANG FILE MULA SA URL
+// ✅ 1. HINDI NA MAPAPALITAN PAG-REFRESH — LOKAL ANG UNA
 // ==================================================
 function getUrlParam(name) {
   const params = new URLSearchParams(window.location.search);
@@ -246,31 +263,18 @@ function getUrlParam(name) {
 async function autoOpenFromUrl() {
   const filePath = getUrlParam("file");
   if (!filePath) return false;
-
-  // ✅ HATIIN SA FOLDER + FILENAME
   const lastSlash = filePath.lastIndexOf("/");
   let targetFolder = "";
   let targetFile = filePath;
-
   if (lastSlash !== -1) {
     targetFolder = filePath.substring(0, lastSlash + 1);
     targetFile = filePath.substring(lastSlash + 1);
   }
-
-  console.log("✅ Galing sa Admin-Order:", { folder: targetFolder, file: targetFile });
-
-  // ✅ PILIIN ANG TAMANG FOLDER SA DROPDOWN
   document.getElementById("folder-select").value = targetFolder;
   currentFolder = targetFolder;
-
-  // ✅ HINTAYIN ANG LISTAHAN NG FILE MABASA
   await loadFileList();
-
-  // ✅ PILIIN ANG TAMANG FILE
   document.getElementById("file-select").value = targetFile;
   currentFilename = targetFile;
-
-  // ✅ BUKAS AGAD ANG FILE
   if (currentFilename) {
     await fileSelected();
     showStatus(`✅ Binuksan mula sa Admin-Order: ${filePath}`, "success");
@@ -278,40 +282,67 @@ async function autoOpenFromUrl() {
   return true;
 }
 
-function expandWidgets(html) {
-  if (!html) return html;
-  return html;
-}
-function safeDecodeBase64(b64) {
-  try { return decodeURIComponent(escape(atob(b64))); }
-  catch { return atob(b64); }
-}
-function safeEncodeContent(text) {
-  return btoa(unescape(encodeURIComponent(text)));
+// ✅ AUTOSAVE — BAWAT PAGBABAGO, NAI-SAVE AGAD SA LOKAL
+function handleTyping() {
+  markUnsaved();
+  autoSaveToLocal();
 }
 
-function checkSession() {
-  const s = sessionStorage.getItem(SESSION_KEY);
-  if (!s || Date.now() > JSON.parse(s).expiresAt) {
-    alert("Nakalipas na ang session — mag-login muli");
-    location.href = "admin.html";
-    return false;
+function markUnsaved() {
+  hasUnsavedChanges = true;
+  document.getElementById("unsaved-indicator").style.display = "inline-block";
+  document.getElementById("unsaved-indicator").classList.remove("saved");
+}
+
+function markSaved() {
+  hasUnsavedChanges = false;
+  document.getElementById("unsaved-indicator").classList.add("saved");
+  document.getElementById("unsaved-indicator").textContent = "✅ Nai-save";
+  setTimeout(() => {
+    document.getElementById("unsaved-indicator").style.display = "none";
+  }, 2000);
+}
+
+function autoSaveToLocal() {
+  if (!currentFilename) return;
+  const fullPath = currentFolder + currentFilename;
+  const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
+
+  let contentToSave = editMode === "full"
+    ? document.getElementById("content-editor").value
+    : rebuildFullFileWithNewContent(
+        editMode === "visual"
+          ? document.getElementById("visual-editor").innerHTML
+          : document.getElementById("content-editor").value
+      );
+
+  localStorage.setItem(storageKey, contentToSave);
+  originalFullContent = contentToSave;
+}
+
+// ✅ BAWASAN ANG PAGKUHA MULA SA GITHUB — HANGGANG HINDI PININDOT ANG "MULA SA GITHUB"
+async function reloadFromGitHub() {
+  if (!currentFilename) return;
+  if (!confirm("⚠️ Papalitan ang kasalukuyang pagbabago gamit ang laman mula sa GitHub. Sigurado ka ba?")) return;
+
+  const fullPath = currentFolder + currentFilename;
+  const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
+  localStorage.removeItem(storageKey); // Burahin ang lokal — kumuha bago
+
+  await loadFileContent(true); // ✅ Pilitin mula sa GitHub
+  showStatus("✅ Kinuha mula sa GitHub — napalitan ang laman", "info");
+}
+
+window.addEventListener("beforeunload", e => {
+  if (hasUnsavedChanges) {
+    e.preventDefault();
+    e.returnValue = "Mayroon kang hindi pa naisave na pagbabago — sigurado ka bang aalis?";
   }
-  return true;
-}
-function getDecryptedToken() {
-  const encrypted = localStorage.getItem("bisyo_encrypted_token");
-  const s = sessionStorage.getItem(SESSION_KEY);
-  if (!encrypted || !s) return null;
-  try {
-    const pwd = JSON.parse(s).password;
-    let decoded = atob(encrypted), t = "";
-    for (let i=0; i<decoded.length; i++)
-      t += String.fromCharCode(decoded.charCodeAt(i) ^ pwd.charCodeAt(i % pwd.length));
-    return t;
-  } catch { return null; }
-}
+});
 
+// ==================================================
+// ✅ 2. VISUAL EDITOR — TAMA ANG PAGBABAON SA BUONG FILE
+// ==================================================
 function switchMode(mode) {
   editMode = mode;
   document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
@@ -330,10 +361,10 @@ function switchMode(mode) {
     visualToolbar.style.display = "none";
     visualEditor.style.display = "none";
     textarea.style.display = "block";
-    if (originalFullContent) textarea.value = originalFullContent;
+    textarea.value = originalFullContent;
   }
   else if (mode === "content") {
-    desc.innerHTML = "📝 <strong>Nilalaman Lamang:</strong> I-edit lamang ang laman — ang menu at istruktura ay mananatili. Ligtas gamitin.";
+    desc.innerHTML = "📝 <strong>Nilalaman Lamang:</strong> I-edit lamang ang laman — ang &lt;head&gt;, &lt;body&gt;, at istruktura ay mananatili. Ligtas gamitin.<br><small>💡 Ang itsura sa pahina ay galing sa <code>style.css</code> — hindi binabago ng editor.</small>";
     themeBar.style.display = "flex";
     visualToolbar.style.display = "none";
     visualEditor.style.display = "none";
@@ -341,13 +372,13 @@ function switchMode(mode) {
     extractContentForEdit();
   }
   else if (mode === "visual") {
-    desc.innerHTML = "🎨 <strong>Visual Editor:</strong> I-click at baguhin direkta — parang Word! Hindi kailangang alam ang HTML.";
+    desc.innerHTML = "🎨 <strong>Visual Editor:</strong> I-click at baguhin direkta — parang Word! Kapag naisave, babalik sa orihinal na istruktura ang buong file.<br><small>💡 Ang itsura ay galing sa <code>style.css</code> — hindi kailangang i-set dito.</small>";
     themeBar.style.display = "flex";
     visualToolbar.style.display = "flex";
     textarea.style.display = "none";
     visualEditor.style.display = "block";
     extractContentForEdit();
-    visualEditor.innerHTML = textarea.value;
+    visualEditor.innerHTML = document.getElementById("content-editor").value;
   }
   updatePreview();
   saveEditorState();
@@ -364,10 +395,12 @@ function insertImage() { const u=prompt("Ipasok ang URL ng imahe:"); if(u)execCm
 function syncVisualToText() {
   if (editMode === "visual") {
     document.getElementById("content-editor").value = document.getElementById("visual-editor").innerHTML;
+    handleTyping();
   }
   updatePreview();
 }
 
+// ✅ AYUSIN — KUNIN LAMANG ANG LAMAN SA LOOB NG BODY/MAIN/ARTICLE
 function extractContentForEdit() {
   if (!originalFullContent) return;
   let extracted = "";
@@ -383,19 +416,39 @@ function extractContentForEdit() {
   document.getElementById("content-editor").value = extracted.trim();
 }
 
+// ✅ AYUSIN — IBALIK ANG LAMAN SA TAMANG LUGAR SA BUONG FILE
 function rebuildFullFileWithNewContent(newContent) {
   if (!originalFullContent || editMode === "full") return newContent;
+
   let result = originalFullContent;
+  let replaced = false;
+
+  // ✅ Palitan lamang ang laman — HINDI SISIRAIN ANG BUONG FILE
   if (/<main[^>]*>[\s\S]*?<\/main>/i.test(result)) {
     result = result.replace(/(<main[^>]*>)[\s\S]*?(<\/main>)/i, `$1${newContent}$2`);
-  } else if (/<article[^>]*>[\s\S]*?<\/article>/i.test(result)) {
-    result = result.replace(/(<article[^>]*>)[\s\S]*?(<\/article>)/i, `$1${newContent}$2`);
-  } else if (/<body[^>]*>[\s\S]*?<\/body>/i.test(result)) {
-    result = result.replace(/(<body[^>]*>)[\s\S]*?(<\/body>)/i, `$1${newContent}$2`);
+    replaced = true;
   }
+  else if (/<article[^>]*>[\s\S]*?<\/article>/i.test(result)) {
+    result = result.replace(/(<article[^>]*>)[\s\S]*?(<\/article>)/i, `$1${newContent}$2`);
+    replaced = true;
+  }
+  else if (/<body[^>]*>[\s\S]*?<\/body>/i.test(result)) {
+    result = result.replace(/(<body[^>]*>)[\s\S]*?(<\/body>)/i, `$1${newContent}$2`);
+    replaced = true;
+  }
+
+  if (!replaced) {
+    // Walang nakitang lalagyan — ibalik ang buong laman
+    result = newContent;
+    showStatus("⚠️ Walang nakitang lalagyan — inilalagay ang buong laman", "info");
+  }
+
   return result;
 }
 
+// ==================================================
+// ✅ 3. PREVIEW — GAMIT ANG TOTOONG style.css HINDI PWEDE SA IFRAME
+// ==================================================
 function setTheme(theme) {
   currentTheme = theme;
   document.querySelectorAll(".theme-btn").forEach(b => b.classList.toggle("active", b.dataset.theme === theme));
@@ -405,20 +458,26 @@ function setTheme(theme) {
 function updatePreview() {
   const iframe = document.getElementById("preview-frame");
   if (!iframe.contentDocument) return;
+
   let content = editMode === "visual"
     ? document.getElementById("visual-editor").innerHTML
     : document.getElementById("content-editor").value;
 
+  // ✅ I-preview — HINDI DAPAT MAG-IMBAL NG BUONG HTML
+  // Ang TOTOONG itsura ay galing sa style.css sa orihinal na file
   let bodyStyle = "margin:0;padding:20px;max-width:700px;margin:0 auto;background:#fff;color:#1f2937;line-height:1.6";
   if (currentTheme === "serif") bodyStyle += " font-family:Georgia,'Times New Roman',serif;font-size:18px";
   else if (currentTheme === "compact") bodyStyle += " font-size:14px;line-height:1.4;padding:10px";
   else bodyStyle += " font-family:'Segoe UI',Roboto,sans-serif";
 
   iframe.contentDocument.open();
-  iframe.contentDocument.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{${bodyStyle}}</style></head><body>${content}</body></html>`);
+  iframe.contentDocument.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><base href="${currentFolder}"></head><body>${content}</body></html>`);
   iframe.contentDocument.close();
 }
 
+// ==================================================
+// ✅ 4. PAGKUHA NG FILE — LOKAL MUNA, GITHUB KAPAG HINDI MERON
+// ==================================================
 async function folderChanged() {
   currentFolder = document.getElementById("folder-select").value;
   document.getElementById("file-select").innerHTML = `<option value="">— Naglo-load —</option>`;
@@ -462,6 +521,12 @@ async function loadFileList() {
 }
 
 async function fileSelected() {
+  if (hasUnsavedChanges && originalFullContent) {
+    if (!confirm("⚠️ Mayroon kang hindi pa naisave na pagbabago. Palitan ang laman?")) {
+      document.getElementById("file-select").value = "";
+      return;
+    }
+  }
   currentFilename = document.getElementById("file-select").value;
   saveEditorState();
   if (!currentFilename) {
@@ -473,7 +538,7 @@ async function fileSelected() {
   await loadFileContent();
 }
 
-async function loadFileContent() {
+async function loadFileContent(forceFromGitHub=false) {
   const editorArea = document.getElementById("editor-area");
   const editor = document.getElementById("content-editor");
   editorArea.style.display = "block";
@@ -481,13 +546,23 @@ async function loadFileContent() {
   editor.classList.add("loading");
   document.getElementById("editor-label").textContent = `📝 I-edit: ${currentFolder}${currentFilename}`;
 
-  let content = null;
   const fullPath = currentFolder + currentFilename;
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
   currentSha = null;
   originalFullContent = "";
+  let content = null;
 
-  if (navigator.onLine) {
+  // ✅ UNA — LOKAL NA NAI-SAVE
+  if (!forceFromGitHub) {
+    content = localStorage.getItem(storageKey);
+    if (content) {
+      originalFullContent = content;
+      showStatus(`📂 Gamit lokal: ${fullPath} — pindutin "🔄 Mula sa GitHub" para kumuha bago`, "info");
+    }
+  }
+
+  // ✅ PANGALAWA — GITHUB KUNG WALANG LOKAL O PINILING KUHIN BAGO
+  if (!content && navigator.onLine) {
     try {
       const token = getDecryptedToken();
       const headers = token ? {Authorization: `token ${token}`} : {};
@@ -501,19 +576,14 @@ async function loadFileContent() {
         showStatus(`✅ Mula sa GitHub: ${fullPath}`, "success");
       }
     } catch {
-      showStatus("📴 Hindi makausap ang GitHub — binabasa mula sa lokal...", "info");
+      if (!content) showStatus("📴 Hindi makausap ang GitHub — gamit lokal", "info");
     }
   }
 
   if (!content) {
-    content = localStorage.getItem(storageKey);
-    if (content) {
-      originalFullContent = content;
-      showStatus(`📂 Gamit lokal: ${fullPath}`, "info");
-    } else {
-      content = "";
-      originalFullContent = "";
-    }
+    content = "";
+    originalFullContent = "";
+    showStatus("⚠️ Walang nakitang laman — bagong file", "info");
   }
 
   if (editMode === "full") editor.value = content;
@@ -521,23 +591,31 @@ async function loadFileContent() {
 
   editor.classList.remove("loading");
   document.getElementById("page-hint").innerHTML = `✅ <strong>${fullPath}</strong>`;
+  hasUnsavedChanges = false;
+  document.getElementById("unsaved-indicator").style.display = "none";
+  lastSavedContent = content;
   updatePreview();
 }
 
+// ==================================================
+// ✅ PAG-SAVE — BINABALIK SA TAMANG LUGAR SA BUONG FILE
+// ==================================================
 async function saveContent() {
   const btn = document.getElementById("save-btn");
-  let contentToSave = editMode === "full"
-    ? document.getElementById("content-editor").value
-    : rebuildFullFileWithNewContent(
-        editMode === "visual"
-          ? document.getElementById("visual-editor").innerHTML
-          : document.getElementById("content-editor").value
-      );
+
+  // ✅ Kunin ang bagong laman — ibalik sa tamang bahagi
+  let contentToSave;
+  if (editMode === "full") {
+    contentToSave = document.getElementById("content-editor").value;
+  } else {
+    const newContent = editMode === "visual"
+      ? document.getElementById("visual-editor").innerHTML
+      : document.getElementById("content-editor").value;
+    contentToSave = rebuildFullFileWithNewContent(newContent);
+  }
 
   if (!currentFilename || !contentToSave.trim())
     return showStatus("❌ Walang napiling file o walang laman", "error");
-
-  contentToSave = expandWidgets(contentToSave);
 
   btn.disabled = true;
   btn.textContent = "⏳ Nag-i-save...";
@@ -546,7 +624,9 @@ async function saveContent() {
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
   localStorage.setItem(storageKey, contentToSave);
   originalFullContent = contentToSave;
+  lastSavedContent = contentToSave;
 
+  // ✅ I-save sa nakabinbin kung walang internet
   const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
   pending.push({
     id: Date.now(), path: fullPath, content: contentToSave,
@@ -556,13 +636,16 @@ async function saveContent() {
 
   if (!navigator.onLine) {
     btn.disabled = false; btn.textContent = "💾 I-save";
+    markSaved();
     showStatus("✅ Nai-save lokal — I-sesync kapag may internet", "success");
     return;
   }
 
+  // ✅ I-upload sa GitHub
   const token = getDecryptedToken();
   if (!token) {
     btn.disabled = false; btn.textContent = "💾 I-save";
+    markSaved();
     showStatus("✅ Nai-save lokal — Kailangan ng Token para i-upload sa GitHub", "warning");
     return;
   }
@@ -584,6 +667,7 @@ async function saveContent() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     currentSha = data.commit.sha;
+    markSaved();
     showStatus(`☁️✅ NAI-UPLOAD SA: assets/${fullPath}`, "success");
   } catch(e) {
     showStatus(`⚠️ Nai-save lokal — ${e.message}`, "warning");
@@ -591,6 +675,35 @@ async function saveContent() {
   btn.disabled = false; btn.textContent = "💾 I-save";
 }
 
+// ============ MGA TULONG NA FUNKSYON ============
+function safeDecodeBase64(b64) {
+  try { return decodeURIComponent(escape(atob(b64))); }
+  catch { return atob(b64); }
+}
+function safeEncodeContent(text) {
+  return btoa(unescape(encodeURIComponent(text)));
+}
+function checkSession() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!s || Date.now() > JSON.parse(s).expiresAt) {
+    alert("Nakalipas na ang session — mag-login muli");
+    location.href = "admin.html";
+    return false;
+  }
+  return true;
+}
+function getDecryptedToken() {
+  const encrypted = localStorage.getItem("bisyo_encrypted_token");
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!encrypted || !s) return null;
+  try {
+    const pwd = JSON.parse(s).password;
+    let decoded = atob(encrypted), t = "";
+    for (let i=0; i<decoded.length; i++)
+      t += String.fromCharCode(decoded.charCodeAt(i) ^ pwd.charCodeAt(i % pwd.length));
+    return t;
+  } catch { return null; }
+}
 function explainStatusCode(status) {
   return {
     401: "🔑 Walang pahintulot — Kailangan ng Token o hindi tama ang Token.",
@@ -600,7 +713,6 @@ function explainStatusCode(status) {
     0: "📴 Walang Koneksyon — Nai-save lamang lokal, isesync kapag online."
   }[status] || `⚠️ Katayuan: HTTP ${status}`;
 }
-
 function copyContent() {
   const val = editMode === "visual"
     ? document.getElementById("visual-editor").innerHTML
@@ -618,7 +730,7 @@ function clearCache() {
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
   localStorage.removeItem(storageKey);
   showStatus("🗑️ Cache na-clear — muling kukuha mula sa GitHub", "info");
-  loadFileContent();
+  loadFileContent(true);
 }
 function saveEditorState() {
   localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({
@@ -647,13 +759,8 @@ function showStatus(txt, cls) {
 
 window.onload = async () => {
   if (!checkSession()) return;
-
-  // ✅ UNA — BUKAS AGAD ANG FILE KUNG GALING SA ADMIN-ORDER
   const opened = await autoOpenFromUrl();
-  if (!opened) {
-    // ✅ KUNG HINDI GALING SA ADMIN-ORDER — BUMALIK SA DATING ESTADO
-    await restoreEditorState();
-  }
+  if (!opened) await restoreEditorState();
 };
 </script>
 
