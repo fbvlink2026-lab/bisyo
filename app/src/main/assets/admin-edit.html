@@ -97,6 +97,10 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 .status.success { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
 .status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
 .status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
+.folder-group {
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.folder-group label { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -112,35 +116,24 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 </div>
 
 <div class="container">
-  <h1>✏️ I-edit ang Nilalaman ng Pahina</h1>
-  <p class="subtitle" id="page-hint">Pumili ng pahina o dumiretso sa pag-edit</p>
+  <h1>✏️ I-edit ang File</h1>
+  <p class="subtitle" id="page-hint">Pumili ng lokasyon at file — kabilang ang mga nasa ugat ng assets/</p>
 
-  <label for="page-select">📄 Pumili ng Pahina:</label>
-  <select id="page-select" onchange="pageSelected()">
-    <option value="">— Pumili ng pahina —</option>
-    <option value="alak">🍺 Alak</option>
-    <option value="sigarilyo">🚬 Sigarilyo</option>
-    <option value="shabu">💊 Shabu</option>
-    <option value="heroin">💉 Heroin</option>
-    <option value="marijuana">🌿 Marijuana</option>
-    <option value="ecstasy">💜 Ecstasy</option>
-    <option value="cocaine">❄️ Cocaine</option>
-    <option value="tinuturok-gamot">💉 Tinuturok na Gamot</option>
-    <option value="tuklaw">🔗 Tuklaw / Pagkalulong</option>
-    <option value="sugal">🎰 Sugal</option>
-    <option value="inhalants">💨 Inhalants</option>
-    <option value="pag-aabuso-gamot">💊 Pag-aabuso sa Gamot</option>
-    <option value="lsd">👁️ LSD</option>
-    <option value="ketamine">🧪 Ketamine</option>
-    <option value="ibang-sugal">🎲 Ibang Uri ng Sugal</option>
-    <option value="internet-laro">🎮 Internet / Laro</option>
-    <option value="labis-pagkain">🍔 Labis na Pagkain</option>
-    <option value="vaping">💨 Vaping</option>
-    <option value="aral-sa-bibliya">📖 Aral mula sa Bibliya</option>
+  <!-- ✅ PUMILI NG LOKASYON — ROOT o PAGES/ -->
+  <label for="folder-select">📁 Lokasyon:</label>
+  <select id="folder-select" onchange="folderChanged()">
+    <option value="">— Pumili ng folder —</option>
+    <option value="">📂 Ugat (assets/) — main.html, style.css...</option>
+    <option value="pages/">📂 pages/ — Mga nilalaman ng pahina</option>
+  </select>
+
+  <label for="file-select">📄 Piliin ang File:</label>
+  <select id="file-select" onchange="fileSelected()">
+    <option value="">— Pumili muna ng lokasyon —</option>
   </select>
 
   <div id="editor-area" style="display:none">
-    <label id="editor-label">📝 Nilalaman ng Pahina:</label>
+    <label id="editor-label">📝 Nilalaman:</label>
     <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..."></textarea>
 
     <div class="btn-group">
@@ -155,20 +148,20 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 
 <script>
 const SESSION_KEY = "bisyo_admin_session";
-const STORAGE_KEY = "bisyo_page_content_";
+const STORAGE_KEY_PREFIX = "bisyo_file_content_";
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
 
-// ✅ KUNGSAN GALING: mula sa URL ?file=...
-function getFileParam() {
-  const params = new URLSearchParams(window.location.search);
-  const fn = params.get('file');
-  if (!fn) return null;
-  // Alisin ang .html kung meron para makuha ang ID
-  return fn.replace(/\.html$/i, '');
-}
+// ✅ AYON SA PLANO — ASSETS/ ANG PINAGMULAN! docs/ = KOPYA LANG
+const ASSETS_ROOT = "app/src/main/assets/";
+const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_ROOT}`;
 
+let currentFolder = ""; // "" = root, "pages/" = pages folder
+let currentFilename = "";
+let currentSha = null;
+
+// === SESSION ===
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
   if (!s || Date.now() > JSON.parse(s).expiresAt) {
@@ -178,77 +171,192 @@ function checkSession() {
   }
   return true;
 }
-
-function pageSelected() {
-  const id = document.getElementById("page-select").value;
-  if (!id) {
-    document.getElementById("editor-area").style.display = "none";
-    document.getElementById("page-hint").textContent = "Pumili ng pahina o dumiretso sa pag-edit";
-    return;
-  }
-  document.getElementById("page-hint").innerHTML = `✅ <strong>${id.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</strong> — binubuksan...`;
-  loadPageContent(id);
+function getDecryptedToken() {
+  const encrypted = localStorage.getItem("bisyo_encrypted_token");
+  const s = sessionStorage.getItem(SESSION_KEY);
+  if (!encrypted || !s) return null;
+  const password = JSON.parse(s).password;
+  try {
+    const decoded = atob(encrypted);
+    let token = "";
+    for (let i=0; i<decoded.length; i++) {
+      token += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+    }
+    return token;
+  } catch { return null; }
 }
 
-async function loadPageContent(forcedId) {
-  const id = forcedId || document.getElementById("page-select").value;
+// ✅ NAGBAGO ANG FOLDER — ILISTA ANG MGA FILE DYAN
+async function folderChanged() {
+  currentFolder = document.getElementById("folder-select").value;
+  document.getElementById("file-select").innerHTML = `<option value="">— Naglo-load —</option>`;
+  document.getElementById("editor-area").style.display = "none";
+  
+  if (!navigator.onLine) {
+    document.getElementById("file-select").innerHTML = `<option value="">📴 Walang internet</option>`;
+    return;
+  }
+
+  await loadFileList();
+}
+
+// ✅ ILISTA ANG LAHAT NG FILE SA KASALUKUYANG FOLDER
+async function loadFileList() {
+  const select = document.getElementById("file-select");
+  try {
+    const res = await fetch(GITHUB_API_BASE + currentFolder, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const files = await res.json();
+    
+    select.innerHTML = `<option value="">— Pumili ng file —</option>`;
+    
+    files
+      .filter(f => f.type === "file")
+      .sort((a,b) => a.name.localeCompare(b.name))
+      .forEach(f => {
+        let icon = "📄";
+        if (f.name.endsWith(".html")) icon = "📄";
+        else if (f.name.endsWith(".css")) icon = "🎨";
+        else if (f.name.endsWith(".js")) icon = "⚙️";
+        else if (f.name.endsWith(".txt")) icon = "📝";
+        else if (f.name.endsWith(".md")) icon = "📋";
+        select.innerHTML += `<option value="${f.name}">${icon} ${f.name}</option>`;
+      });
+
+    showStatus(`✅ Nabasa: ${files.length} file sa ${currentFolder || 'assets/'}`, "info");
+    
+  } catch(e) {
+    select.innerHTML = `<option value="">❌ Nabigo: ${e.message}</option>`;
+    showStatus(`❌ Hindi mabasa: ${e.message}`, "error");
+  }
+}
+
+// ✅ NAPILI ANG FILE — BASAHIN ANG LAMAN
+async function fileSelected() {
+  currentFilename = document.getElementById("file-select").value;
+  if (!currentFilename) {
+    document.getElementById("editor-area").style.display = "none";
+    document.getElementById("page-hint").textContent = "Pumili muna ng file";
+    return;
+  }
+
+  document.getElementById("page-hint").innerHTML = `✅ <strong>${currentFolder}${currentFilename}</strong> — binubuksan...`;
+  await loadFileContent();
+}
+
+// ✅ BASAHIN ANG LAMAN NG FILE
+async function loadFileContent() {
   const editorArea = document.getElementById("editor-area");
   const editor = document.getElementById("content-editor");
-  
-  if (!id) { editorArea.style.display = "none"; return; }
-  
-  // ✅ Itakda ang pagpili kung galing sa link
-  document.getElementById("page-select").value = id;
   
   editorArea.style.display = "block";
   editor.value = "";
   editor.classList.add("loading");
-  document.getElementById("editor-label").textContent = `📝 I-edit: ${id}.html`;
+  document.getElementById("editor-label").textContent = `📝 I-edit: ${currentFolder}${currentFilename}`;
 
   let content = null;
   const online = navigator.onLine;
+  const fullPath = currentFolder + currentFilename;
+  const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
+
+  currentSha = null;
 
   if (online) {
     try {
-      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages/${id}.html?ref=${BRANCH}`);
+      const res = await fetch(GITHUB_API_BASE + fullPath, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
+        currentSha = data.sha;
         content = atob(data.content);
-        localStorage.setItem(STORAGE_KEY + id, content);
-        showStatus(`✅ Kinuha mula sa GitHub: ${id}.html`, "info");
+        localStorage.setItem(storageKey, content);
+        showStatus(`✅ Mula sa GitHub: ${fullPath}`, "success");
       }
     } catch(e) { console.log("GitHub fail:", e); }
   }
 
   if (!content) {
-    content = localStorage.getItem(STORAGE_KEY + id);
-    if (content) showStatus(`📂 Gamit ang nakaimbak na bersyon`, "info");
-    else content = `<h2>${id.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</h2>\n<p>Ilagay dito ang nilalaman...</p>`;
+    content = localStorage.getItem(storageKey);
+    if (content) showStatus(`📂 Gamit lokal: ${fullPath}`, "info");
+    else content = "";
   }
 
   editor.value = content;
   editor.classList.remove("loading");
-  document.getElementById("page-hint").innerHTML = `✅ <strong>${id.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</strong>`;
+  document.getElementById("page-hint").innerHTML = `✅ <strong>${fullPath}</strong>`;
 }
 
+// ✅ I-SAVE — SA TAMANG LUGAR SA ASSETS/
 async function saveContent() {
-  const id = document.getElementById("page-select").value;
   const content = document.getElementById("content-editor").value;
-  if (!id || !content.trim()) return showStatus("❌ Walang laman o walang napiling pahina", "error");
+  if (!currentFilename || content === null) return showStatus("❌ Walang napiling file o walang laman", "error");
 
-  localStorage.setItem(STORAGE_KEY + id, content);
+  const fullPath = currentFolder + currentFilename;
+  const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
 
+  // 💾 Lokal — agad
+  localStorage.setItem(storageKey, content);
+
+  // ⏳ Nakabinbin — para sa sync
   const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
   pending.push({
     id: Date.now(),
-    pageId: id,
+    path: fullPath,
     content: content,
+    sha: currentSha,
     timestamp: new Date().toISOString(),
     synced: false
   });
   localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
 
-  showStatus("✅ Nai-save! I-sesync kapag may internet.", "success");
+  // ☁️ Diretsong i-upload kung may internet
+  if (!navigator.onLine) {
+    showStatus("✅ Nai-save lokal — I-sesync kapag may internet", "success");
+    return;
+  }
+
+  const token = getDecryptedToken();
+  if (!token) {
+    showStatus("✅ Nai-save lokal — Token kailangan para sa GitHub", "warning");
+    return;
+  }
+
+  // ✅ I-upload sa TAMANG LUGAR — assets/...
+  try {
+    const uploadRes = await fetch(GITHUB_API_BASE + fullPath, {
+      method: "PUT",
+      headers: {
+        "Authorization": `token ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: `✏️ Na-edit: ${fullPath} — ${new Date().toLocaleString('tl-PH')}`,
+        content: btoa(unescape(encodeURIComponent(content))),
+        sha: currentSha,
+        branch: BRANCH
+      })
+    });
+
+    if (!uploadRes.ok) throw new Error(`HTTP ${uploadRes.status}`);
+    
+    // I-update ang SHA
+    const result = await uploadRes.json();
+    currentSha = result.commit.sha;
+
+    // Markahin na naka-sync
+    markAsSynced(fullPath);
+
+    showStatus(`☁️✅ NAI-UPLOAD SA: assets/${fullPath}`, "success");
+    showStatus("⚙️ Ang build ay kopyahin ito papuntang docs/ — hindi mo na kailangang hawakan ang docs/", "info");
+
+  } catch (e) {
+    showStatus(`⚠️ Nai-save lokal — GitHub: ${e.message}`, "warning");
+  }
+}
+
+function markAsSynced(path) {
+  const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
+  pending.forEach(p => { if (p.path === path) p.synced = true; });
+  localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
 }
 
 function previewContent() {
@@ -260,27 +368,41 @@ function previewContent() {
 }
 
 function clearCache() {
-  const id = document.getElementById("page-select").value;
-  if (!id) return;
-  localStorage.removeItem(STORAGE_KEY + id);
-  showStatus("🗑️ Cache na-clear — muling kukuha mula sa pinagmulan", "info");
-  loadPageContent();
+  if (!currentFilename) return;
+  const fullPath = currentFolder + currentFilename;
+  const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
+  localStorage.removeItem(storageKey);
+  showStatus("🗑️ Cache na-clear — muling kukuha mula sa GitHub", "info");
+  loadFileContent();
 }
 
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
   el.className = `status ${cls}`;
-  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 6000);
+  el.style.display = "block";
+  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 8000);
 }
 
-// ✅ SA PAGBUKAS — KUNG MAY DUMATING NA FILE, AGAD BUBUKSAN!
+// ✅ PAGBUKAS
 window.onload = () => {
   if (!checkSession()) return;
-  const fromUrl = getFileParam();
-  if (fromUrl) {
-    document.getElementById("page-select").value = fromUrl;
-    loadPageContent(fromUrl); // ✅ AGAD — WALANG PIPILING ULIT!
+  // Kung galing sa link: ?file=...
+  const params = new URLSearchParams(window.location.search);
+  const fileParam = params.get('file');
+  if (fileParam) {
+    const parts = fileParam.split('/');
+    if (parts.length > 1) {
+      currentFolder = parts.slice(0,-1).join('/') + '/';
+    } else {
+      currentFolder = "";
+    }
+    currentFilename = parts.pop();
+    document.getElementById("folder-select").value = currentFolder;
+    loadFileList().then(() => {
+      document.getElementById("file-select").value = currentFilename;
+      fileSelected();
+    });
   }
 };
 </script>
