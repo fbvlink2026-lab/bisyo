@@ -4,24 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>Mga Nakabinbing Pagbabago</title>
+<title>⏳ Mga Nakabinbing Pagbabago</title>
 <style>
-.nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
-.nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
-.nav-bar a:hover,.nav-bar a.active{background:#b91c1c}
+/* ✅ PARA MAGING ABO ANG BUTTON HABANG GINAGAWA */
+.btn-primary:disabled,
+.btn-primary.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.hidden { display: none !important; }
 .container{max-width:700px;margin:0 auto;padding:16px}
 .item{background:white;padding:14px;border-radius:10px;margin:8px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .item-synced{border-left:4px solid #22c55e}
 .item-pending{border-left:4px solid #f59e0b}
+.item-path{font-size:13px;color:#374151;margin:4px 0}
 .item-time{font-size:13px;color:#6b7280;margin-top:4px}
 .btn{padding:10px 18px;border:none;border-radius:8px;font-size:14px;cursor:pointer}
 .btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;font-weight:bold}
 .btn-secondary{background:#e5e7eb;color:#374151}
 .btn-group{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
 .empty{text-align:center;padding:40px;color:#6b7280}
-.status{padding:12px;border-radius:8px;margin:12px 0;display:none}
-.status.success{background:#dcfce7;color:#166534;display:block}
-.status.error{background:#fee2e2;color:#991b1b;display:block}
+.status{padding:12px;border-radius:8px;margin:12px 0;display:none;font-weight:500}
+.status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
+.status.error{background:#fee2e2;color:#991b1b;display:block;border-left:4px solid #dc2626}
+.status.info{background:#eff6ff;color:#1e40af;display:block;border-left:4px solid #3b82f6}
 </style>
 </head>
 <body>
@@ -41,7 +49,7 @@
   <p style="color:#6b7280;margin-bottom:16px">Mga pagbabagong hindi pa naipapasa sa GitHub — kusang magsisync kapag online.</p>
 
   <div class="btn-group">
-    <button class="btn btn-primary" onclick="syncAll()">🔄 I-sync Lahat</button>
+    <button id="sync-btn" class="btn btn-primary" onclick="syncAll()">🔄 I-sync Lahat</button>
     <button class="btn btn-secondary" onclick="clearAll()">🗑️ Linisin Lahat</button>
   </div>
 
@@ -54,6 +62,23 @@
 <script>
 const SESSION_KEY = "bisyo_admin_session";
 const PENDING_KEY = "bisyo_offline_changes";
+const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME = "bisyo";
+const BRANCH = "main";
+const ASSETS_ROOT = "app/src/main/assets/";
+
+// ✅ PAREHONG LIGTAS NA PAG-ENCODE / DECODE — WALANG SIRANG EMOJI
+function safeEncodeContent(text) {
+  return btoa(unescape(encodeURIComponent(text)));
+}
+function safeDecodeBase64(base64) {
+  try {
+    return decodeURIComponent(escape(atob(base64)));
+  } catch {
+    return atob(base64);
+  }
+}
 
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
@@ -63,6 +88,27 @@ function checkSession() {
     return false;
   }
   return true;
+}
+
+function getPassword() {
+  const s = sessionStorage.getItem(SESSION_KEY);
+  return s ? JSON.parse(s).password : "";
+}
+function getEncryptedToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+}
+function decryptToken(encrypted, password) {
+  try {
+    const decoded = atob(encrypted);
+    let result = "";
+    for (let i = 0; i < decoded.length; i++) {
+      result += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+    }
+    return result;
+  } catch { return ""; }
+}
+function getToken() {
+  return decryptToken(getEncryptedToken(), getPassword());
 }
 
 function loadList() {
@@ -79,9 +125,12 @@ function loadList() {
   container.innerHTML = "";
 
   list.forEach((item, idx) => {
+    const path = item.filePath || item.path || "—";
+    const label = item.pageName || item.fileName || item.pageId || "Pagbabago";
     container.innerHTML += `
       <div class="item ${item.synced ? 'item-synced' : 'item-pending'}">
-        <strong>${item.pageId || item.type || 'Pagbabago'}</strong>
+        <strong>${label}</strong>
+        <div class="item-path">📁 ${path}</div>
         <div class="item-time">${new Date(item.timestamp).toLocaleString('tl-PH')}</div>
         <span>${item.synced ? '✅ Naka-sync' : '⏳ Nakabinbin'}</span>
         ${!item.synced ? `<button class="btn btn-secondary" style="margin-left:10px" onclick="removeItem(${idx})">Alisin</button>` : ''}
@@ -89,23 +138,87 @@ function loadList() {
   });
 }
 
+// ✅ TOTOONG SYNC SA GITHUB — HINDI LOKAL LANG!
 async function syncAll() {
+  const btn = document.getElementById("sync-btn");
+
   if (!navigator.onLine) return showStatus("❌ Walang internet — hindi makakapag-sync", "error");
+  const token = getToken();
+  if (!token) return showStatus("❌ Walang token — i-setup muna sa Token page", "error");
+
+  btn.disabled = true;
+  btn.classList.add("saving");
+  btn.textContent = "⏳ Sinisync...";
 
   let list = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
   const pending = list.filter(i => !i.synced);
-  if (!pending.length) return showStatus("✅ Wala nang kailangang i-sync", "success");
+  if (!pending.length) {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "🔄 I-sync Lahat";
+    return showStatus("✅ Wala nang kailangang i-sync", "success");
+  }
 
-  // ✅ Markahan bilang naka-sync (sa totoong gamit — dito tatawagin ang GitHub API)
-  list = list.map(i => ({ ...i, synced: true }));
+  let successCount = 0, failCount = 0;
+
+  for (const item of pending) {
+    try {
+      let filePath = item.filePath || item.path;
+      if (!filePath.startsWith(ASSETS_ROOT)) filePath = ASSETS_ROOT + filePath;
+
+      let sha = "";
+      try {
+        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
+          headers: { "Authorization": `token ${token}` }
+        });
+        if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+      } catch {}
+
+      const content = item.content || "";
+      const body = {
+        message: `🔄 Auto-sync: ${filePath} — ${new Date(item.timestamp).toLocaleString('tl-PH')}`,
+        content: safeEncodeContent(content),
+        branch: BRANCH
+      };
+      if (sha) body.sha = sha;
+
+      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `token ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        item.synced = true;
+        successCount++;
+      } else {
+        failCount++;
+      }
+    } catch {
+      failCount++;
+    }
+  }
+
   localStorage.setItem(PENDING_KEY, JSON.stringify(list));
-
-  showStatus(`✅ Nai-sync: ${pending.length} pagbabago`, "success");
   loadList();
+
+  // ✅ BALIK SA PULA
+  btn.disabled = false;
+  btn.classList.remove("saving");
+  btn.textContent = "🔄 I-sync Lahat";
+
+  if (successCount && !failCount) {
+    showStatus(`✅ Nai-sync lahat: ${successCount} pagbabago`, "success");
+  } else if (successCount) {
+    showStatus(`⚠️ Nai-sync: ${successCount} — Nabigo: ${failCount}`, "info");
+  } else {
+    showStatus(`❌ Walang naisync — ${failCount} nabigo`, "error");
+  }
 }
 
 function clearAll() {
-  if (!confirm("Burahin ang lahat ng nakabinbing pagbabago?")) return;
+  if (!confirm("Burahin ang lahat ng nakabinbing pagbabago? Hindi na ito maibabalik.")) return;
   localStorage.removeItem(PENDING_KEY);
   loadList();
   showStatus("🗑️ Nilinis na ang listahan", "success");
@@ -122,7 +235,8 @@ function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
   el.className = `status ${cls}`;
-  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 5000);
+  el.style.display = "block";
+  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 8000);
 }
 
 window.onload = () => checkSession() && loadList();
