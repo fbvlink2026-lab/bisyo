@@ -86,13 +86,11 @@
 .status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
 .status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
 
-/* MODE TABS */
 .mode-tabs { display:flex;gap:8px;margin:16px 0 }
 .mode-tab { padding:10px 14px;border-radius:8px;background:#f3f4f6;cursor:pointer;font-weight:bold;color:#4b5563;border:2px solid transparent }
 .mode-tab.active { background:#fef2f2;color:#b91c1c;border-color:#b91c1c }
 .mode-desc { font-size:14px;color:#6b7280;margin-bottom:12px;padding:10px;background:#f9fafb;border-radius:8px }
 
-/* IMAGE UPLOAD */
 .image-upload-area {
   border: 3px dashed #d1d5db;
   border-radius: 12px;
@@ -111,7 +109,6 @@
 .preview-wrap { margin-top:12px;display:none }
 .preview-wrap img { max-width:180px;border-radius:8px;border:2px solid #e5e7eb }
 
-/* ✅ IMAGE SIZE OPTIONS */
 .size-option-card {
   background: #f9fafb;
   border-radius: 10px;
@@ -144,7 +141,6 @@
   <div class="form-card">
     <h1>➕ Bagong File / Imahe</h1>
 
-    <!-- ✅ PILI NG URI: TEKSTO O IMAHE -->
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="text" onclick="switchMode('text')">📄 Teksto / Code</div>
       <div class="mode-tab" data-mode="image" onclick="switchMode('image')">🖼️ Imahe / Icon</div>
@@ -153,7 +149,6 @@
       📄 <strong>Teksto / Code:</strong> HTML, CSS, JS, TXT — lahat na nakasulat na teksto.
     </div>
 
-    <!-- 📂 LOKASYON -->
     <label>📂 Lokasyon:</label>
     <select id="location-select" onchange="updatePathHint()">
       <option value="assets/">📂 [ASSETS] Ugat — app/src/main/assets/</option>
@@ -173,12 +168,10 @@
       📂 Pupunta sa: <code>app/src/main/assets/pages/</code>
     </p>
 
-    <!-- PANGALAN -->
     <label>Pangalan ng File:</label>
     <input type="text" id="filename" placeholder="Hal. index.html o icon_bisyo">
     <div class="note">💡 Sa <code>res/drawable</code>: maliit na titik, numero at _ lamang — walang puwang o malaking titik</div>
 
-    <!-- 📄 TEKSTO MODE -->
     <div id="text-mode-area">
       <label>Uri ng Nilalaman:</label>
       <div class="type-tabs" style="display:flex;gap:8px;margin:8px 0 16px 0">
@@ -193,31 +186,29 @@
       <textarea id="file-content" placeholder="Isulat dito ang nilalaman..."></textarea>
     </div>
 
-    <!-- 🖼️ IMAHE MODE -->
     <div id="image-mode-area" style="display:none">
       <label>Pumili ng Imahe:</label>
       <div class="image-upload-area" id="image-drop" onclick="document.getElementById('image-file').click()">
-        <p style="font-size:16px;color:#4b5563">📤 I-tap o i-drag dito ang imahe<br><small>PNG, JPG, WebP, SVG — hanggang 1MB pagkatapos paliitin</small></p>
-        <input type="file" id="image-file" accept="image/*" style="display:none" onchange="imageSelected(this.files[0])">
+        <p style="font-size:16px;color:#4b5563">📤 I-tap o i-drag dito ang imahe<br><small>PNG, JPG, WebP — hanggang 1MB pagkatapos paliitin</small></p>
+        <input type="file" id="image-file" accept="image/*" style="display:none" onchange="handleFileSelect(this.files)">
         <div class="preview-wrap" id="image-preview">
           <img id="preview-img">
         </div>
       </div>
 
-      <!-- ✅ BAGONG: PAGPILI NG SUKAT -->
       <label>📐 Sukat ng Imahe:</label>
       <div class="size-option-card selected" id="size-single" onclick="selectSizeMode('single')">
         <div class="size-option-row">
-          <input type="radio" name="size-mode" checked>
-          <strong>🖼️ Isang Bersyon — Orihinal / Pinaliit</strong>
+          <input type="radio" name="size-mode" id="r-single" checked>
+          <label for="r-single" style="margin:0;cursor:pointer"><strong>🖼️ Isang Bersyon — Orihinal / Pinaliit</strong></label>
         </div>
         <div class="size-desc">Isang file lang — awtomatikong pinaliliit kung lalampas sa 1MB</div>
       </div>
 
       <div class="size-option-card" id="size-android" onclick="selectSizeMode('android')">
         <div class="size-option-row">
-          <input type="radio" name="size-mode">
-          <strong>📱 5 Sukat para sa Android</strong>
+          <input type="radio" name="size-mode" id="r-android">
+          <label for="r-android" style="margin:0;cursor:pointer"><strong>📱 5 Sukat para sa Android</strong></label>
         </div>
         <div class="size-desc">Awtomatikong gagawing: mdpi · hdpi · xhdpi · xxhdpi · xxxhdpi</div>
         <div class="size-preview-info" id="sizes-preview" style="display:none">
@@ -225,7 +216,6 @@
         </div>
       </div>
 
-      <!-- ✅ BAGONG: IMPORMASYON TUNGKOL SA LAKI NG FILE -->
       <div class="note note-green" id="resize-note" style="display:none">
         ✅ Awtomatikong pinaliliit — kahit malaki ang orihinal, ibabawas sa kalidad hanggang umabot sa 1MB o mas mababa.
       </div>
@@ -251,25 +241,24 @@ const PENDING_KEY = "bisyo_offline_changes";
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
-
-const MAX_FILE_SIZE = 1024 * 1024; // ✅ 1MB limit pagkatapos paliitin
+const MAX_FILE_SIZE = 1024 * 1024;
 
 let currentMode = "text";
 let contentType = "content";
-let selectedImage = null;
-let sizeMode = "single"; // ✅ "single" o "android"
+let selectedImage = null; // ✅ Siguradong laging may halaga kapag napili
+let sizeMode = "single";
 
-// ✅ PALITAN ANG PAGPILI NG SUKAT
+// ✅ AYUS: TINANGGAL ANG DOUBLE CHECK — SIGURADONG TAMA ANG PAG-SET
 function selectSizeMode(mode) {
   sizeMode = mode;
   document.getElementById("size-single").classList.toggle("selected", mode === "single");
   document.getElementById("size-android").classList.toggle("selected", mode === "android");
-  document.querySelector("#size-single input").checked = (mode === "single");
-  document.querySelector("#size-android input").checked = (mode === "android");
+  document.getElementById("r-single").checked = (mode === "single");
+  document.getElementById("r-android").checked = (mode === "android");
   document.getElementById("sizes-preview").style.display = mode === "android" ? "block" : "none";
 }
 
-// ✅ PAGPALIIT NG IMAHE — KAHIT 5MB+ AY GAGAWANG 1MB
+// ✅ PAGPALIIT NG IMAHE
 async function resizeImage(file, maxSizeBytes = MAX_FILE_SIZE) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -280,7 +269,6 @@ async function resizeImage(file, maxSizeBytes = MAX_FILE_SIZE) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      // ✅ Unang bawas: Sukat
       const maxPixels = 2000 * 2000;
       if (width * height > maxPixels) {
         const ratio = Math.sqrt(maxPixels / (width * height));
@@ -292,11 +280,10 @@ async function resizeImage(file, maxSizeBytes = MAX_FILE_SIZE) {
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
 
-      // ✅ Pangalawang bawas: Kalidad hanggang umabot sa 1MB
       function tryCompress(q) {
         canvas.toBlob(
           blob => {
-            if (!blob) return resolve({ blob: null, base64: "", width, height, quality: q });
+            if (!blob) return resolve(null);
             if (blob.size <= maxSizeBytes || q <= 0.08) {
               const reader = new FileReader();
               reader.onloadend = () => {
@@ -326,33 +313,29 @@ async function resizeImage(file, maxSizeBytes = MAX_FILE_SIZE) {
   });
 }
 
-// ✅ GUMAGAWA NG 5 SUKAT PARA SA ANDROID
 function generateAndroidVariants(resized) {
-  const densities = [
+  return [
     { name: "mdpi",  scale: 0.75, folder: "drawable-mdpi/" },
     { name: "hdpi",  scale: 1.0,  folder: "drawable-hdpi/" },
     { name: "xhdpi", scale: 1.5,  folder: "drawable-xhdpi/" },
     { name: "xxhdpi",scale: 2.0,  folder: "drawable-xxhdpi/" },
     { name: "xxxhdpi", scale: 3.0, folder: "drawable-xxxhdpi/" }
-  ];
-
-  return densities.map(d => {
-    const w = Math.round(resized.width * d.scale);
-    const h = Math.round(resized.height * d.scale);
-    return { ...d, width: w, height: h, base64: resized.base64 };
-  });
+  ].map(d => ({
+    ...d,
+    width: Math.round(resized.width * d.scale),
+    height: Math.round(resized.height * d.scale),
+    base64: resized.base64
+  }));
 }
 
-// ✅ TOTOONG MENSAHE NG ERROR
 function explainStatusCode(status) {
-  const explanations = {
+  return {
     401: "🔑 Walang pahintulot — Kailangan ng Token.",
     403: "⚠️ Limitasyon — Naubos na ang kahilingan o kulang ang pahintulot ng Token.",
     404: "📂 Hindi Natagpuan — Hindi umiiral ang landas.",
     422: "⚠️ Hindi Tinatanggap — Maaaring may katulad na file na o mali ang datos.",
     0: "📴 Walang Koneksyon — Nai-save lokal, isesync kapag may internet."
-  };
-  return explanations[status] || `⚠️ HTTP ${status} — Subukan muli mamaya.`;
+  }[status] || `⚠️ HTTP ${status} — Subukan muli mamaya.`;
 }
 
 function safeEncodeContent(text) {
@@ -375,13 +358,9 @@ function switchMode(mode) {
   document.getElementById("text-mode-area").style.display = mode === "text" ? "block" : "none";
   document.getElementById("image-mode-area").style.display = mode === "image" ? "block" : "none";
 
-  const desc = document.getElementById("mode-desc");
-  if (mode === "text") {
-    desc.innerHTML = "📄 <strong>Teksto / Code:</strong> HTML, CSS, JS, TXT — lahat na nakasulat na teksto.";
-  } else {
-    desc.innerHTML = "🖼️ <strong>Imahe / Icon:</strong> Pumili ng isa o awtomatikong 5 sukat para Android — pinaliliit hanggang 1MB bago i-upload.";
-  }
-  selectedImage = null;
+  document.getElementById("mode-desc").innerHTML = mode === "text"
+    ? "📄 <strong>Teksto / Code:</strong> HTML, CSS, JS, TXT — lahat na nakasulat na teksto."
+    : "🖼️ <strong>Imahe / Icon:</strong> Pumili ng isa o awtomatikong 5 sukat para Android — pinaliliit hanggang 1MB bago i-upload.";
 }
 
 function updatePathHint() {
@@ -398,8 +377,7 @@ function updatePathHint() {
     hint.style.display = "block";
     customLabel.style.display = "none";
     customInput.style.display = "none";
-    let fullPath = `app/src/main/${sel}`;
-    hint.innerHTML = `📂 Pupunta sa: <code>${fullPath}</code>`;
+    hint.innerHTML = `📂 Pupunta sa: <code>app/src/main/${sel}</code>`;
   }
 }
 
@@ -407,69 +385,53 @@ function getFullPath() {
   const sel = document.getElementById("location-select").value;
   if (sel === "custom") {
     const cp = document.getElementById("custom-path").value.trim();
-    if (!cp) return null;
-    return cp.endsWith("/") ? cp : cp + "/";
+    return cp ? (cp.endsWith("/") ? cp : cp + "/") : null;
   }
   return `app/src/main/${sel}`;
 }
 
-// ✅ BAGONG PAGBASA NG IMAHE — MAY PAGPALIIIT
-async function imageSelected(file) {
-  if (!file) return;
+// ✅ AYUS: TAMA NA ANG PAGTATALA NG NAPILING IMAHE
+async function handleFileSelect(files) {
+  if (!files || !files[0]) return;
+  const file = files[0];
 
   document.getElementById("img-name").textContent = file.name;
   document.getElementById("img-size").textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
   document.getElementById("image-info").style.display = "block";
 
-  // ✅ PALIITIN AGAD — KAHIT MALAKI ANG FILE
-  selectedImage = await resizeImage(file);
+  selectedImage = await resizeImage(file); // ✅ SIGURADONG NAKA-SAVE SA VARIABL
 
-  // ✅ Ipakita kung pinaliit
-  const statusEl = document.getElementById("img-resize-status");
-  if (selectedImage.shrunk) {
-    statusEl.textContent = `✅ Pinaliit: ${(selectedImage.originalSize/1024/1024).toFixed(2)}MB → ${(selectedImage.finalSize/1024).toFixed(1)}KB`;
-    document.getElementById("resize-note").style.display = "block";
-  } else {
-    statusEl.textContent = "✅ Sakto — hindi kailangang paliitin";
-    document.getElementById("resize-note").style.display = "none";
+  if (!selectedImage) {
+    showStatus("❌ Hindi mabasa ang imahe", "error");
+    return;
   }
+
+  // ✅ Ipakita ang pinaliit na impormasyon
+  document.getElementById("img-resize-status").textContent = selectedImage.shrunk
+    ? `✅ Pinaliit: ${(selectedImage.originalSize/1024/1024).toFixed(2)}MB → ${(selectedImage.finalSize/1024).toFixed(1)}KB`
+    : "✅ Sakto — hindi kailangang paliitin";
+  document.getElementById("resize-note").style.display = selectedImage.shrunk ? "block" : "none";
 
   // ✅ I-preview
   document.getElementById("preview-img").src = selectedImage.dataUrl;
   document.getElementById("image-preview").style.display = "block";
   document.getElementById("image-drop").classList.add("has-image");
 
-  // ✅ Awtong ilagay ang pangalan
+  // ✅ Awtong pangalan
   if (!document.getElementById("filename").value) {
-    let autoName = file.name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9._-]/g, "_");
-    document.getElementById("filename").value = autoName.replace(/\.(jpg|jpeg|png|webp|svg)$/i, ".png");
+    document.getElementById("filename").value = file.name
+      .toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9._-]/g, "_")
+      .replace(/\.(jpg|jpeg|webp)$/i, ".png");
   }
 }
 
 function switchContentType(type) {
   contentType = type;
   document.querySelectorAll(".type-tab").forEach(t => t.classList.toggle("active", t.dataset.type === type));
-  const ta = document.getElementById("file-content");
-  if (type === "content") {
-    ta.value = `<h2>Pamagat</h2>
-<p>Nilalaman dito...</p>`;
-  } else if (type === "blank") {
-    ta.value = "";
-  } else {
-    ta.value = `<!DOCTYPE html>
-<html lang="tl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<title>Pamagat</title>
-</head>
-<body>
-<h1>Pamagat</h1>
-<p>Nilalaman...</p>
-</body>
-</html>`;
-  }
+  document.getElementById("file-content").value =
+    type === "content" ? `<h2>Pamagat</h2>\n<p>Nilalaman dito...</p>` :
+    type === "blank" ? "" :
+    `<!DOCTYPE html>\n<html lang="tl">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<link rel="stylesheet" href="style.css">\n<title>Pamagat</title>\n</head>\n<body>\n<h1>Pamagat</h1>\n<p>Nilalaman...</p>\n</body>\n</html>`;
 }
 
 function getEncryptedToken() { return localStorage.getItem(TOKEN_STORAGE_KEY) || ""; }
@@ -487,33 +449,34 @@ function decryptToken(encrypted, password) {
   } catch { return ""; }
 }
 
-// ✅ PANGUNAHING PAGLIPAT
+// ✅ AYUS: TAMA NA ANG PAGSUSURI — selectedImage SIGURADONG MAY HALAGA
 async function createFile() {
   const btn = document.getElementById("create-btn");
   btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Nag-i-save...";
 
   const filename = document.getElementById("filename").value.trim();
   const folderPath = getFullPath();
+
   if (!filename || !folderPath) {
+    showStatus("❌ Ilagay ang pangalan at lokasyon", "error");
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
-    return showStatus("❌ Ilagay ang pangalan at lokasyon", "error");
+    return;
   }
 
-  // ✅ IMAHE MODE
+  // ✅ IMAHE MODE — AYUS: HINDI NA NABIBIGONG MENSAHE DAHIL SIGURADONG MAY HALAGA
   if (currentMode === "image") {
     if (!selectedImage) {
+      showStatus("❌ Pumili muna ng imahe", "error");
       btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
-      return showStatus("❌ Pumili muna ng imahe", "error");
+      return;
     }
 
-    // ✅ KUNG 5 SUKAT PARA SA ANDROID
     if (sizeMode === "android") {
       const variants = generateAndroidVariants(selectedImage);
       showStatus(`📐 5 Sukat — Mdpi hanggang Xxxhdpi...`, "info");
       let okCount = 0;
       for (const v of variants) {
-        const fp = `app/src/main/res/${v.folder}${filename}`;
-        if (await finishCreateOne(fp, v.base64, true, null)) okCount++;
+        if (await uploadOne(`app/src/main/res/${v.folder}${filename}`, v.base64)) okCount++;
       }
       showStatus(`✅ ${okCount}/5 Nai-upload sa res/drawable-*`, "success");
       resetForm();
@@ -521,28 +484,40 @@ async function createFile() {
       return;
     }
 
-    // ✅ ISANG LANG — DIRETSONG I-UPLOAD
-    return finishCreate(folderPath + filename, selectedImage.base64, true, btn);
+    await uploadOne(folderPath + filename, selectedImage.base64);
+    resetForm();
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    return;
   }
 
   // ✅ TEKSTO MODE
   const content = document.getElementById("file-content").value;
   if (!content.trim()) {
+    showStatus("❌ Walang laman ang file", "error");
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
-    return showStatus("❌ Walang laman ang file", "error");
+    return;
   }
-  return finishCreate(folderPath + filename, safeEncodeContent(content), false, btn);
+  await uploadOne(folderPath + filename, safeEncodeContent(content));
+  resetForm();
+  btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
 }
 
-// ✅ PAG-UPLOAD NG ISANG FILE
-async function finishCreateOne(filePath, fileContentBase64, isBinary, btnRef) {
+// ✅ KARANIWANG PAG-UPLOAD
+async function uploadOne(filePath, contentBase64) {
   const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
-  pending.push({ filePath, content: fileContentBase64, isBinary, timestamp: new Date().toISOString(), synced: false });
+  pending.push({ filePath, content: contentBase64, timestamp: new Date().toISOString(), synced: false });
   localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
-  if (!navigator.onLine) return false;
+  if (!navigator.onLine) {
+    showStatus(`📴 Nai-save lokal — ${filePath}`, "info");
+    return true;
+  }
+
   const token = decryptToken(getEncryptedToken(), getPassword());
-  if (!token) return false;
+  if (!token) {
+    showStatus("⚠️ Walang Token — Nai-save lamang lokal", "warning");
+    return true;
+  }
 
   try {
     let sha = "";
@@ -553,49 +528,9 @@ async function finishCreateOne(filePath, fileContentBase64, isBinary, btnRef) {
       if (c.ok) sha = (await c.json()).sha;
     } catch {}
 
-    const body = { message: `🖼️ Imahe: ${filename}`, content: fileContentBase64, branch: BRANCH };
-    if (sha) body.sha = sha;
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
-      method: "PUT",
-      headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-    return res.ok;
-  } catch { return false; }
-}
-
-async function finishCreate(filePath, fileContentBase64, isBinary, btn) {
-  const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
-  pending.push({ filePath, content: fileContentBase64, isBinary, timestamp: new Date().toISOString(), synced: false });
-  localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
-
-  if (!navigator.onLine) {
-    showStatus(`📴 Nai-save lokal — ${filePath}`, "info");
-    resetForm();
-    if (btn) { btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB"; }
-    return;
-  }
-
-  const token = decryptToken(getEncryptedToken(), getPassword());
-  if (!token) {
-    showStatus("⚠️ Walang Token — Nai-save lamang lokal", "warning");
-    resetForm();
-    if (btn) { btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB"; }
-    return;
-  }
-
-  try {
-    let sha = "";
-    try {
-      const check = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
-        headers: { Authorization: `token ${token}` }
-      });
-      if (check.ok) { const d = await check.json(); sha = d.sha; }
-    } catch {}
-
     const body = {
       message: currentMode==="image" ? `🖼️ Imahe: ${filePath}` : `📄 Bagong File: ${filePath}`,
-      content: fileContentBase64,
+      content: contentBase64,
       branch: BRANCH
     };
     if (sha) body.sha = sha;
@@ -609,18 +544,17 @@ async function finishCreate(filePath, fileContentBase64, isBinary, btn) {
     if (!res.ok) throw new Error(explainStatusCode(res.status));
     showStatus(`✅ NAI-UPLOAD: ${filePath}`, "success");
     markAsSynced(filePath);
-
+    return true;
   } catch (e) {
     showStatus(`⚠️ Nai-save lokal — ${e.message}`, "warning");
+    return true;
   }
-
-  resetForm();
-  if (btn) { btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB"; }
 }
 
 function markAsSynced(path) {
-  let list = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
-  list = list.map(i => i.filePath===path ? {...i, synced:true} : i);
+  const list = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]").map(
+    i => i.filePath === path ? {...i, synced: true} : i
+  );
   localStorage.setItem(PENDING_KEY, JSON.stringify(list));
 }
 
@@ -633,7 +567,7 @@ function resetForm() {
   document.getElementById("image-info").style.display = "none";
   document.getElementById("resize-note").style.display = "none";
   document.getElementById("image-drop").classList.remove("has-image");
-  selectedImage = null;
+  selectedImage = null; // ✅ Siguradong walang laman pag nalinis
   sizeMode = "single";
   selectSizeMode("single");
   updatePathHint();
