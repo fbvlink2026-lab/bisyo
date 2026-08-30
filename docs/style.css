@@ -846,3 +846,27 @@ pre {
   opacity: 0.5;
   pointer-events: none;
 }
+/* ---------- PULANG BILOG — NUMERO SA BUTTON ---------- */
+.btn, .menu-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn .num, .menu-btn .num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  color: #ffffff !important;
+  font-weight: bold;
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.btn .txt, .menu-btn .txt {
+  flex: 1;
+}
