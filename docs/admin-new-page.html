@@ -100,7 +100,6 @@
 .type-tab { padding:8px 12px;border-radius:6px;background:#f3f4f6;cursor:pointer;font-weight:bold;color:#4b5563;border:2px solid transparent }
 .type-tab.active { background:#fef2f2;color:#b91c1c;border-color:#b91c1c }
 
-/* ===== 🎨 HIWALAY NA VISUAL EDITOR ===== */
 .visual-toolbar {
   display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;padding:8px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb
 }
@@ -162,9 +161,7 @@
 </head>
 <body>
 
-<script>
-window.WIDGETS = {
-  "nav-bar": `
+<!-- ✅ DIRETSONG ILAGAY ANG NAVIGATION — HINDI NAKA-DEPENDE SA WIDGET -->
 <div class="nav-bar">
   <a href="admin.html">🏠 Dashboard</a>
   <a href="admin-order.html">🔢 Ayusin Ayos</a>
@@ -174,27 +171,11 @@ window.WIDGETS = {
   <a href="setup-token.html">🔧 Token</a>
   <a href="admin-settings.html">⚙️ Setting</a>
 </div>
-  `.trim()
-};
-
-function expandWidgets(html) {
-  if (!html) return html;
-  let result = html;
-  for (const [name, code] of Object.entries(window.WIDGETS)) {
-    const marker = `<!-- WIDGET:${name} -->`;
-    result = result.split(marker).join(code);
-  }
-  return result;
-}
-</script>
-
-<!-- WIDGET:nav-bar -->
 
 <div class="container">
   <div class="form-card">
     <h1>➕ Bagong File / Imahe</h1>
 
-    <!-- ✅ TATLONG TAB — HIWALAY AT HINDI NAGTUTUNGGALI -->
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="text" onclick="switchMode('text')">📄 Teksto / Code</div>
       <div class="mode-tab" data-mode="visual" onclick="switchMode('visual')">🎨 Visual Editor ✨</div>
@@ -228,7 +209,7 @@ function expandWidgets(html) {
     <div class="note" id="filename-note">💡 Sa <code>res/drawable</code>: maliit na titik, numero at _ lamang — walang puwang o malaking titik</div>
     <div class="note note-info" id="ext-note" style="display:none">💡 Awtomatikong idinagdag ang tamang extension</div>
 
-    <!-- ✅ TAB 1: TEKSTO / CODE -->
+    <!-- ✅ TEKSTO MODE -->
     <div id="text-mode-area">
       <label>Uri ng Nilalaman:</label>
       <div class="type-tabs">
@@ -244,7 +225,7 @@ function expandWidgets(html) {
       <div class="autosave-indicator">✅ Naka-save sa lokal</div>
     </div>
 
-    <!-- ✅ TAB 2: VISUAL EDITOR — SARILI AT HIWALAY -->
+    <!-- ✅ VISUAL EDITOR MODE -->
     <div id="visual-mode-area" style="display:none">
       <label>🎨 Direktang Pag-edit — I-click at baguhin agad!</label>
       <div class="visual-toolbar">
@@ -271,7 +252,7 @@ function expandWidgets(html) {
       <div class="autosave-indicator">✅ Naka-save — i-type lang</div>
     </div>
 
-    <!-- ✅ TAB 3: IMAHE / ICON -->
+    <!-- ✅ IMAHE MODE -->
     <div id="image-mode-area" style="display:none">
       <label>Pumili ng Imahe:</label>
       <div class="image-upload-area" id="image-drop" 
@@ -336,7 +317,7 @@ let selectedImage = null;
 let sizeMode = "single";
 
 // ==================================================
-// 🎨 VISUAL EDITOR — SARILI AT HIWALAY
+// 🎨 VISUAL EDITOR
 // ==================================================
 function execCmd(cmd, val=null) {
   document.execCommand(cmd, false, val);
@@ -347,13 +328,12 @@ function formatBlock(tag) { execCmd('formatBlock', `<${tag}>`); }
 function insertLink() { const u=prompt("Ipasok ang URL:"); if(u)execCmd('createLink',u); }
 function insertImage() { const u=prompt("Ipasok ang URL ng imahe:"); if(u)execCmd('insertImage',u); }
 function syncVisualToText() {
-  // ✅ Kopyahin mula Visual → Textarea bago lumipat
   document.getElementById("file-content-visual").value = document.getElementById("visual-editor").innerHTML;
   saveDraft();
 }
 
 // ==================================================
-// 💾 AUTO-SAVE — HINDI NAWAWALA ANG LAMAN PAG LUMILIPAT
+// 💾 AUTO-SAVE
 // ==================================================
 function saveDraft() {
   const contentVal = currentMode === "visual"
@@ -381,8 +361,6 @@ function loadDraft() {
     if (d.location === "custom") document.getElementById("custom-path").value = d.customPath || "";
     document.getElementById("filename").value = d.filename || "";
     switchContentType(d.contentType || "content");
-
-    // ✅ Ibalik ang tamang laman sa tamang tab
     if (d.mode === "visual") {
       switchMode("visual");
       document.getElementById("visual-editor").innerHTML = d.content || "";
@@ -477,16 +455,12 @@ function checkSession() {
 }
 
 // ==================================================
-// ✅ PALITAN ANG TAB — WALANG NAWAWALANG LAMAN
+// ✅ PALITAN ANG EDITOR MODE
 // ==================================================
 function switchMode(mode) {
-  // ✅ Bago lumipat — i-save ang kasalukuyang laman
   saveDraft();
-
   currentMode = mode;
   document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
-
-  // ✅ Ipakita lang ang napiling tab — iba nakatago
   document.getElementById("text-mode-area").style.display = mode === "text" ? "block" : "none";
   document.getElementById("visual-mode-area").style.display = mode === "visual" ? "block" : "none";
   document.getElementById("image-mode-area").style.display = mode === "image" ? "block" : "none";
@@ -554,7 +528,15 @@ function switchContentType(type) {
 <title>Pamagat</title>
 </head>
 <body>
-<!-- WIDGET:nav-bar -->
+<div class="nav-bar">
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-order.html">🔢 Ayusin Ayos</a>
+  <a href="admin-edit.html">✏️ I-edit</a>
+  <a href="admin-new-page.html" class="active">➕ Bagong File</a>
+  <a href="admin-pending.html">⏳ Nakabinbin</a>
+  <a href="setup-token.html">🔧 Token</a>
+  <a href="admin-settings.html">⚙️ Setting</a>
+</div>
 <div class="container">
   <h1>Pamagat</h1>
   <p>Nilalaman dito...</p>
@@ -578,7 +560,7 @@ function decryptToken(enc, pwd) {
 }
 
 // ==================================================
-// ✅ I-SAVE — BAGO I-UPLOAD → PALAWAKIN ANG WIDGET
+// ✅ I-SAVE — BAGO I-UPLOAD
 // ==================================================
 async function createFile() {
   const btn = document.getElementById("create-btn");
@@ -618,7 +600,6 @@ async function createFile() {
     : document.getElementById("file-content").value;
 
   if (!content.trim()) { showStatus("❌ Walang laman", "error"); resetBtn(); return; }
-  content = expandWidgets(content);
   await uploadOne(folderPath + filename, safeEncodeContent(content));
   resetForm(); resetBtn();
 
