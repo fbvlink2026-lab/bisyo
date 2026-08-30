@@ -42,7 +42,7 @@ textarea {
   border-radius: 10px;
   font-size: 15px;
   font-family: 'Segoe UI', Consolas, monospace;
-  min-height: 380px;
+  min-height: 320px;
   resize: vertical;
   line-height: 1.6;
   background: #fefefe;
@@ -100,32 +100,39 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 .status.success { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
 .status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
 .status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
-/* ✅ MODE SWITCH — BUONG FILE VS NILALAMAN LANG */
 .mode-tabs { display:flex;gap:8px;margin:12px 0;border-bottom:2px solid #e5e7eb;padding-bottom:0 }
 .mode-tab { padding:10px 16px;cursor:pointer;border-radius:8px 8px 0 0;background:#f3f4f6;color:#4b5563;font-weight:bold;border-bottom:3px solid transparent;margin-bottom:-2px }
 .mode-tab.active { background:white;color:#b91c1c;border-bottom-color:#b91c1c }
 .mode-desc { font-size:13px;color:#6b7280;margin:8px 0 12px;padding:10px;background:#f9fafb;border-radius:8px }
-/* ✅ PREVIEW PANEL */
 .preview-wrap { border:2px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-top:16px;display:none }
 .preview-header { background:#f3f4f6;padding:8px 14px;font-weight:bold;display:flex;justify-content:space-between;align-items:center }
 .preview-frame { width:100%;min-height:250px;border:none;background:white }
-/* ✅ STYLE THEME SELECTOR */
 .theme-bar { display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center }
 .theme-btn { padding:6px 12px;border-radius:6px;border:2px solid #e5e7eb;cursor:pointer;font-size:14px;background:white }
 .theme-btn.active { border-color:#b91c1c;background:#fef2f2;color:#b91c1c;font-weight:bold }
+.visual-toolbar {
+  display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;padding:8px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb
+}
+.visual-toolbar button {
+  padding:6px 10px;border:none;background:white;border-radius:4px;cursor:pointer;font-weight:bold
+}
+.visual-toolbar button:hover {background:#fef2f2}
+#visual-editor {
+  border:2px solid #b91c1c;
+  border-radius:10px;
+  padding:20px;
+  min-height:320px;
+  outline:none;
+  background:white;
+  line-height:1.6;
+  display:none;
+}
 </style>
 </head>
-<body><!DOCTYPE html>
-<html lang="tl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<title>✏️ I-edit ang File</title>
+<body>
 
 <!-- ==================================================
-     🧩 REUSABLE WIDGETS — IISANG PINAGMULAN LANG
-     I-paste lang ang marker sa anumang pahina, awtomatikong papalitan
+     🧩 WIDGET SYSTEM — IISANG PINAGMULAN LANG
      ================================================== -->
 <script>
 window.WIDGETS = {
@@ -139,17 +146,9 @@ window.WIDGETS = {
   <a href="setup-token.html">🔧 Token</a>
   <a href="admin-settings.html">⚙️ Setting</a>
 </div>
-  `.trim(),
-
-  "header-proyekto": `
-<div class="header">
-  <h1>MGA ILEGAL NA BISYO</h1>
-  <p>Proyekto ni Mark Jann Tampok — Edukasyon Laban sa Masamang Bisyo</p>
-</div>
   `.trim()
 };
 
-// AWTOMATIKONG PALITAN ANG MGA WIDGET MARKER SA BUONG PAHINA
 function expandWidgets(html) {
   if (!html) return html;
   let result = html;
@@ -160,10 +159,8 @@ function expandWidgets(html) {
   return result;
 }
 </script>
-</head>
-<body>
 
-<!-- ✅ GINAGAMIT ANG WIDGET — HINDI NA ULITIN ANG BUONG CODE -->
+<!-- ✅ WIDGET — HINDI NA ULITIN ANG BUONG NAV-BAR -->
 <!-- WIDGET:nav-bar -->
 
 <div class="container">
@@ -182,11 +179,9 @@ function expandWidgets(html) {
     <option value="">— Pumili muna ng lokasyon —</option>
   </select>
 
-  <!-- ✅ PAGPILI NG URI NG PAG-EEDIT -->
   <div id="editor-area" style="display:none">
     <label id="editor-label">📝 Nilalaman:</label>
 
-    <!-- ✅ BAGONG: EDITOR MODE — CODE o VISUAL -->
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="full" onclick="switchMode('full')">📄 Buong File</div>
       <div class="mode-tab" data-mode="content" onclick="switchMode('content')">📝 Nilalaman Lamang</div>
@@ -196,7 +191,6 @@ function expandWidgets(html) {
       📄 <strong>Buong File:</strong> I-edit ang buong code — gamitin para sa <code>main.html</code>, <code>style.css</code>, at iba pa. Mag-ingat.
     </div>
 
-    <!-- ✅ THEME BAR — LALABAS SA CONTENT & VISUAL MODE -->
     <div class="theme-bar" id="theme-bar" style="display:none">
       <span style="font-weight:bold;color:#374151">🎨 Itsura:</span>
       <button class="theme-btn active" data-theme="light" onclick="setTheme('light')">Maliwanag</button>
@@ -204,7 +198,6 @@ function expandWidgets(html) {
       <button class="theme-btn" data-theme="compact" onclick="setTheme('compact')">Maikli</button>
     </div>
 
-    <!-- ✅ TOOLBAR — PARA SA VISUAL EDITING -->
     <div id="visual-toolbar" class="visual-toolbar" style="display:none">
       <button onclick="execCmd('bold')"><b>B</b></button>
       <button onclick="execCmd('italic')"><i>I</i></button>
@@ -220,34 +213,25 @@ function expandWidgets(html) {
       <span style="color:#ccc">|</span>
       <button onclick="insertLink()">🔗 Link</button>
       <button onclick="insertImage()">🖼️ Imahe</button>
-      <span style="color:#ccc">|</span>
-      <button onclick="toggleSourceView()">📄 Tingnan Code</button>
     </div>
 
-    <!-- ✅ TEXT MODE — Textarea -->
-    <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..." 
-      style="display:block;width:100%;min-height:320px;padding:14px;border:2px solid #e5e7eb;border-radius:10px;font-family:monospace;font-size:14px;line-height:1.5"
-      oninput="updatePreview()"></textarea>
+    <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..." oninput="updatePreview()"></textarea>
 
-    <!-- ✅ VISUAL MODE — NAKIKITA ANG PAGBABAGO AGAD -->
-    <div id="visual-editor" contenteditable="true" 
-      style="display:none;min-height:320px;padding:20px;border:2px solid #b91c1c;border-radius:10px;outline:none"
-      oninput="syncVisualToText()"></div>
+    <div id="visual-editor" contenteditable="true" style="display:none" oninput="syncVisualToText()"></div>
 
     <div class="btn-group">
       <button id="save-btn" class="btn btn-primary" onclick="saveContent()">💾 I-save</button>
       <button class="btn btn-secondary" onclick="copyContent()">📋 Kopyahin</button>
       <button class="btn btn-secondary" onclick="togglePreview()">👁️ I-preview</button>
-      <button class="btn btn-secondary" onclick="clearCache()">🗑️ I-clear Cache</button>
+      <button class="btn btn-secondary" onclick="clearCache()">🗑️ Cache</button>
     </div>
 
-    <!-- ✅ LIVE PREVIEW -->
-    <div class="preview-wrap" id="preview-wrap" style="display:none">
+    <div class="preview-wrap" id="preview-wrap">
       <div class="preview-header">
         <span>👁️ Pagtingin</span>
-        <button style="border:none;background:none;color:#b91c1c;cursor:pointer;font-weight:bold" onclick="togglePreview()">✕ Isara</button>
+        <button style="border:none;background:none;color:#b91c1c;cursor:pointer;font-weight:bold" onclick="togglePreview()">✕</button>
       </div>
-      <iframe id="preview-frame" class="preview-frame" style="width:100%;height:400px;border-radius:8px;border:1px solid #e5e7eb"></iframe>
+      <iframe id="preview-frame" class="preview-frame"></iframe>
     </div>
   </div>
 
@@ -261,19 +245,16 @@ const EDITOR_STATE_KEY = "bisyo_editor_state";
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
-
 const ASSETS_ROOT = "app/src/main/assets/";
 const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_ROOT}`;
 
 let currentFolder = "";
 let currentFilename = "";
 let currentSha = null;
-let editMode = "full"; // "full" / "content" / "visual"
+let editMode = "full";
 let currentTheme = "light";
 let originalFullContent = "";
-let visualSourceView = false;
 
-// ✅ LIGTAS NA PAG-ENCODE/DECODE
 function safeDecodeBase64(b64) {
   try { return decodeURIComponent(escape(atob(b64))); }
   catch { return atob(b64); }
@@ -304,9 +285,6 @@ function getDecryptedToken() {
   } catch { return null; }
 }
 
-// ==================================================
-// ✅ PALITAN ANG EDITOR MODE — CODE / CONTENT / VISUAL
-// ==================================================
 function switchMode(mode) {
   editMode = mode;
   document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
@@ -317,32 +295,28 @@ function switchMode(mode) {
   const visualEditor = document.getElementById("visual-editor");
   const visualToolbar = document.getElementById("visual-toolbar");
 
-  // ✅ Sync bago lumipat
   if (mode !== "visual") syncVisualToText();
 
   if (mode === "full") {
-    desc.innerHTML = "📄 <strong>Buong File:</strong> I-edit ang buong code — gamitin para sa <code>main.html</code>, <code>style.css</code>, at iba pa. Mag-ingat sa pagbabago.";
+    desc.innerHTML = "📄 <strong>Buong File:</strong> I-edit ang buong code — gamitin para sa <code>main.html</code>, <code>style.css</code>, at iba pa. Mag-ingat.";
     themeBar.style.display = "none";
     visualToolbar.style.display = "none";
     textarea.style.display = "block";
     visualEditor.style.display = "none";
     if (originalFullContent) textarea.value = originalFullContent;
-  }
-  else if (mode === "content") {
+  } else if (mode === "content") {
     desc.innerHTML = "📝 <strong>Nilalaman Lamang:</strong> I-edit lamang ang laman — ang menu at istruktura ay mananatili. Ligtas gamitin.";
     themeBar.style.display = "flex";
     visualToolbar.style.display = "none";
     textarea.style.display = "block";
     visualEditor.style.display = "none";
     extractContentForEdit();
-  }
-  else { // ✅ VISUAL MODE
-    desc.innerHTML = "🎨 <strong>Visual Editor:</strong> I-click at i-edit direkta — baguhin ang teksto, kulay, pormat nang walang code!";
+  } else {
+    desc.innerHTML = "🎨 <strong>Visual Editor:</strong> I-click at baguhin direkta — parang Word!";
     themeBar.style.display = "flex";
     visualToolbar.style.display = "flex";
     textarea.style.display = "none";
     visualEditor.style.display = "block";
-    // I-load ang laman sa visual editor
     extractContentForEdit();
     visualEditor.innerHTML = textarea.value;
   }
@@ -350,51 +324,23 @@ function switchMode(mode) {
   saveEditorState();
 }
 
-// ==================================================
-// ✅ VISUAL EDITING — KASANGKAPAN
-// ==================================================
 function execCmd(cmd, val=null) {
   document.execCommand(cmd, false, val);
   document.getElementById("visual-editor").focus();
   syncVisualToText();
 }
-function formatBlock(tag) {
-  execCmd('formatBlock', `<${tag}>`);
-}
-function insertLink() {
-  const url = prompt("Ipasok ang URL:");
-  if (url) execCmd('createLink', url);
-}
-function insertImage() {
-  const url = prompt("Ipasok ang lokasyon ng imahe:");
-  if (url) execCmd('insertImage', url);
-}
+function formatBlock(tag) { execCmd('formatBlock', `<${tag}>`); }
+function insertLink() { const u=prompt("Ipasok ang URL:"); if(u)execCmd('createLink',u); }
+function insertImage() { const u=prompt("Ipasok ang URL ng imahe:"); if(u)execCmd('insertImage',u); }
 function syncVisualToText() {
-  if (editMode === "visual") {
-    document.getElementById("content-editor").value = document.getElementById("visual-editor").innerHTML;
-  }
+  if (editMode === "visual") document.getElementById("content-editor").value = document.getElementById("visual-editor").innerHTML;
   updatePreview();
 }
-function toggleSourceView() {
-  visualSourceView = !visualSourceView;
-  const ve = document.getElementById("visual-editor");
-  if (visualSourceView) {
-    ve.textContent = ve.innerHTML;
-    ve.setAttribute("contenteditable", "true");
-  } else {
-    ve.innerHTML = ve.textContent;
-  }
-}
 
-// ==================================================
-// ✅ KUNIN / IBALIK ANG NILALAMAN — HINDI NA UULITIN ANG BUONG HTML
-// ==================================================
 function extractContentForEdit() {
   if (!originalFullContent) return;
   let extracted = "";
-  // ✅ Palawakin muna ang mga widget bago hanapin ang laman
   const expanded = expandWidgets(originalFullContent);
-
   const mainMatch = expanded.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
   const articleMatch = expanded.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
   const bodyMatch = expanded.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
@@ -409,239 +355,35 @@ function extractContentForEdit() {
 
 function rebuildFullFileWithNewContent(newContent) {
   if (!originalFullContent || editMode === "full") return newContent;
-
   let result = originalFullContent;
-  // Palitan lamang ang laman — HUWAG GALAWIN ANG MGA WIDGET MARKER
   if (/<main[^>]*>[\s\S]*?<\/main>/i.test(result)) {
     result = result.replace(/(<main[^>]*>)[\s\S]*?(<\/main>)/i, `$1${newContent}$2`);
-  }
-  else if (/<article[^>]*>[\s\S]*?<\/article>/i.test(result)) {
+  } else if (/<article[^>]*>[\s\S]*?<\/article>/i.test(result)) {
     result = result.replace(/(<article[^>]*>)[\s\S]*?(<\/article>)/i, `$1${newContent}$2`);
-  }
-  else if (/<body[^>]*>[\s\S]*?<\/body>/i.test(result)) {
+  } else if (/<body[^>]*>[\s\S]*?<\/body>/i.test(result)) {
     result = result.replace(/(<body[^>]*>)[\s\S]*?(<\/body>)/i, `$1${newContent}$2`);
   }
   return result;
 }
 
-// ✅ ITSURA NG PREVIEW
 function setTheme(theme) {
   currentTheme = theme;
   document.querySelectorAll(".theme-btn").forEach(b => b.classList.toggle("active", b.dataset.theme === theme));
   updatePreview();
 }
 
-// ✅ BUUIN ANG PREVIEW
 function updatePreview() {
   const iframe = document.getElementById("preview-frame");
   if (!iframe.contentDocument) return;
-
-  let content = editMode === "visual"
-    ? document.getElementById("visual-editor").innerHTML
-    : document.getElementById("content-editor").value;
-
+  let content = editMode === "visual" ? document.getElementById("visual-editor").innerHTML : document.getElementById("content-editor").value;
   let bodyStyle = "margin:0;padding:20px;max-width:700px;margin:0 auto;background:#fff;color:#1f2937;line-height:1.6";
   if (currentTheme === "serif") bodyStyle += " font-family:Georgia,'Times New Roman',serif;font-size:18px";
   else if (currentTheme === "compact") bodyStyle += " font-size:14px;line-height:1.4;padding:10px";
   else bodyStyle += " font-family:'Segoe UI',Roboto,sans-serif";
 
   iframe.contentDocument.open();
-  iframe.contentDocument.write(`
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="UTF-8">
-    <base target="_blank">
-    <style>body{${bodyStyle}}</style>
-    </head>
-    <body>${content}</body>
-    </html>`);
+  iframe.contentDocument.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{${bodyStyle}}</style></head><body>${content}</body></html>`);
   iframe.contentDocument.close();
-}
-
-// ==================================================
-// ✅ PAGBASA NG LISTAHAN AT FILE
-// ==================================================
-async function folderChanged() {
-  currentFolder = document.getElementById("folder-select").value;
-  await loadFileList();
-}
-async function loadFileList() {
-  const sel = document.getElementById("file-select");
-  sel.innerHTML = `<option value="">— Pumili ng File —</option>`;
-  try {
-    const token = getDecryptedToken();
-    const res = await fetch(`${GITHUB_API_BASE}${currentFolder}`, {
-      headers: token ? {Authorization: `token ${token}`} : {}
-    });
-    if (!res.ok) return;
-    const files = await res.json();
-    files.filter(f => f.type === "file").forEach(f => {
-      const opt = document.createElement("option");
-      opt.value = f.name;
-      opt.textContent = f.name;
-      sel.appendChild(opt);
-    });
-  } catch {}
-}
-async function fileSelected() {
-  currentFilename = document.getElementById("file-select").value;
-  if (!currentFilename) return;
-  try {
-    const token = getDecryptedToken();
-    const res = await fetch(`${GITHUB_API_BASE}${currentFolder}${currentFilename}`, {
-      headers: token ? {Authorization: `token ${token}`} : {}
-    });
-    if (!res.ok) throw new Error("Hindi mabasa");
-    const data = await res.json();
-    currentSha = data.sha;
-    originalFullContent = safeDecodeBase64(data.content);
-    // ✅ Palawakin ang mga widget sa preview
-    originalFullContent_expanded = expandWidgets(originalFullContent);
-    document.getElementById("content-editor").value = originalFullContent;
-    switchMode(editMode);
-    document.getElementById("editor-area").style.display = "block";
-    updatePreview();
-  } catch(e) { showStatus("❌ " + e.message, "error"); }
-}
-
-// ==================================================
-// ✅ I-SAVE PAPUNTA SA GITHUB
-// ==================================================
-async function saveContent() {
-  const btn = document.getElementById("save-btn");
-  btn.disabled = true; btn.textContent = "⏳ Sinasave...";
-
-  let finalContent;
-  if (editMode === "full") {
-    finalContent = document.getElementById("content-editor").value;
-  } else {
-    const editorVal = editMode === "visual"
-      ? document.getElementById("visual-editor").innerHTML
-      : document.getElementById("content-editor").value;
-    finalContent = rebuildFullFileWithNewContent(editorVal);
-  }
-
-  const token = getDecryptedToken();
-  if (!token) {
-    showStatus("⚠️ Walang Token — Nai-save lamang lokal", "warning");
-    localStorage.setItem(STORAGE_KEY_PREFIX + currentFilename, finalContent);
-    btn.disabled = false; btn.textContent = "💾 I-save";
-    return;
-  }
-
-  try {
-    const body = {
-      message: `✏️ Inedit: ${currentFolder}${currentFilename}`,
-      content: safeEncodeContent(finalContent),
-      branch: BRANCH
-    };
-    if (currentSha) body.sha = currentSha;
-
-    const res = await fetch(`${GITHUB_API_BASE}${currentFolder}${currentFilename}`, {
-      method: "PUT",
-      headers: {Authorization: `token ${token}`, "Content-Type": "application/json"},
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const result = await res.json();
-    currentSha = result.content.sha;
-    showStatus(`✅ Nai-save: ${currentFilename}`, "success");
-  } catch(e) {
-    showStatus("❌ Nabigo: " + e.message, "error");
-  }
-  btn.disabled = false; btn.textContent = "💾 I-save";
-}
-
-function copyContent() {
-  const val = editMode === "visual"
-    ? document.getElementById("visual-editor").innerHTML
-    : document.getElementById("content-editor").value;
-  navigator.clipboard.writeText(val).then(() => showStatus("📋 Nakopya!", "success"));
-}
-function togglePreview() {
-  const pw = document.getElementById("preview-wrap");
-  pw.style.display = pw.style.display === "none" ? "block" : "none";
-  if (pw.style.display === "block") updatePreview();
-}
-function clearCache() {
-  localStorage.clear();
-  showStatus("🗑️ Nalinis na ang cache!", "success");
-}
-function showStatus(txt, cls) {
-  const el = document.getElementById("status-msg");
-  el.textContent = txt;
-  el.className = `status ${cls}`;
-  el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 10000);
-}
-function saveEditorState() {
-  localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({
-    folder: currentFolder, filename: currentFilename, mode: editMode
-  }));
-}
-async function restoreEditorState() {
-  try {
-    const s = localStorage.getItem(EDITOR_STATE_KEY);
-    if (!s) return;
-    const st = JSON.parse(s);
-    document.getElementById("folder-select").value = st.folder;
-    currentFolder = st.folder;
-    await loadFileList();
-    document.getElementById("file-select").value = st.filename;
-    currentFilename = st.filename;
-    if (st.mode) switchMode(st.mode);
-    if (currentFilename) await fileSelected();
-  } catch {}
-}
-
-window.onload = async () => {
-  if (!checkSession()) return;
-  await restoreEditorState();
-};
-</script>
-
-<style>
-.visual-toolbar {
-  display:flex;gap:4px;flex-wrap:wrap;margin:8px 0 4px 0;padding:8px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb
-}
-.visual-toolbar button {
-  padding:6px 10px;border:none;background:white;border-radius:4px;cursor:pointer;font-weight:bold
-}
-.visual-toolbar button:hover {background:#fef2f2}
-.mode-tab {padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:bold;border:2px solid transparent;background:#f3f4f6;color:#4b5563}
-.mode-tab.active {background:#fef2f2;color:#b91c1c;border-color:#b91c1c}
-.mode-tabs {display:flex;gap:8px;margin:12px 0 4px}
-.theme-bar {display:flex;gap:6px;align-items:center;padding:8px;background:#f9fafb;border-radius:6px;margin:8px 0}
-.theme-btn {padding:4px 10px;border-radius:4px;border:none;background:white;cursor:pointer}
-.theme-btn.active {background:#b91c1c;color:white}
-.preview-wrap {margin-top:16px;border:2px solid #e5e7eb;border-radius:10px;overflow:hidden}
-.preview-header {padding:8px 12px;background:#f9fafb;display:flex;justify-content:space-between;align-items:center}
-</style>
-</body>
-</html>
-</body>
-    </html>
-  `);
-  iframe.contentDocument.close();
-}
-
-function togglePreview() {
-  const wrap = document.getElementById("preview-wrap");
-  wrap.style.display = wrap.style.display === "block" ? "none" : "block";
-  if (wrap.style.display === "block") updatePreview();
-}
-
-// ✅ TOTOONG MENSAHE NG ERROR — HINDI LANG "403"
-function explainStatusCode(status) {
-  const explanations = {
-    401: "🔑 Walang pahintulot — Kailangan ng Token o hindi tama ang Token. Pumunta sa '🔧 Token' upang i-setup muli.",
-    403: "⚠️ Limitasyon ng GitHub — Naubos na ang bilang ng kahilingan, o walang sapat na pahintulot ang Token. Subukan muli pagkalipas ng isang oras, o tingnan ang sakop ng iyong Token.",
-    404: "📂 Hindi Natagpuan — Ang file o folder ay wala sa repositori, o mali ang landas.",
-    409: "🔄 Salungat na Pagbabago — May ibang nagbago sa file bago ka. I-refresh at subukan ulit.",
-    500: "☁️ May Problema sa GitHub — Hindi sa iyong bahagi, subukan muli mamaya.",
-    0: "📴 Walang Koneksyon — Hindi makausap ang GitHub. Ang iyong pagbabago ay nai-save lamang sa iyong aparato at isesync kapag may internet."
-  };
-  return explanations[status] || `⚠️ Hindi Makakonekta — Katayuan: HTTP ${status}. Subukan muli o tingnan ang iyong koneksyon.`;
 }
 
 async function folderChanged() {
@@ -659,39 +401,29 @@ async function folderChanged() {
 }
 
 async function loadFileList() {
-  const select = document.getElementById("file-select");
+  const sel = document.getElementById("file-select");
   try {
     const token = getDecryptedToken();
-    const headers = {};
-    if (token) headers["Authorization"] = `token ${token}`;
-
-    const res = await fetch(GITHUB_API_BASE + currentFolder, { 
-      cache: "no-store",
-      headers: headers
-    });
-
+    const headers = token ? {Authorization: `token ${token}`} : {};
+    const res = await fetch(`${GITHUB_API_BASE}${currentFolder}`, { cache: "no-store", headers });
     if (res.status === 403 || res.status === 401) {
-      select.innerHTML = `<option value="">⚠️ Hindi Makakonekta</option>`;
+      sel.innerHTML = `<option value="">⚠️ Hindi Makakonekta</option>`;
       showStatus(explainStatusCode(res.status), "warning");
       return;
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
     const files = await res.json();
-    select.innerHTML = `<option value="">— Pumili ng file —</option>`;
-    files.filter(f => f.type === "file")
-         .sort((a,b) => a.name.localeCompare(b.name))
-         .forEach(f => {
-           let icon = "📄";
-           if (f.name.endsWith(".html")) icon = "📄";
-           else if (f.name.endsWith(".css")) icon = "🎨";
-           else if (f.name.endsWith(".js")) icon = "⚙️";
-           else if (f.name.endsWith(".txt")) icon = "📝";
-           select.innerHTML += `<option value="${f.name}">${icon} ${f.name}</option>`;
-         });
+    sel.innerHTML = `<option value="">— Pumili ng file —</option>`;
+    files.filter(f => f.type === "file").sort((a,b) => a.name.localeCompare(b.name)).forEach(f => {
+      let icon = "📄";
+      if (f.name.endsWith(".css")) icon = "🎨";
+      else if (f.name.endsWith(".js")) icon = "⚙️";
+      else if (f.name.endsWith(".txt")) icon = "📝";
+      sel.innerHTML += `<option value="${f.name}">${icon} ${f.name}</option>`;
+    });
     showStatus(`✅ Nabasa: ${files.length} file sa ${currentFolder || 'assets/'}`, "success");
   } catch(e) {
-    select.innerHTML = `<option value="">❌ Hindi Mabasa</option>`;
+    sel.innerHTML = `<option value="">❌ Hindi Mabasa</option>`;
     if (e.message.includes("Failed to fetch") || e.message.includes("NetworkError")) {
       showStatus(explainStatusCode(0), "error");
     } else {
@@ -703,7 +435,6 @@ async function loadFileList() {
 async function fileSelected() {
   currentFilename = document.getElementById("file-select").value;
   saveEditorState();
-
   if (!currentFilename) {
     document.getElementById("editor-area").style.display = "none";
     document.getElementById("page-hint").textContent = "Pumili muna ng file";
@@ -722,35 +453,25 @@ async function loadFileContent() {
   document.getElementById("editor-label").textContent = `📝 I-edit: ${currentFolder}${currentFilename}`;
 
   let content = null;
-  const online = navigator.onLine;
   const fullPath = currentFolder + currentFilename;
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
   currentSha = null;
   originalFullContent = "";
 
-  if (online) {
+  if (navigator.onLine) {
     try {
       const token = getDecryptedToken();
-      const headers = {};
-      if (token) headers["Authorization"] = `token ${token}`;
-
-      const res = await fetch(GITHUB_API_BASE + fullPath, { 
-        cache: "no-store",
-        headers: headers
-      });
-
-      if (res.status === 403 || res.status === 401) {
-        showStatus(explainStatusCode(res.status), "warning");
-      } else if (res.ok) {
+      const headers = token ? {Authorization: `token ${token}`} : {};
+      const res = await fetch(`${GITHUB_API_BASE}${fullPath}`, { cache: "no-store", headers });
+      if (res.ok) {
         const data = await res.json();
         currentSha = data.sha;
         content = safeDecodeBase64(data.content);
-        originalFullContent = content; // ✅ Tandaan ang buong orihinal
+        originalFullContent = content;
         localStorage.setItem(storageKey, content);
         showStatus(`✅ Mula sa GitHub: ${fullPath}`, "success");
       }
-    } catch(e) {
-      console.log("GitHub fail:", e);
+    } catch {
       showStatus("📴 Hindi makausap ang GitHub — binabasa mula sa lokal...", "info");
     }
   }
@@ -766,12 +487,8 @@ async function loadFileContent() {
     }
   }
 
-  // ✅ Ipakita ayon sa kasalukuyang Mode
-  if (editMode === "full") {
-    editor.value = content;
-  } else {
-    extractContentForEdit();
-  }
+  if (editMode === "full") editor.value = content;
+  else extractContentForEdit();
 
   editor.classList.remove("loading");
   document.getElementById("page-hint").innerHTML = `✅ <strong>${fullPath}</strong>`;
@@ -779,104 +496,85 @@ async function loadFileContent() {
 }
 
 async function saveContent() {
-  const saveBtn = document.getElementById("save-btn");
+  const btn = document.getElementById("save-btn");
+  let contentToSave = editMode === "full"
+    ? document.getElementById("content-editor").value
+    : rebuildFullFileWithNewContent(editMode === "visual"
+        ? document.getElementById("visual-editor").innerHTML
+        : document.getElementById("content-editor").value);
 
-  // ✅ Kunin ang tamang laman na isasave
-  let contentToSave = document.getElementById("content-editor").value;
   if (!currentFilename || !contentToSave.trim()) return showStatus("❌ Walang napiling file o walang laman", "error");
+  contentToSave = expandWidgets(contentToSave);
 
-  // ✅ Kung Content Mode — ibalik sa loob ng orihinal na istruktura
-  if (editMode === "content") {
-    contentToSave = rebuildFullFileWithNewContent(contentToSave);
-  }
-
-  saveBtn.disabled = true;
-  saveBtn.classList.add("saving");
-  saveBtn.textContent = "⏳ Nag-i-save...";
+  btn.disabled = true;
+  btn.textContent = "⏳ Nag-i-save...";
 
   const fullPath = currentFolder + currentFilename;
   const storageKey = STORAGE_KEY_PREFIX + fullPath.replace(/[^\w]/g, "_");
   localStorage.setItem(storageKey, contentToSave);
-  originalFullContent = contentToSave; // ✅ I-update ang orihinal
+  originalFullContent = contentToSave;
 
   const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
-  pending.push({
-    id: Date.now(),
-    path: fullPath,
-    content: contentToSave,
-    sha: currentSha,
-    timestamp: new Date().toISOString(),
-    synced: false
-  });
+  pending.push({ id: Date.now(), path: fullPath, content: contentToSave, sha: currentSha, timestamp: new Date().toISOString(), synced: false });
   localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
 
   if (!navigator.onLine) {
-    saveBtn.disabled = false;
-    saveBtn.classList.remove("saving");
-    saveBtn.textContent = "💾 I-save";
+    btn.disabled = false; btn.textContent = "💾 I-save";
     showStatus("✅ Nai-save lokal — I-sesync kapag may internet", "success");
     return;
   }
 
   const token = getDecryptedToken();
   if (!token) {
-    saveBtn.disabled = false;
-    saveBtn.classList.remove("saving");
-    saveBtn.textContent = "💾 I-save";
+    btn.disabled = false; btn.textContent = "💾 I-save";
     showStatus("✅ Nai-save lokal — Kailangan ng Token para i-upload sa GitHub", "warning");
     return;
   }
 
   try {
-    const uploadRes = await fetch(GITHUB_API_BASE + fullPath, {
+    const body = {
+      message: `✏️ Na-edit: ${fullPath} — ${new Date().toLocaleString('tl-PH')}`,
+      content: safeEncodeContent(contentToSave),
+      branch: BRANCH
+    };
+    if (currentSha) body.sha = currentSha;
+
+    const res = await fetch(`${GITHUB_API_BASE}${fullPath}`, {
       method: "PUT",
-      headers: {
-        "Authorization": `token ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: `✏️ Na-edit: ${fullPath} — ${new Date().toLocaleString('tl-PH')} [${editMode==='content'?'Nilalaman':'Buong File'}]`,
-        content: safeEncodeContent(contentToSave),
-        sha: currentSha,
-        branch: BRANCH
-      })
+      headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
     });
-
-    if (uploadRes.status === 403 || uploadRes.status === 401) {
-      throw new Error(explainStatusCode(uploadRes.status));
-    }
-    if (!uploadRes.ok) throw new Error(`HTTP ${uploadRes.status}`);
-
-    const result = await uploadRes.json();
-    currentSha = result.commit.sha;
-    markAsSynced(fullPath);
-
-    saveBtn.disabled = false;
-    saveBtn.classList.remove("saving");
-    saveBtn.textContent = "💾 I-save";
+    if (res.status === 403 || res.status === 401) throw new Error(explainStatusCode(res.status));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    currentSha = data.commit.sha;
     showStatus(`☁️✅ NAI-UPLOAD SA: assets/${fullPath}`, "success");
-
-  } catch (e) {
-    saveBtn.disabled = false;
-    saveBtn.classList.remove("saving");
-    saveBtn.textContent = "💾 I-save";
+  } catch(e) {
     showStatus(`⚠️ Nai-save lokal — ${e.message}`, "warning");
   }
+  btn.disabled = false; btn.textContent = "💾 I-save";
+}
+
+function explainStatusCode(status) {
+  const explanations = {
+    401: "🔑 Walang pahintulot — Kailangan ng Token o hindi tama ang Token.",
+    403: "⚠️ Limitasyon ng GitHub — Naubos na ang bilang ng kahilingan o kulang ang pahintulot.",
+    404: "📂 Hindi Natagpuan — Ang file o folder ay wala sa repositori.",
+    500: "☁️ Problema sa GitHub — Subukan muli mamaya.",
+    0: "📴 Walang Koneksyon — Nai-save lamang lokal, isesync kapag online."
+  };
+  return explanations[status] || `⚠️ Katayuan: HTTP ${status}`;
 }
 
 function copyContent() {
-  const content = document.getElementById("content-editor").value;
-  if (!content.trim()) return alert("Walang laman na kopyahin!");
-  navigator.clipboard.writeText(content)
-    .then(() => showStatus("📋✅ NAKOPYAHIN NA SA IMBAKAN NG TEKSTO!", "success"))
-    .catch(() => {
-      const editor = document.getElementById("content-editor");
-      editor.select();
-      document.execCommand("copy");
-      showStatus("📋✅ NAKOPYAHIN NA!", "success");
-    });
+  const val = editMode === "visual" ? document.getElementById("visual-editor").innerHTML : document.getElementById("content-editor").value;
+  navigator.clipboard.writeText(val).then(() => showStatus("📋 Nakopya!", "success"));
 }
-
+function togglePreview() {
+  const pw = document.getElementById("preview-wrap");
+  pw.style.display = pw.style.display === "none" ? "block" : "none";
+  if (pw.style.display === "block") updatePreview();
+}
 function clearCache() {
   if (!currentFilename) return;
   const fullPath = currentFolder + currentFilename;
@@ -885,42 +583,34 @@ function clearCache() {
   showStatus("🗑️ Cache na-clear — muling kukuha mula sa GitHub", "info");
   loadFileContent();
 }
-
-function markAsSynced(path) {
-  const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
-  pending.forEach(p => { if (p.path === path) p.synced = true; });
-  localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
+function saveEditorState() {
+  localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({ folder: currentFolder, filename: currentFilename, mode: editMode }));
 }
-
+async function restoreEditorState() {
+  try {
+    const s = localStorage.getItem(EDITOR_STATE_KEY);
+    if (!s) return;
+    const st = JSON.parse(s);
+    document.getElementById("folder-select").value = st.folder;
+    currentFolder = st.folder;
+    await loadFileList();
+    document.getElementById("file-select").value = st.filename;
+    currentFilename = st.filename;
+    if (st.mode) switchMode(st.mode);
+    if (currentFilename) await fileSelected();
+  } catch {}
+}
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
-  el.textContent = txt;
-  el.className = `status ${cls}`;
-  el.style.display = "block";
-  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 12000);
+  el.textContent = txt; el.className = `status ${cls}`; el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 12000);
 }
 
-window.onload = async function() {
+window.onload = async () => {
   if (!checkSession()) return;
-  const restored = await restoreEditorState();
-  if (!restored) {
-    const params = new URLSearchParams(window.location.search);
-    const fileParam = params.get('file');
-    if (fileParam) {
-      const parts = fileParam.split('/');
-      if (parts.length > 1) {
-        currentFolder = parts.slice(0,-1).join('/') + '/';
-      } else {
-        currentFolder = "";
-      }
-      currentFilename = parts.pop();
-      document.getElementById("folder-select").value = currentFolder;
-      await loadFileList();
-      document.getElementById("file-select").value = currentFilename;
-      await fileSelected();
-    }
-  }
+  await restoreEditorState();
 };
 </script>
+
 </body>
 </html>
