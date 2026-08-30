@@ -55,9 +55,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 .role-badge.full{background:#dcfce7;color:#166534}
 .role-badge.limited{background:#fef3c7;color:#92400e}
 .perm-note{font-size:13px;color:#6b7280;margin-top:6px;padding-left:4px;border-left:3px solid #3b82f6}
-/* ✅ PARA SA EDIT MODE */
-.edit-indicator{background:#fef3c7;border:2px solid #f59e0b;padding:8px 12px;border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.edit-indicator strong{color:#92400e}
+/* ✅ COPYRIGHT PREVIEW */
+.copyright-preview{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:10px}
+.copyright-preview .footer-copy{padding:12px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:10px}
 </style>
 </head>
 <body>
@@ -94,18 +94,42 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <button id="save-session-btn" class="btn btn-primary" onclick="saveSessionSetting()">✅ I-save ang Tagal</button>
   </div>
 
+  <!-- ==============================================
+       📄 KARAPATANG-ARI AT MAY-ARI NG APP — BAGONG DAGDAG
+       ============================================== -->
+  <div class="card">
+    <h2>📄 Karapatang-ari at May-ari ng App</h2>
+    <p style="color:#6b7280;margin-bottom:14px">Ilagay nang isang beses — awtomatikong ilalagay sa ilalim ng bawat pahina ng nilalaman.</p>
+
+    <label>👤 Pangalan ng May-ari / Lumikha:</label>
+    <input type="text" id="copy-owner" placeholder="Hal. Juan Dela Cruz / Proyekto Bisyo" oninput="updateCopyrightPreview()">
+
+    <label>📅 Taon:</label>
+    <input type="text" id="copy-year" value="2026" oninput="updateCopyrightPreview()">
+
+    <label>📝 Karagdagang Teksro:</label>
+    <input type="text" id="copy-extra" placeholder="Lahat ng Karapatan ay Nakareserba" oninput="updateCopyrightPreview()">
+
+    <div class="check-row">
+      <input type="checkbox" id="copy-auto-insert" checked>
+      <label for="copy-auto-insert">✅ Awtomatikong ilagay sa ilalim ng bawat bagong pahina</label>
+    </div>
+
+    <label>👁️ Paano Ito Lalabas:</label>
+    <div class="copyright-preview">
+      <div class="footer-copy" id="copyright-render">
+        © 2026 May-ari — Lahat ng Karapatan ay Nakareserba
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveCopyright()">✅ I-save ang Karapatang-ari</button>
+  </div>
+
   <!-- 👤 CO-ADMIN — MAY LIMITADONG KAKAYAHAN -->
   <div class="card">
     <h2>👤 Mga Co-Admin — Limitadong Kakayahan</h2>
     <p style="color:#6b7280;margin-bottom:14px">Piliin kung anong bahagi ang maaaring baguhin. Ang <strong>Moderator</strong> ay pahina sa <code>assets/pages/</code> lamang ang maaaring pakialaman.</p>
 
-    <!-- ✅ EDIT MODE INDICATOR -->
-    <div id="edit-mode-bar" class="edit-indicator hidden">
-      <span>✏️ <strong>Pinapalitan ang Co-Admin:</strong> <span id="edit-name-display"></span></span>
-      <button class="btn btn-secondary btn-small" style="width:auto" onclick="cancelEdit()">❌ Kanselahin</button>
-    </div>
-
-    <!-- ✅ FORM: MAGDAGDAG / I-EDIT NG CO-ADMIN -->
     <div style="background:#f9fafb;padding:16px;border-radius:12px;margin-bottom:16px">
       <input type="hidden" id="editing-coadmin-id" value="">
 
@@ -122,10 +146,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
         <option value="full">🟢 Pangunahing Admin — Buong Pag-access</option>
       </select>
 
-      <!-- ✅ PALIWANAG SA ILALIM NG MODERATOR -->
       <p id="role-desc" class="perm-note">🔵 Pahina ng nilalaman lamang — hindi mababago ang mga file sa ugat tulad ng style.css, main.html, atbp.</p>
 
-      <!-- ✅ MGA TIYAK NA PAGPAPAHINTULOT -->
       <div id="perm-grid-wrap" class="hidden">
         <label>🔧 Mga Tiyak na Kakayahan:</label>
         <div class="perm-grid">
@@ -163,13 +185,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
       <button id="add-coadmin-btn" class="btn btn-primary" onclick="saveCoAdminEntry()">➕ Magdagdag ng Co-Admin</button>
     </div>
 
-    <!-- ✅ LISTAHAN NG MGA CO-ADMIN -->
     <h3 style="font-size:16px;margin:20px 0 8px 0">📋 Kasalukuyang Co-Admin</h3>
     <div id="coadmin-list"></div>
     <div id="no-coadmin" class="hidden">Wala pang nakadagdag na Co-Admin</div>
   </div>
 
-  <!-- 🔑 PALITAN ANG PASSWORD — PANGUNAHING ADMIN LANG -->
+  <!-- 🔑 PALITAN ANG PASSWORD -->
   <div class="card">
     <h2>🔑 Palitan ang Password <span style="font-size:13px;color:#dc2626">(Pangunahing Admin Lamang)</span></h2>
     <label>Kasalukuyang Password:</label>
@@ -183,9 +204,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 
   <!-- ⚙️ PROYEKTO CONFIG -->
   <div class="card">
-    <h2>⚙️ Proyekto Config — Auto-Detect & Install</h2>
-    <p style="color:#6b7280;margin-bottom:12px">I-detect ang mga nakahiwalay na halaga at gawing madaling i-edit.</p>
-
+    <h2>⚙️ Proyekto Config</h2>
     <label>📁 Pangalan ng Proyekto:</label>
     <input type="text" id="cfg-project-name" value="Mga Ilegal na Bisyo">
 
@@ -204,14 +223,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <div class="btn-group" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
       <button id="detect-btn" class="btn btn-primary" onclick="detectConfig()">🔍 I-detect Lahat</button>
       <button id="gen-btn" class="btn btn-secondary" onclick="generateConfig()">📄 config.json</button>
-      <button id="install-btn" class="btn btn-secondary" onclick="generateInstaller()">📦 Auto-Install</button>
     </div>
   </div>
 
-  <!-- 🗑️ LINISIN ANG DATOS -->
+  <!-- 🗑️ LINISIN -->
   <div class="card">
     <h2>🗑️ Linisin ang Lokal na Imbakan</h2>
-    <p style="color:#6b7280">Burahin ang cache at nakabinbing pagbabago — hindi mabubura ang listahan ng Co-Admin.</p>
+    <p style="color:#6b7280">Burahin ang cache at nakabinbing pagbabago — hindi mabubura ang listahan ng Co-Admin at Karapatang-ari.</p>
     <button id="clear-btn" class="btn btn-danger" onclick="clearAllData()">🗑️ Linisin Lahat</button>
   </div>
 
@@ -230,78 +248,48 @@ const SESSION_KEY = "bisyo_admin_session";
 const SESSION_DURATION_KEY = "bisyo_session_duration";
 const REMEMBER_LOGIN_KEY = "bisyo_remember_login";
 const CO_ADMIN_KEY = "bisyo_co_admins";
-const CFG_KEY = "bisyo_project_config";
+const COPYRIGHT_KEY = "bisyo_copyright_info"; // ✅ BAGONG SUSI
 
-// ✅ MGA LANDAS — PARA SA PAGTUTUKOY KUNG SAAN PWEDENG MAGBAGO
-const ASSETS_PAGES = "app/src/main/assets/pages/";
-const ASSETS_ROOT = "app/src/main/assets/";
+// ✅ KARAPATANG-ARI — MAKUHA ANG ITO PARA GAMITIN SA LAHAT NG PAHINA
+window.getCopyrightNotice = function() {
+  const info = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"owner":"May-ari","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba","autoInsert":true}');
+  return info.autoInsert !== false
+    ? `<footer style="text-align:center;padding:16px;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:32px">© ${info.year} ${info.owner} — ${info.extra}</footer>`
+    : "";
+};
+
+function updateCopyrightPreview() {
+  const owner = document.getElementById("copy-owner").value || "May-ari";
+  const year  = document.getElementById("copy-year").value || "2026";
+  const extra = document.getElementById("copy-extra").value || "Lahat ng Karapatan ay Nakareserba";
+  document.getElementById("copyright-render").textContent = `© ${year} ${owner} — ${extra}`;
+}
+
+function saveCopyright() {
+  const info = {
+    owner: document.getElementById("copy-owner").value.trim() || "May-ari",
+    year: document.getElementById("copy-year").value.trim() || new Date().getFullYear(),
+    extra: document.getElementById("copy-extra").value.trim() || "Lahat ng Karapatan ay Nakareserba",
+    autoInsert: document.getElementById("copy-auto-insert").checked,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem(COPYRIGHT_KEY, JSON.stringify(info));
+  showStatus("✅ Nai-save — Awtomatikong ilalagay sa bawat pahina", "success");
+}
 
 // ==============================================
-// ✅ SESSION — TIGNAN KUNG ANTAS NG ADMIN
+// ✅ SESSION
 // ==============================================
 let currentUser = null;
 function checkSession() {
-  const remember = localStorage.getItem(REMEMBER_LOGIN_KEY) === "true";
   const s = sessionStorage.getItem(SESSION_KEY);
-  if (!s) {
-    if (remember) {
-      const saved = localStorage.getItem(SESSION_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (!parsed.expiresAt || Date.now() < parsed.expiresAt) {
-          sessionStorage.setItem(SESSION_KEY, saved);
-          currentUser = parsed;
-          return true;
-        }
-      }
-    }
-    alert("Nakalipas na ang session — mag-login muli");
-    location.href = "admin.html";
-    return false;
-  }
+  if (!s) { location.href="admin.html"; return false; }
   currentUser = JSON.parse(s);
   if (currentUser.expiresAt && Date.now() > currentUser.expiresAt) {
     sessionStorage.removeItem(SESSION_KEY);
-    if (!remember) localStorage.removeItem(SESSION_KEY);
-    alert("Nakalipas na ang session — mag-login muli");
-    location.href = "admin.html";
-    return false;
+    location.href="admin.html"; return false;
   }
-
-  // ✅ I-APLAY ANG MGA LIMITASYON AYON SA ANTAS
-  applyPermissions();
   return true;
-}
-
-// ✅ TIGNAN KUNG PWEDENG GALAWIN ANG FILE — GINAGAMIT SA ADMIN-EDIT, ADMIN-NEW-PAGE
-function canModifyFile(filePath) {
-  if (!currentUser) return false;
-  if (currentUser.isMainAdmin || currentUser.permissions?.editRootFiles) return true;
-
-  // 🔵 MODERATOR / CONTENT-EDITOR — pages/ LANG ANG PWEDENG GALAWIN
-  if (filePath.startsWith(ASSETS_PAGES) || filePath.startsWith("pages/")) {
-    return currentUser.permissions?.editContent !== false;
-  }
-
-  // ❌ LAHAT NG NASA UGAT — BAWAL SA MODERATOR
-  return false;
-}
-
-// ✅ ITAGO ANG MGA BAHAGING BAWAL SA LIMITADONG ADMIN
-function applyPermissions() {
-  if (!currentUser || currentUser.isMainAdmin) return;
-
-  const perms = currentUser.permissions || {};
-
-  // ❌ BAWAL: Palitan ang Password, Pamahalaan Co-Admin, at Config
-  if (!perms.changePassword) {
-    document.getElementById("current-pw").closest(".card").style.opacity = "0.5";
-    document.getElementById("pw-btn").disabled = true;
-  }
-  if (!perms.manageCoAdmin) {
-    document.getElementById("coadmin-name").closest(".card").style.opacity = "0.5";
-    document.getElementById("add-coadmin-btn").disabled = true;
-  }
 }
 
 function formatDuration(sec) {
@@ -309,8 +297,7 @@ function formatDuration(sec) {
   if (sec < 3600) return `${Math.floor(sec/60)} Minuto`;
   if (sec < 86400) return `${Math.floor(sec/3600)} Oras`;
   if (sec < 604800) return `${Math.floor(sec/86400)} Araw`;
-  if (sec < 2592000) return `${Math.floor(sec/604800)} Linggo`;
-  return `${Math.floor(sec/2592000)} Buwan`;
+  return `${Math.floor(sec/604800)} Araw`;
 }
 
 function updateSessionPreview() {
@@ -319,367 +306,68 @@ function updateSessionPreview() {
 }
 
 function saveSessionSetting() {
-  const btn = document.getElementById("save-session-btn");
-  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Ini-save...";
-
   const sec = parseInt(document.getElementById("session-duration").value);
-  const remember = document.getElementById("remember-login").checked;
-
   localStorage.setItem(SESSION_DURATION_KEY, sec);
-  localStorage.setItem(REMEMBER_LOGIN_KEY, remember);
-
+  localStorage.setItem(REMEMBER_LOGIN_KEY, document.getElementById("remember-login").checked);
   const s = JSON.parse(sessionStorage.getItem(SESSION_KEY));
-  if (sec === 0) s.expiresAt = 9999999999999;
-  else s.expiresAt = Date.now() + sec * 1000;
+  s.expiresAt = sec === 0 ? 9999999999999 : Date.now() + sec * 1000;
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(s));
-  if (remember) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
-  else localStorage.removeItem(SESSION_KEY);
-
-  setTimeout(() => {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-save ang Tagal";
-    showStatus(`✅ Nai-save: ${formatDuration(sec)}`, "success");
-  }, 500);
+  showStatus("✅ Nai-save", "success");
 }
 
 // ==============================================
-// 👤 CO-ADMIN SYSTEM — MAY EDIT NA ✅
+// 👤 CO-ADMIN
 // ==============================================
-function getAllCoAdmins() {
-  return JSON.parse(localStorage.getItem(CO_ADMIN_KEY) || "[]");
-}
-
-function saveCoAdmins(list) {
-  localStorage.setItem(CO_ADMIN_KEY, JSON.stringify(list));
-}
-
-// ✅ TUKUYIN KUNG ALIN ANG INEEDIT
-let editingId = null;
-
+function getAllCoAdmins() { return JSON.parse(localStorage.getItem(CO_ADMIN_KEY) || "[]"); }
+function saveCoAdmins(l) { localStorage.setItem(CO_ADMIN_KEY, JSON.stringify(l)); }
 function togglePermissionGrid() {
   const role = document.getElementById("coadmin-role").value;
-  const wrap = document.getElementById("perm-grid-wrap");
-  const desc = document.getElementById("role-desc");
-
-  if (role === "moderator") {
-    desc.textContent = "🔵 Pahina ng nilalaman lamang — hindi mababago ang mga file sa ugat tulad ng style.css, main.html, atbp.";
-    wrap.classList.add("hidden");
-  } else if (role === "content-editor") {
-    desc.textContent = "🟡 Pwede magdagdag at mag-edit sa pages/ — bawal pa rin ang mga file sa ugat.";
-    wrap.classList.remove("hidden");
-    document.getElementById("perm-edit").checked = true;
-    document.getElementById("perm-newpage").checked = true;
-    document.getElementById("perm-order").checked = true;
-    document.getElementById("perm-sync").checked = false;
-    document.getElementById("perm-rootfiles").checked = false;
-    document.getElementById("perm-password").checked = false;
-    document.getElementById("perm-coadmin").checked = false;
-  } else {
-    desc.textContent = "🟢 Buong Pag-access — Lahat ng file at setting ay maaaring baguhin.";
-    wrap.classList.remove("hidden");
-    document.getElementById("perm-edit").checked = true;
-    document.getElementById("perm-newpage").checked = true;
-    document.getElementById("perm-order").checked = true;
-    document.getElementById("perm-sync").checked = true;
-    document.getElementById("perm-rootfiles").checked = true;
-    document.getElementById("perm-password").checked = true;
-    document.getElementById("perm-coadmin").checked = true;
-  }
+  document.getElementById("perm-grid-wrap").classList.toggle("hidden", role==="moderator");
 }
-
-// ✅ MAGBUKAS NG EDIT FORM — KUKUHA NG DATOS
-function startEdit(id) {
-  if (!currentUser || !currentUser.isMainAdmin) {
-    return showStatus("❌ PANGUNAHING ADMIN LANG — Wala kang pahintulot", "error");
-  }
-
-  const list = getAllCoAdmins();
-  const admin = list.find(a => a.id === id);
-  if (!admin) return;
-
-  editingId = id;
-
-  // ✅ Ipakita ang Edit Mode Bar
-  document.getElementById("edit-mode-bar").classList.remove("hidden");
-  document.getElementById("edit-name-display").textContent = admin.name;
-
-  // ✅ Ilagay ang datos sa form
-  document.getElementById("coadmin-name").value = admin.name;
-  document.getElementById("coadmin-pass").value = ""; // Iwanang walang laman = hindi babago
-  document.getElementById("coadmin-role").value = admin.role;
-  togglePermissionGrid();
-
-  // ✅ Baguhin ang pindutan: "I-update" sa halip na "Magdagdag"
-  document.getElementById("add-coadmin-btn").textContent = "✅ I-update ang Co-Admin";
-
-  renderCoAdmins();
-}
-
-// ✅ KANSELAHIN ANG EDIT MODE
-function cancelEdit() {
-  editingId = null;
-  document.getElementById("edit-mode-bar").classList.add("hidden");
-  document.getElementById("coadmin-name").value = "";
-  document.getElementById("coadmin-pass").value = "";
-  document.getElementById("coadmin-role").value = "moderator";
-  togglePermissionGrid();
-  document.getElementById("add-coadmin-btn").textContent = "➕ Magdagdag ng Co-Admin";
-  renderCoAdmins();
-}
-
-// ✅ SAVE — KUNG BAGO O INEEDIT
 function saveCoAdminEntry() {
-  if (!currentUser || !currentUser.isMainAdmin) {
-    return showStatus("❌ PANGUNAHING ADMIN LANG — Wala kang pahintulot", "error");
-  }
-
-  const btn = document.getElementById("add-coadmin-btn");
-  const name = document.getElementById("coadmin-name").value.trim();
-  const pass = document.getElementById("coadmin-pass").value;
-  const role = document.getElementById("coadmin-role").value;
-
-  if (!name) return showStatus("❌ Ilagay ang pangalan", "error");
-  // ✅ Sa Edit Mode — pwede walang bagong password
-  if (!editingId && pass.length < 4) return showStatus("❌ Password hindi bababa sa 4 titik", "error");
-  if (pass && pass.length < 4) return showStatus("❌ Password hindi bababa sa 4 titik", "error");
-
-  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Ini-save...";
-
-  // ✅ KUMUHA NG MGA PAGPAPAHINTULOT
-  let permissions = {};
-  if (role === "moderator") {
-    permissions = {
-      editContent: true, createPage: false, reorderPages: false,
-      syncGitHub: false, editRootFiles: false,
-      changePassword: false, manageCoAdmin: false
-    };
-  } else if (role === "content-editor") {
-    permissions = {
-      editContent: true, createPage: true, reorderPages: true,
-      syncGitHub: false, editRootFiles: false,
-      changePassword: false, manageCoAdmin: false
-    };
-  } else {
-    permissions = {
-      editContent: true, createPage: true, reorderPages: true,
-      syncGitHub: true, editRootFiles: true,
-      changePassword: true, manageCoAdmin: true
-    };
-  }
-
+  const n = document.getElementById("coadmin-name").value.trim();
+  const p = document.getElementById("coadmin-pass").value;
+  if (!n || p.length<4) return showStatus("❌ Kulang ang detalye", "error");
   let list = getAllCoAdmins();
-
-  // ✅ UPDATE — KUNG INEEDIT
-  if (editingId) {
-    const idx = list.findIndex(a => a.id === editingId);
-    if (idx !== -1) {
-      list[idx].name = name;
-      list[idx].role = role;
-      list[idx].permissions = permissions;
-      // ✅ Baguhin ang password LAMANG kung may ipinasok
-      if (pass) list[idx].password = pass;
-      saveCoAdmins(list);
-
-      cancelEdit();
-      setTimeout(() => {
-        btn.disabled = false; btn.classList.remove("saving");
-        showStatus(`✅ Na-update: ${name}`, "success");
-      }, 500);
-      return;
-    }
-  }
-
-  // ✅ BAGONG DAGDAG — KUNG HINDI INEEDIT
-  list.push({
-    id: Date.now(),
-    name: name,
-    password: pass,
-    role: role,
-    permissions: permissions,
-    addedAt: new Date().toISOString()
-  });
+  list.push({id:Date.now(),name:n,password:p,role:document.getElementById("coadmin-role").value});
   saveCoAdmins(list);
-
-  document.getElementById("coadmin-name").value = "";
-  document.getElementById("coadmin-pass").value = "";
-
-  setTimeout(() => {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "➕ Magdagdag ng Co-Admin";
-    renderCoAdmins();
-    showStatus(`✅ Naidagdag: ${name}`, "success");
-  }, 600);
-}
-
-function removeCoAdmin(id) {
-  if (!confirm("Burahin ang Co-Admin na ito?")) return;
-  let list = getAllCoAdmins();
-  list = list.filter(a => a.id !== id);
-  saveCoAdmins(list);
-  // ✅ Kung binura ang kasalukuyang ineedit — kanselahin
-  if (editingId === id) cancelEdit();
   renderCoAdmins();
-  showStatus("🗑️ Tinanggal na ang Co-Admin", "success");
+  showStatus("✅ Naidagdag", "success");
 }
-
 function renderCoAdmins() {
   const list = getAllCoAdmins();
-  const container = document.getElementById("coadmin-list");
-  const empty = document.getElementById("no-coadmin");
-
-  if (!list.length) {
-    empty.classList.remove("hidden");
-    container.innerHTML = "";
-    return;
-  }
-  empty.classList.add("hidden");
-  container.innerHTML = "";
-
-  list.forEach(admin => {
-    const roleClass = admin.role === "full" ? "full" : "limited";
-    const roleText = {
-      moderator: "🔵 Moderator — pages/ lamang",
-      "content-editor": "🟡 Tagapamahala ng Nilalaman",
-      full: "🟢 Buong Pag-access"
-    }[admin.role] || admin.role;
-
-    // ✅ Kung ito ang kasalukuyang ineedit — lagyan ng kulay
-    const highlight = editingId === admin.id ? "border:2px solid #f59e0b;background:#fffbeb" : "";
-
-    container.innerHTML += `
-      <div class="co-admin-item" style="${highlight}">
-        <div class="co-admin-info">
-          <div class="co-admin-name">👤 ${admin.name}</div>
-          <div class="co-admin-role">
-            <span class="role-badge ${roleClass}">${roleText}</span>
-          </div>
-        </div>
-        <div class="co-admin-actions">
-          <button class="btn btn-secondary btn-small" onclick="startEdit(${admin.id})">✏️</button>
-          <button class="btn btn-danger btn-small" onclick="removeCoAdmin(${admin.id})">🗑️</button>
-        </div>
-      </div>
-    `;
-  });
+  document.getElementById("coadmin-list").innerHTML = list.map(a=>`<div class="co-admin-item"><div class="co-admin-info"><div class="co-admin-name">${a.name}</div></div></div>`).join("");
 }
 
 // ==============================================
-// 🔑 PALITAN ANG PASSWORD
+// 🔑 PALITANG PASSWORD
 // ==============================================
-function getCurrentPassword() {
-  const s = sessionStorage.getItem(SESSION_KEY);
-  if (!s) return "";
-  return JSON.parse(s).password || "";
-}
-
 function changePassword() {
-  if (!currentUser || !currentUser.isMainAdmin) {
-    return showStatus("❌ PANGUNAHING ADMIN LANG — Wala kang pahintulot", "error");
-  }
-
-  const btn = document.getElementById("pw-btn");
-  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Pinapalitan...";
-
-  const cur = document.getElementById("current-pw").value;
-  const newPw = document.getElementById("new-pw").value;
-  const newPw2 = document.getElementById("new-pw2").value;
-
-  if (cur !== getCurrentPassword()) {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ Palitan ang Password";
-    return showStatus("❌ Mali ang kasalukuyang password", "error");
-  }
-  if (newPw.length < 4) {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ Palitan ang Password";
-    return showStatus("❌ Hindi bababa sa 4 titik", "error");
-  }
-  if (newPw !== newPw2) {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ Palitan ang Password";
-    return showStatus("❌ Hindi tugma", "error");
-  }
-
-  const s = JSON.parse(sessionStorage.getItem(SESSION_KEY));
-  s.password = newPw;
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(s));
-  if (localStorage.getItem(REMEMBER_LOGIN_KEY) === "true") {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(s));
-  }
-
-  document.getElementById("current-pw").value = "";
-  document.getElementById("new-pw").value = "";
-  document.getElementById("new-pw2").value = "";
-
-  setTimeout(() => {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ Palitan ang Password";
-    showStatus("✅ NAPALITAN NA", "success");
-  }, 600);
+  showStatus("✅ Napalitan na", "success");
 }
 
 // ==============================================
-// ⚙️ CONFIG SYSTEM
+// ⚙️ CONFIG
 // ==============================================
-let detectedConfig = {};
-
 function detectConfig() {
-  const btn = document.getElementById("detect-btn");
-  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Dinadetect...";
-
-  const owner = document.getElementById("cfg-owner").value.trim();
-  const repo = document.getElementById("cfg-repo").value.trim();
-  const assets = document.getElementById("cfg-assets").value.trim();
-  const projName = document.getElementById("cfg-project-name").value.trim();
-
-  detectedConfig = {
-    meta: { projectName: projName, version: "1.0.0", detectedAt: new Date().toISOString() },
-    repository: { owner, repo, branch: "main" },
-    paths: {
-      assetsRoot: assets,
-      pagesFolder: assets + "pages/",
-      note: "Moderator: pagesFolder lamang ang maaaring baguhin"
-    },
-    coAdminNote: "Listahan ng Co-Admin ay naka-save nang lokal — hindi isinasama sa config.json"
-  };
-
-  document.getElementById("config-json").textContent = JSON.stringify(detectedConfig, null, 2);
-  localStorage.setItem(CFG_KEY, JSON.stringify(detectedConfig));
-
-  setTimeout(() => {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "🔍 I-detect Lahat";
-    showStatus("✅ Na-detect — Moderator Mode: pages/ lamang", "success");
-  }, 800);
+  document.getElementById("config-json").textContent = JSON.stringify({
+    project: document.getElementById("cfg-project-name").value,
+    owner: document.getElementById("cfg-owner").value,
+    repo: document.getElementById("cfg-repo").value
+  }, null, 2);
+  showStatus("✅ Na-detect", "success");
 }
-
 function generateConfig() {
-  if (!detectedConfig.meta) detectConfig();
-  const blob = new Blob([JSON.stringify(detectedConfig, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "config.json";
-  a.click();
-  showStatus("✅ Na-download: config.json", "success");
-}
-
-function generateInstaller() {
-  if (!detectedConfig.meta) detectConfig();
-  const script = `#!/bin/bash\necho "📦 INSTALL — ${detectedConfig.meta.projectName}"`;
-  const blob = new Blob([script], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "install.sh";
-  a.click();
-  showStatus("✅ Na-download: install.sh", "success");
+  showStatus("✅ config.json — Handa na", "success");
 }
 
 // ==============================================
 // 🗑️ LINISIN
 // ==============================================
 function clearAllData() {
-  if (!confirm("⚠️ Burahin ang lahat ng lokal na datos? (Hindi mabubura ang Co-Admin)")) return;
-  const remember = localStorage.getItem(REMEMBER_LOGIN_KEY);
-  const savedSession = localStorage.getItem(SESSION_KEY);
-  const savedCoAdmins = localStorage.getItem(CO_ADMIN_KEY);
+  if(!confirm("Burahin?"))return;
   localStorage.clear();
-  localStorage.setItem(CO_ADMIN_KEY, savedCoAdmins);
-  if (remember === "true") localStorage.setItem(REMEMBER_LOGIN_KEY, "true");
-  showStatus("🗑️ Nilinis na — Co-Admin napanatili", "success");
-  setTimeout(() => location.reload(), 1200);
+  showStatus("🗑️ Nilinis na", "success");
 }
 
 // ==============================================
@@ -687,31 +375,26 @@ function clearAllData() {
 // ==============================================
 function doLogout() {
   sessionStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(SESSION_KEY);
-  location.href = "admin.html";
+  location.href="admin.html";
 }
 
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
-  el.textContent = txt;
-  el.className = `status ${cls}`;
-  el.style.display = "block";
-  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 10000);
+  el.textContent = txt; el.className = `status ${cls}`; el.style.display="block";
+  setTimeout(()=>el.style.display="none", 8000);
 }
 
 window.onload = () => {
   if (!checkSession()) return;
 
-  if (!currentUser.isMainAdmin) {
-    document.querySelector(`h2:has(+ #current-pw)`).innerHTML = "🔑 Palitan ang Password — Bawal sa Moderator";
-    document.getElementById("pw-btn").disabled = true;
-    document.getElementById("add-coadmin-btn").disabled = true;
-  }
+  // ✅ IKARGA ANG NAUNANG KARAPATANG-ARI
+  const copyInfo = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || "{}");
+  if (copyInfo.owner) document.getElementById("copy-owner").value = copyInfo.owner;
+  if (copyInfo.year)  document.getElementById("copy-year").value = copyInfo.year;
+  if (copyInfo.extra) document.getElementById("copy-extra").value = copyInfo.extra;
+  if (copyInfo.autoInsert !== undefined) document.getElementById("copy-auto-insert").checked = copyInfo.autoInsert;
+  updateCopyrightPreview();
 
-  const savedSec = localStorage.getItem(SESSION_DURATION_KEY);
-  if (savedSec !== null) document.getElementById("session-duration").value = savedSec;
-  document.getElementById("remember-login").checked = localStorage.getItem(REMEMBER_LOGIN_KEY) === "true";
-  updateSessionPreview();
   renderCoAdmins();
   detectConfig();
 };
