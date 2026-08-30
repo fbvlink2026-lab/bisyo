@@ -6,6 +6,33 @@
 <link rel="stylesheet" href="style.css">
 <title>Mga Ilegal na Bisyo — Edukasyon Laban sa Masamang Bisyo</title>
 
+<style>
+/* ✅ PROBLEMA 2 INAYOS — PULANG BILOG NA MAY PUTING NUMERO SA GITNA */
+.btn, .menu-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.btn .num, .menu-btn .num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  color: #ffffff !important;
+  font-weight: bold;
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.btn .txt, .menu-btn .txt {
+  flex: 1;
+}
+</style>
+
 <script>
 // ==================================================
 // ✅ TAMA NA ANG LOKASYON — assets/pages/ HINDI docs/
@@ -34,7 +61,58 @@ let foundApk = null, downloadUrl = null;
 let gotProgressFromApp = false;
 
 // ==================================================
-// ✅ BATAYANG LISTAHAN — KUSANG AYUSIN AYON SA ADMIN-ORDER
+// ✅ PROBLEMA 1 INAYOS — KUNIN ANG BERSYON MULA SA APK FILENAME
+// ==================================================
+function extractVersionFromApkName(filename) {
+  // Halimbawa: BisyoApp-v1.2.3.apk → "v1.2.3"
+  const match = filename.match(/[vV]\d+(?:[.-]\d+)+/);
+  return match ? match[0] : null;
+}
+
+function getCachedVersion() {
+  return localStorage.getItem(VERSION_CACHE_KEY) || DEFAULT_VERSION;
+}
+
+async function fetchLatestVersion() {
+  if (!isOnline()) return getCachedVersion();
+
+  // ✅ UNANG SURIIN: mula sa pangalan ng APK
+  const apkName = await findAnyApk();
+  if (apkName) {
+    const verFromApk = extractVersionFromApkName(apkName);
+    if (verFromApk) {
+      localStorage.setItem(VERSION_CACHE_KEY, verFromApk);
+      return verFromApk;
+    }
+  }
+
+  // ✅ RESERBA: mula sa version.txt
+  try {
+    const res = await fetch(VERSION_FILE_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Hindi mabasa");
+    const versionText = (await res.text()).trim();
+    if (versionText) {
+      localStorage.setItem(VERSION_CACHE_KEY, versionText);
+      return versionText;
+    }
+  } catch {}
+
+  return getCachedVersion();
+}
+
+async function updateVersionDisplay() {
+  const version = await fetchLatestVersion();
+  document.querySelectorAll(".version-display").forEach(el => el.textContent = version);
+}
+
+// ==================================================
+// 📡 KONEKSYON — ONLINE / OFFLINE
+// ==================================================
+function isOnline() { return navigator.onLine; }
+function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
+
+// ==================================================
+// 📋 LISTAHAN NG PAHINA — KUSANG LUMALAWAK
 // ==================================================
 const BASE_PAGES = [
   {id:"alak",           name:"Alak",                desc:"Labis na pag-inom at epekto", group:"bisyo", num:1, file:"alak.html", folder:PAGES_FOLDER},
@@ -58,41 +136,6 @@ const BASE_PAGES = [
   {id:"aral-sa-bibliya",name:"Aral mula sa Bibliya", desc:"Pag-asa at lakas laban sa bisyo", group:"extra", num:null, file:"aral-sa-bibliya.html", folder:PAGES_FOLDER}
 ];
 
-// ==================================================
-// 📡 KONEKSYON — ONLINE / OFFLINE
-// ==================================================
-function isOnline() { return navigator.onLine; }
-function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
-
-// ==================================================
-// 🔢 BERSYON — KUSANG KUKUHA
-// ==================================================
-function getCachedVersion() {
-  return localStorage.getItem(VERSION_CACHE_KEY) || DEFAULT_VERSION;
-}
-async function fetchLatestVersion() {
-  if (!isOnline()) return getCachedVersion();
-  try {
-    const res = await fetch(VERSION_FILE_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("Hindi mabasa");
-    const versionText = (await res.text()).trim();
-    if (versionText) {
-      localStorage.setItem(VERSION_CACHE_KEY, versionText);
-      return versionText;
-    }
-    return DEFAULT_VERSION;
-  } catch {
-    return getCachedVersion();
-  }
-}
-async function updateVersionDisplay() {
-  const version = await fetchLatestVersion();
-  document.querySelectorAll(".version-display").forEach(el => el.textContent = version);
-}
-
-// ==================================================
-// 📋 LISTAHAN NG PAHINA — KUSANG LUMALAWAK
-// ==================================================
 function getAllPages() {
   const stored = localStorage.getItem(ALL_PAGES_KEY);
   let list = BASE_PAGES.slice();
@@ -107,7 +150,6 @@ function getAllPages() {
   return list;
 }
 
-// ✅ BASAHIN ANG AYOS AT TINAGO MULA SA ADMIN-ORDER
 function getPageOrder() {
   const s = localStorage.getItem(ORDER_KEY);
   if (s) {
@@ -127,7 +169,6 @@ function getVisibleSet() {
   return new Set(getAllPages().map(p => p.id));
 }
 
-// ✅ KUMAHIN NG MGA BAGONG PAHINA MULA SA GITHUB — KUNG ONLINE
 async function fetchPagesFromGitHub() {
   if (!isOnline()) return getAllPages();
   try {
@@ -159,7 +200,7 @@ async function fetchPagesFromGitHub() {
 }
 
 // ==================================================
-// 🧩 BUUIN ANG MGA BUTTON — SUNOD SA AYOS MULA SA ADMIN
+// ✅ PROBLEMA 2 INAYOS — BUMALIK NA ANG PULANG BILOG
 // ==================================================
 async function buildPageGrids() {
   const allPages = await fetchPagesFromGitHub();
@@ -168,15 +209,18 @@ async function buildPageGrids() {
 
   const bisyoGrid = document.getElementById("bisyo-grid");
   const extraGrid = document.getElementById("extra-grid");
-  bisyoGrid.innerHTML = "";
-  extraGrid.innerHTML = "";
+  if (bisyoGrid) bisyoGrid.innerHTML = "";
+  if (extraGrid) extraGrid.innerHTML = "";
 
   order.forEach(pageId => {
-    if (!visible.has(pageId)) return; // ✅ Itinago sa Admin — laktawan
+    if (!visible.has(pageId)) return;
     const page = allPages.find(p => p.id === pageId);
     if (!page) return;
 
-    const container = page.group === "extra" ? extraGrid : bisyoGrid;
+    // ✅ Hanapin ang tamang lalagyan — o gumawa ng bagong button
+    const container = page.group === "extra" ? (extraGrid||bisyoGrid) : bisyoGrid;
+    if (!container) return;
+
     const a = document.createElement("a");
     a.href = `${page.folder}${page.file}`;
     a.className = "btn";
@@ -188,8 +232,10 @@ async function buildPageGrids() {
     container.appendChild(a);
   });
 
-  document.getElementById("extra-section").style.display =
-    extraGrid.children.length > 0 ? "block" : "none";
+  const extraSection = document.getElementById("extra-section");
+  if (extraSection) {
+    extraSection.style.display = (extraGrid && extraGrid.children.length > 0) ? "block" : "none";
+  }
 }
 
 // ==================================================
@@ -199,11 +245,11 @@ function updateDownloadVisibility() {
   const ds = document.getElementById("download-section");
   const on = document.getElementById("offline-note");
   if (isOnline()) {
-    ds.classList.remove("hidden");
-    on.style.display = "none";
+    ds?.classList.remove("hidden");
+    if (on) on.style.display = "none";
   } else {
-    ds.classList.add("hidden");
-    on.style.display = "block";
+    ds?.classList.add("hidden");
+    if (on) on.style.display = "block";
   }
 }
 
@@ -227,20 +273,22 @@ function setProgress(percent, text) {
   const c = document.getElementById("progress-container");
   const b = document.getElementById("progress-bar");
   const t = document.getElementById("progress-text");
-  if (percent > 0) {
-    c.style.display = "block";
-    t.style.display = "block";
-    b.style.width = percent + "%";
-    b.textContent = Math.round(percent) + "%";
-    t.textContent = text || "";
-  } else {
-    c.style.display = "none";
-    t.style.display = "none";
+  if (c && b && t) {
+    if (percent > 0) {
+      c.style.display = "block";
+      t.style.display = "block";
+      b.style.width = percent + "%";
+      b.textContent = Math.round(percent) + "%";
+      t.textContent = text || "";
+    } else {
+      c.style.display = "none";
+      t.style.display = "none";
+    }
   }
 }
 
-function showCompleteDialog() { document.getElementById("dialog-overlay").style.display = "flex"; }
-function closeDialog() { document.getElementById("dialog-overlay").style.display = "none"; }
+function showCompleteDialog() { document.getElementById("dialog-overlay")?.style.display = "flex"; }
+function closeDialog() { document.getElementById("dialog-overlay")?.style.display = "none"; }
 
 function confirmUpdate() {
   closeDialog();
@@ -250,7 +298,7 @@ function confirmUpdate() {
         AndroidApp.openDownloadedApk();
         alert("✅ Sinisimulan ang awtomatikong pag-update!\n\n📱 Maghihintay...\n✅ Kusa mag-i-install\n✅ Magsasara ang app\n✅ Bubukas muli pagkatapos");
       } else {
-        alert("✅ Tapos na ang pag-download!\n\n📂 Pumunta sa:\n👉 Downloads → BisyoApp-update.apk\n👉 Pindutin para i-install!\n\nO pindutin ang abiso sa itaas.");
+        alert("✅ Tapos na ang pag-download!\n\n📂 Pumunta sa:\n👉 Downloads → " + (foundApk||"BisyoApp.apk") + "\n👉 Pindutin para i-install!\n\nO pindutin ang abiso sa itaas.");
       }
     }, 100);
   } else {
@@ -261,27 +309,33 @@ function confirmUpdate() {
 function updateProgressFromApp(percent) {
   gotProgressFromApp = true;
   setProgress(percent, percent < 100 ? "Nagda-download mula sa server..." : "✅ Halos tapos na...");
-  document.getElementById("download-apk-btn").textContent = percent + "%";
+  const btn = document.getElementById("download-apk-btn");
+  if (btn) btn.textContent = percent + "%";
 }
 
 function downloadCompleteFromApp() {
   setProgress(100, "✅ Tapos na! Bububukas na ang installer...");
-  document.getElementById("download-apk-btn").textContent = "✅ Tapos na";
+  const btn = document.getElementById("download-apk-btn");
+  if (btn) btn.textContent = "✅ Tapos na";
   setTimeout(showCompleteDialog, 500);
 }
 
 function downloadErrorFromApp() {
   setProgress(0, "❌ Nabigo — Subukan muli");
   const btn = document.getElementById("download-apk-btn");
-  btn.textContent = "🔄 Subukan Muli";
-  btn.disabled = false;
+  if (btn) {
+    btn.textContent = "🔄 Subukan Muli";
+    btn.disabled = false;
+  }
 }
 
 async function startDownload() {
   if (!downloadUrl) return;
   const btn = document.getElementById("download-apk-btn");
-  btn.disabled = true;
-  btn.textContent = "⏳ Sinisimulan...";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳ Sinisimulan...";
+  }
   setProgress(5, "Kumukuha ng impormasyon...");
   gotProgressFromApp = false;
 
@@ -291,7 +345,7 @@ async function startDownload() {
       setTimeout(() => {
         if (!gotProgressFromApp) {
           setProgress(0, "⬆️ Tignan ang abiso sa itaas ng telepono");
-          btn.textContent = "Nagda-download...";
+          if (btn) btn.textContent = "Nagda-download...";
         }
       }, 900);
     }, 400);
@@ -307,7 +361,7 @@ async function startDownload() {
 // ==================================================
 window.onload = async function() {
   updateDownloadVisibility();
-  await buildPageGrids(); // ✅ Kusang ayon sa Admin-Order
+  await buildPageGrids();
   await updateVersionDisplay();
 
   if (isOnline()) {
@@ -315,13 +369,13 @@ window.onload = async function() {
     const note = document.getElementById("update-note");
     foundApk = await findAnyApk();
     if (!foundApk) {
-      btn.textContent = "❌ Walang APK";
-      btn.disabled = true;
+      if (btn) btn.textContent = "❌ Walang APK";
+      if (btn) btn.disabled = true;
       return;
     }
-    btn.textContent = isInsideApp() ? "🔄 I-update ang Aplikasyon" : "⬇️ I-download ang APK";
-    note.style.display = isInsideApp() ? "block" : "none";
-    btn.onclick = e => { e.preventDefault(); startDownload(); };
+    if (btn) btn.textContent = isInsideApp() ? "🔄 I-update ang Aplikasyon" : "⬇️ I-download ang APK";
+    if (note) note.style.display = isInsideApp() ? "block" : "none";
+    if (btn) btn.onclick = e => { e.preventDefault(); startDownload(); };
   }
 };
 
@@ -356,7 +410,7 @@ window.addEventListener("offline", updateDownloadVisibility);
     📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Tignan ang abiso sa itaas ng iyong telepono.
   </div>
   <div class="download-info">
-    📦 Bersyon: <strong class="version-display">v1.0</strong> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
+    📦 Bersyon: <strong class="version-display">v1.0</strong> &nbsp;|&nbsp; 📄 APK: <span id="apk-filename">Kinukuha...</span> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
     📱 Kinakailangan: Android 7.0 (API 24) o mas bagong bersyon<br>
     ✅ Libre — Walang Patalastas — Walang Karagdagang Bayad<br>
     📇 Opisyal — Proyekto ni Mark Jann Tampok
@@ -404,32 +458,28 @@ window.addEventListener("offline", updateDownloadVisibility);
 <h4 class="section-subtitle">Mga Uri ng Bisyo</h4>
 
 <!-- ✅ DITO ILALAGAY NG ADMIN-ORDER.HTML ANG LISTAHAN -->
-<!-- AUTO-LIST-START -->
-<a href="pages/alak.html" class="menu-btn">Alak</a>
-<a href="pages/aral-sa-bibliya.html" class="menu-btn">Aral Sa Bibliya</a>
-<a href="pages/araw-araw-babasahin.html" class="menu-btn">Araw Araw Babasahin</a>
-<a href="pages/cocaine.html" class="menu-btn">Cocaine</a>
-<a href="pages/ecstasy.html" class="menu-btn">Ecstasy</a>
-<a href="pages/heroin.html" class="menu-btn">Heroin</a>
-<a href="pages/ibang-sugal.html" class="menu-btn">Ibang Sugal</a>
-<a href="pages/inhalants.html" class="menu-btn">Inhalants</a>
-<a href="pages/internet-laro.html" class="menu-btn">Internet Laro</a>
-<a href="pages/ketamine.html" class="menu-btn">Ketamine</a>
-<a href="pages/labis-pagkain.html" class="menu-btn">Labis Pagkain</a>
-<a href="pages/lsd.html" class="menu-btn">Lsd</a>
-<a href="pages/marijuana.html" class="menu-btn">Marijuana</a>
-<a href="pages/pag-aabuso-gamot.html" class="menu-btn">Pag Aabuso Gamot</a>
-<a href="pages/shabu.html" class="menu-btn">Shabu</a>
-<a href="pages/sigarilyo.html" class="menu-btn">Sigarilyo</a>
-<a href="pages/sugal.html" class="menu-btn">Sugal</a>
-<a href="pages/tinuturok-gamot.html" class="menu-btn">Tinuturok Gamot</a>
-<a href="pages/tuklaw.html" class="menu-btn">Tuklaw</a>
-<a href="pages/vaping.html" class="menu-btn">Vaping</a>
-<!-- AUTO-LIST-END -->
+<div id="bisyo-grid" class="grid"></div>
+
+<div id="extra-section" class="extra-section">
+  <h4 class="section-subtitle">Karagdagang Pahina</h4>
+  <div id="extra-grid" class="grid"></div>
+</div>
 
 <div class="admin-link">
   <a href="admin.html">⚙️ Admin Panel</a>
 </div>
+
+<script>
+// ✅ Ipakita ang pangalan ng APK
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    if (foundApk) {
+      const el = document.getElementById("apk-filename");
+      if (el) el.textContent = foundApk;
+    }
+  }, 300);
+});
+</script>
 
 </body>
 </html>
