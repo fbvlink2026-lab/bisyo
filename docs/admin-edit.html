@@ -110,8 +110,6 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 .theme-bar { display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center }
 .theme-btn { padding:6px 12px;border-radius:6px;border:2px solid #e5e7eb;cursor:pointer;font-size:14px;background:white }
 .theme-btn.active { border-color:#b91c1c;background:#fef2f2;color:#b91c1c;font-weight:bold }
-
-/* ===== 🎨 HIWALAY NA VISUAL EDITOR ===== */
 .visual-toolbar {
   display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;padding:8px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb
 }
@@ -133,7 +131,6 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 </head>
 <body>
 
-<!-- ✅ DIRETSONG ILAGAY ANG NAVIGATION — HINDI NAKA-DEPENDE SA WIDGET -->
 <div class="nav-bar">
   <a href="admin.html">🏠 Dashboard</a>
   <a href="admin-order.html">🔢 Ayusin Ayos</a>
@@ -147,6 +144,9 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 <div class="container">
   <h1>✏️ I-edit ang File</h1>
   <p class="subtitle" id="page-hint">Pumili ng lokasyon at file — kabilang ang mga nasa ugat ng assets/</p>
+
+  <!-- ✅ NAKATAGONG INPUT — KUNG GALING SA ADMIN-ORDER -->
+  <input type="hidden" id="auto-file-path" value="">
 
   <label for="folder-select">📁 Lokasyon:</label>
   <select id="folder-select" onchange="folderChanged()">
@@ -163,7 +163,6 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
   <div id="editor-area" style="display:none">
     <label id="editor-label">📝 Nilalaman:</label>
 
-    <!-- ✅ TATLONG PILI — HINDI NAGTUTUNGGALI -->
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="full" onclick="switchMode('full')">📄 Buong File</div>
       <div class="mode-tab" data-mode="content" onclick="switchMode('content')">📝 Nilalaman Lamang</div>
@@ -180,10 +179,8 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
       <button class="theme-btn" data-theme="compact" onclick="setTheme('compact')">Maikli</button>
     </div>
 
-    <!-- 📄 CODE EDITOR — PARA SA Buong File at Nilalaman Lamang -->
     <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..." oninput="updatePreview()"></textarea>
 
-    <!-- 🎨 HIWALAY NA VISUAL EDITOR — HINDI NAHALO SA CODE -->
     <div id="visual-toolbar" class="visual-toolbar" style="display:none">
       <button onclick="execCmd('bold')"><b>B</b></button>
       <button onclick="execCmd('italic')"><i>I</i></button>
@@ -238,6 +235,49 @@ let editMode = "full";
 let currentTheme = "light";
 let originalFullContent = "";
 
+// ==================================================
+// ✅ BAGONG KAKAYAHAN — BASAHIN ANG FILE MULA SA URL
+// ==================================================
+function getUrlParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
+}
+
+async function autoOpenFromUrl() {
+  const filePath = getUrlParam("file");
+  if (!filePath) return false;
+
+  // ✅ HATIIN SA FOLDER + FILENAME
+  const lastSlash = filePath.lastIndexOf("/");
+  let targetFolder = "";
+  let targetFile = filePath;
+
+  if (lastSlash !== -1) {
+    targetFolder = filePath.substring(0, lastSlash + 1);
+    targetFile = filePath.substring(lastSlash + 1);
+  }
+
+  console.log("✅ Galing sa Admin-Order:", { folder: targetFolder, file: targetFile });
+
+  // ✅ PILIIN ANG TAMANG FOLDER SA DROPDOWN
+  document.getElementById("folder-select").value = targetFolder;
+  currentFolder = targetFolder;
+
+  // ✅ HINTAYIN ANG LISTAHAN NG FILE MABASA
+  await loadFileList();
+
+  // ✅ PILIIN ANG TAMANG FILE
+  document.getElementById("file-select").value = targetFile;
+  currentFilename = targetFile;
+
+  // ✅ BUKAS AGAD ANG FILE
+  if (currentFilename) {
+    await fileSelected();
+    showStatus(`✅ Binuksan mula sa Admin-Order: ${filePath}`, "success");
+  }
+  return true;
+}
+
 function expandWidgets(html) {
   if (!html) return html;
   return html;
@@ -272,9 +312,6 @@ function getDecryptedToken() {
   } catch { return null; }
 }
 
-// ==================================================
-// ✅ SWITCH MODE — MALINAW NA HINDI NAGTUTUNGGALI
-// ==================================================
 function switchMode(mode) {
   editMode = mode;
   document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
@@ -285,7 +322,6 @@ function switchMode(mode) {
   const visualEditor = document.getElementById("visual-editor");
   const visualToolbar = document.getElementById("visual-toolbar");
 
-  // ✅ Bago lumipat — i-save ang kasalukuyang laman
   if (mode !== "visual") syncVisualToText();
 
   if (mode === "full") {
@@ -317,9 +353,6 @@ function switchMode(mode) {
   saveEditorState();
 }
 
-// ==================================================
-// 🎨 VISUAL EDITOR — SARILI AT HIWALAY
-// ==================================================
 function execCmd(cmd, val=null) {
   document.execCommand(cmd, false, val);
   document.getElementById("visual-editor").focus();
@@ -614,7 +647,13 @@ function showStatus(txt, cls) {
 
 window.onload = async () => {
   if (!checkSession()) return;
-  await restoreEditorState();
+
+  // ✅ UNA — BUKAS AGAD ANG FILE KUNG GALING SA ADMIN-ORDER
+  const opened = await autoOpenFromUrl();
+  if (!opened) {
+    // ✅ KUNG HINDI GALING SA ADMIN-ORDER — BUMALIK SA DATING ESTADO
+    await restoreEditorState();
+  }
 };
 </script>
 
