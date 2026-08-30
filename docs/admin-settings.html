@@ -73,9 +73,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 .copyright-preview .footer-copy{padding:12px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:10px}
 </style>
 </head>
-<body>
-
-<div class="nav-bar">
+<body><div class="nav-bar">
   <a href="admin.html">🏠 Dashboard</a>
   <a href="admin-order.html">🔢 Ayusin Ayos</a>
   <a href="admin-edit.html">✏️ I-edit</a>
@@ -231,7 +229,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
     <input type="text" id="cfg-assets" value="app/src/main/assets/">
 
     <label>📄 config.json — Lalabas:</label>
-    <div class="config-preview" id="config-json">Naglo-detect...</div>
+    <div class="config-preview" id="config-json">Nagdi-detect...</div>
 
     <div class="btn-group" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
       <button id="detect-btn" class="btn btn-secondary" onclick="detectConfig()">🔍 I-detect</button>
@@ -256,7 +254,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
   <div id="status-msg" class="status"></div>
 </div>
 
-<script>
+
 const SESSION_KEY = "bisyo_admin_session";
 const SESSION_DURATION_KEY = "bisyo_session_duration";
 const REMEMBER_LOGIN_KEY = "bisyo_remember_login";
@@ -275,7 +273,7 @@ const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}
 window.getCopyrightNotice = function() {
   const info = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"owner":"May-ari","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba","autoInsert":true}');
   if (info.autoInsert === false) return "";
-  return `\n<footer style="text-align:center;padding:16px;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:32px">© ${info.year} ${info.owner} — ${info.extra}</footer>\n`;
+  return `\n© ${info.year} ${info.owner} — ${info.extra}\n`;
 };
 
 window.appendCopyrightIfNeeded = function(content) {
