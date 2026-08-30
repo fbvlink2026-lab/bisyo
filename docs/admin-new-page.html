@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>➕ Bagong File / Pahina — Sa Assets</title>
+<title>➕ Bagong File / Imahe — Sa Assets at Res</title>
 <style>
-/* ✅ PARA MAGING ABO ANG BUTTON HABANG GINAGAWA */
 .btn-primary:disabled,
 .btn-primary.saving {
   background: #9ca3af !important;
@@ -76,10 +75,43 @@
   margin: 20px 0 0;
   display: none;
   font-weight: 500;
+  line-height: 1.5;
 }
 .status.success { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
 .status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
 .status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
+
+/* MODE TABS */
+.mode-tabs { display:flex;gap:8px;margin:16px 0 }
+.mode-tab { padding:10px 14px;border-radius:8px;background:#f3f4f6;cursor:pointer;font-weight:bold;color:#4b5563;border:2px solid transparent }
+.mode-tab.active { background:#fef2f2;color:#b91c1c;border-color:#b91c1c }
+.mode-desc { font-size:14px;color:#6b7280;margin-bottom:12px;padding:10px;background:#f9fafb;border-radius:8px }
+
+/* IMAGE UPLOAD */
+.image-upload-area {
+  border: 3px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 10px 0;
+}
+.image-upload-area:hover, .image-upload-area.highlight {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+.image-upload-area img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-top: 10px;
+  display: none;
+}
+.image-upload-area.has-image { padding:15px }
+.image-upload-area.has-image p { display:none }
+.preview-wrap { margin-top:12px;display:none }
+.preview-wrap img { max-width:180px;border-radius:8px;border:2px solid #e5e7eb }
 </style>
 </head>
 <body>
@@ -96,16 +128,26 @@
 
 <div class="container">
   <div class="form-card">
-    <h1>➕ Gumawa ng Bagong File sa Assets</h1>
+    <h1>➕ Bagong File / Imahe</h1>
 
-    <div class="note">
-      📂 Pumili ng lokasyon — sa ugat ng <code>assets/</code> o sa loob ng <code>assets/pages/</code>
+    <!-- ✅ PILI NG URI: TEKSTO O IMAHE -->
+    <div class="mode-tabs">
+      <div class="mode-tab active" data-mode="text" onclick="switchMode('text')">📄 Teksto / Code</div>
+      <div class="mode-tab" data-mode="image" onclick="switchMode('image')">🖼️ Imahe / Icon</div>
+    </div>
+    <div class="mode-desc" id="mode-desc">
+      📄 <strong>Teksto / Code:</strong> HTML, CSS, JS, TXT — lahat na nakasulat na teksto.
     </div>
 
+    <!-- 📂 LOKASYON -->
     <label>📂 Lokasyon:</label>
     <select id="location-select" onchange="updatePathHint()">
-      <option value="assets/">📂 Sa ugat: app/src/main/assets/</option>
-      <option value="assets/pages/" selected>📂 Sa pages: app/src/main/assets/pages/</option>
+      <option value="assets/">📂 [ASSETS] Ugat — app/src/main/assets/</option>
+      <option value="assets/pages/" selected>📂 [ASSETS] Pages — app/src/main/assets/pages/</option>
+      <option disabled>────── 📱 RESOURCES ──────</option>
+      <option value="res/drawable/">🖼️ [RES] Drawable — Mga Icon at Litrato</option>
+      <option value="res/layout/">📐 [RES] Layout — Istruktura ng Pahina (.xml)</option>
+      <option value="res/values/">🎨 [RES] Values — Kulay, Estilo, Teksto</option>
       <option value="custom">✏️ Ipasok ang sariling landas...</option>
     </select>
 
@@ -116,19 +158,43 @@
       📂 Pupunta sa: <code>app/src/main/assets/pages/</code>
     </p>
 
-    <label>Pangalan ng File (kabilang ang .html / .css / .js atbp.):</label>
-    <input type="text" id="filename" placeholder="Hal. index.html o style.css o tungkol.html">
-    <div class="note">💡 Ipasok ang buong pangalan kasama ang uri — hal. <code>index.html</code>, hindi <code>index</code> lang</div>
+    <!-- PANGALAN -->
+    <label>Pangalan ng File:</label>
+    <input type="text" id="filename" placeholder="Hal. index.html o icon_bisyo">
+    <div class="note">💡 Sa <code>res/drawable</code>: maliit na titik lang, numero at _ — walang puwang o malaking titik</div>
 
-    <label>Maikling Paglalarawan / Pamagat:</label>
-    <input type="text" id="page-name" placeholder="Hal. Tungkol sa Proyekto">
+    <!-- 📄 TEKSTO MODE -->
+    <div id="text-mode-area">
+      <label>Uri ng Nilalaman:</label>
+      <div class="type-tabs" style="display:flex;gap:8px;margin:8px 0 16px 0">
+        <div class="type-tab active" data-type="content" onclick="switchContentType('content')">📝 Pahina ng Nilalaman</div>
+        <div class="type-tab" data-type="blank" onclick="switchContentType('blank')">📄 Walang Laman</div>
+        <div class="type-tab" data-type="full" onclick="switchContentType('full')">⚙️ Buong HTML</div>
+      </div>
+      <div class="type-desc" id="type-desc" style="background:#f9fafb;padding:10px;border-radius:8px;margin-bottom:8px">
+        📝 <strong>Pahina ng Nilalaman:</strong> Isulat lang ang laman — awtomatikong isasama sa tamang disenyo.
+      </div>
+      <label>Nilalaman:</label>
+      <textarea id="file-content" placeholder="Isulat dito ang nilalaman..."></textarea>
+    </div>
 
-    <label>Nilalaman ng File:</label>
-    <textarea id="file-content" placeholder="<h2>Pamagat Dito</h2>
-<p>Isulat dito ang buong nilalaman...</p>"></textarea>
+    <!-- 🖼️ IMAHE MODE -->
+    <div id="image-mode-area" style="display:none">
+      <label>Pumili ng Imahe:</label>
+      <div class="image-upload-area" id="image-drop" onclick="document.getElementById('image-file').click()">
+        <p style="font-size:16px;color:#4b5563">📤 I-tap o i-drag dito ang imahe<br><small>PNG, JPG, WebP, SVG — hanggang 1MB</small></p>
+        <input type="file" id="image-file" accept="image/*" style="display:none" onchange="imageSelected(this.files[0])">
+        <div class="preview-wrap" id="image-preview">
+          <img id="preview-img">
+        </div>
+      </div>
+      <div class="note" id="image-info" style="display:none;margin-top:12px">
+        ✅ Napili: <span id="img-name"></span> · <span id="img-size"></span>
+      </div>
+    </div>
 
     <div class="btn-group">
-      <button id="create-btn" class="btn btn-primary" onclick="createFile()">✅ I-SAVE SA ASSETS</button>
+      <button id="create-btn" class="btn btn-primary" onclick="createFile()">✅ I-SAVE SA GITHUB</button>
       <button class="btn btn-secondary" onclick="resetForm()">↩️ Linisin</button>
     </div>
 
@@ -143,9 +209,24 @@ const PENDING_KEY = "bisyo_offline_changes";
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
-const BASE_PATH = "app/src/main/";
 
-// ✅ LIGTAS NA PAG-ENCODE — PAREHO SA LAHAT NG PAHINA
+let currentMode = "text"; // "text" o "image"
+let contentType = "content";
+let selectedImage = null; // {blob, base64, type}
+
+// ✅ TOTOONG MENSAHE NG ERROR
+function explainStatusCode(status) {
+  const explanations = {
+    401: "🔑 Walang pahintulot — Kailangan ng Token.",
+    403: "⚠️ Limitasyon — Naubos na ang kahilingan o kulang ang pahintulot ng Token.",
+    404: "📂 Hindi Natagpuan — Hindi umiiral ang landas.",
+    422: "⚠️ Hindi Tinatanggap — Maaaring may katulad na file na o mali ang datos.",
+    0: "📴 Walang Koneksyon — Nai-save lokal, isesync kapag may internet."
+  };
+  return explanations[status] || `⚠️ HTTP ${status} — Subukan muli mamaya.`;
+}
+
+// ✅ LIGTAS NA PAG-ENCODE
 function safeEncodeContent(text) {
   return btoa(unescape(encodeURIComponent(text)));
 }
@@ -158,6 +239,22 @@ function checkSession() {
     return false;
   }
   return true;
+}
+
+// ✅ PALITAN ANG TEKSTO O IMAHE MODE
+function switchMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
+  document.getElementById("text-mode-area").style.display = mode === "text" ? "block" : "none";
+  document.getElementById("image-mode-area").style.display = mode === "image" ? "block" : "none";
+
+  const desc = document.getElementById("mode-desc");
+  if (mode === "text") {
+    desc.innerHTML = "📄 <strong>Teksto / Code:</strong> HTML, CSS, JS, TXT — lahat na nakasulat na teksto.";
+  } else {
+    desc.innerHTML = "🖼️ <strong>Imahe / Icon:</strong> Diretsong i-upload papuntang <code>res/drawable/</code> — awtomatikong gagawing base64 at ia-upload sa GitHub.";
+  }
+  selectedImage = null;
 }
 
 function updatePathHint() {
@@ -174,7 +271,13 @@ function updatePathHint() {
     hint.style.display = "block";
     customLabel.style.display = "none";
     customInput.style.display = "none";
-    hint.innerHTML = `📂 Pupunta sa: <code>${BASE_PATH}${sel}</code>`;
+    let fullPath;
+    if (sel.startsWith("res/")) {
+      fullPath = `app/src/main/${sel}`;
+    } else {
+      fullPath = `app/src/main/${sel}`;
+    }
+    hint.innerHTML = `📂 Pupunta sa: <code>${fullPath}</code>`;
   }
 }
 
@@ -183,146 +286,200 @@ function getFullPath() {
   if (sel === "custom") {
     const cp = document.getElementById("custom-path").value.trim();
     if (!cp) return null;
-    return BASE_PATH + (cp.endsWith("/") ? cp : cp + "/");
+    return cp.endsWith("/") ? cp : cp + "/";
   }
-  return BASE_PATH + sel;
+  return `app/src/main/${sel}`;
 }
 
-function getEncryptedToken() {
-  return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+// ✅ PAGBASA NG IMAHE → BASE64
+function imageSelected(file) {
+  if (!file) return;
+  if (file.size > 1024 * 1024) {
+    return showStatus("❌ Masyadong malaki — hanggang 1MB lang ang pwede", "error");
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    selectedImage = {
+      blob: file,
+      dataUrl: e.target.result,
+      base64: e.target.result.split(',')[1],
+      type: file.type,
+      name: file.name
+    };
+
+    // ✅ I-preview
+    document.getElementById("preview-img").src = selectedImage.dataUrl;
+    document.getElementById("image-preview").style.display = "block";
+    document.getElementById("image-drop").classList.add("has-image");
+    document.getElementById("img-name").textContent = file.name;
+    document.getElementById("img-size").textContent = (file.size / 1024).toFixed(1) + " KB";
+    document.getElementById("image-info").style.display = "block";
+
+    // ✅ Awtong ilagay ang pangalan kung wala pa
+    if (!document.getElementById("filename").value) {
+      let autoName = file.name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9._-]/g, "_");
+      document.getElementById("filename").value = autoName;
+    }
+  };
+  reader.readAsDataURL(file);
 }
+
+// ✅ TEKSTO — URI NG NILALAMAN
+function switchContentType(type) {
+  contentType = type;
+  document.querySelectorAll(".type-tab").forEach(t => t.classList.toggle("active", t.dataset.type === type));
+  const ta = document.getElementById("file-content");
+  if (type === "content") {
+    ta.value = `<h2>Pamagat</h2>
+<p>Nilalaman dito...</p>`;
+  } else if (type === "blank") {
+    ta.value = "";
+  } else {
+    ta.value = `<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>Pamagat</title>
+</head>
+<body>
+<h1>Pamagat</h1>
+<p>Nilalaman...</p>
+</body>
+</html>`;
+  }
+}
+
+function getEncryptedToken() { return localStorage.getItem(TOKEN_STORAGE_KEY) || ""; }
 function getPassword() {
   const s = sessionStorage.getItem(SESSION_KEY);
   return s ? JSON.parse(s).password : "";
 }
-
 function decryptToken(encrypted, password) {
   try {
     const decoded = atob(encrypted);
-    let result = "";
-    for (let i = 0; i < decoded.length; i++) {
-      result += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
-    }
-    return result;
+    let r = "";
+    for (let i=0; i<decoded.length; i++)
+      r += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+    return r;
   } catch { return ""; }
 }
 
+// ✅ PANGUNAHING PAGLIPAT — TEKSTO O IMAHE
 async function createFile() {
   const btn = document.getElementById("create-btn");
-
-  // ⏳ SIMULA — Abo ang buton
-  btn.disabled = true;
-  btn.classList.add("saving");
-  btn.textContent = "⏳ Gumagawa...";
+  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Nag-i-save...";
 
   const filename = document.getElementById("filename").value.trim();
-  const name = document.getElementById("page-name").value.trim() || filename;
-  let content = document.getElementById("file-content").value;
-
-  if (!filename) {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA ASSETS";
-    return showStatus("❌ Ilagay ang pangalan ng file", "error");
-  }
-  if (!content) content = `<!-- ${name} -->\n<p>Ilagay ang nilalaman dito...</p>`;
-
   const folderPath = getFullPath();
-  if (!folderPath) {
-    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA ASSETS";
-    return showStatus("❌ Ilagay ang sariling landas", "error");
+  if (!filename || !folderPath) {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    return showStatus("❌ Ilagay ang pangalan at lokasyon", "error");
   }
   const filePath = folderPath + filename;
 
-  localStorage.setItem(`bisyo_file_${filePath}`, content);
+  // ✅ IMAHE MODE
+  if (currentMode === "image") {
+    if (!selectedImage) {
+      btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+      return showStatus("❌ Pumili muna ng imahe", "error");
+    }
+    return finishCreate(filePath, selectedImage.base64, true, btn);
+  }
 
+  // ✅ TEKSTO MODE
+  const content = document.getElementById("file-content").value;
+  if (!content.trim()) {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    return showStatus("❌ Walang laman ang file", "error");
+  }
+  const encoded = safeEncodeContent(content);
+  return finishCreate(filePath, encoded, false, btn);
+}
+
+// ✅ TUNAY NA PAG-UPLOAD
+async function finishCreate(filePath, fileContentBase64, isBinary, btn) {
   const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
   pending.push({
-    type: "new-file",
-    fileName: filename,
-    filePath: filePath,
-    pageName: name,
-    content: content,
+    filePath,
+    content: fileContentBase64,
+    isBinary,
     timestamp: new Date().toISOString(),
     synced: false
   });
   localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
-  if (navigator.onLine) {
-    showStatus(`📤 Ipinapasa sa GitHub → ${filePath} ...`, "info");
-    const saved = await tryUploadToGitHub(filePath, content, name);
-    if (saved) {
-      markAsSynced(filePath);
-      showStatus(`✅ NAI-SAVE: ${filePath}`, "success");
-    } else {
-      showStatus(`⏳ Nakabinbin — pupunta sa: ${filePath}`, "warning");
-    }
-  } else {
-    showStatus(`📴 Walang internet — NAKABINBIN: ${filePath}`, "info");
+  if (!navigator.onLine) {
+    showStatus(`📴 Nai-save lokal — ${filePath}`, "info");
+    resetForm();
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    return;
   }
 
-  // ✅ TAPOS NA — BALIK SA PULA
-  btn.disabled = false;
-  btn.classList.remove("saving");
-  btn.textContent = "✅ I-SAVE SA ASSETS";
-
-  resetForm();
-}
-
-async function tryUploadToGitHub(filePath, content, messageTitle) {
-  const encrypted = getEncryptedToken();
-  if (!encrypted) return false;
-
-  const password = getPassword();
-  const realToken = decryptToken(encrypted, password);
-  if (!realToken) return false;
+  const token = decryptToken(getEncryptedToken(), getPassword());
+  if (!token) {
+    showStatus("⚠️ Walang Token — Nai-save lamang lokal", "warning");
+    resetForm();
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
+    return;
+  }
 
   try {
     let sha = "";
     try {
-      const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
-        headers: { "Authorization": `token ${realToken}` }
+      const check = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}?ref=${BRANCH}`, {
+        headers: { Authorization: `token ${token}` }
       });
-      if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
+      if (check.ok) { const d = await check.json(); sha = d.sha; }
     } catch {}
 
     const body = {
-      message: `Bagong file: ${filePath} — ${messageTitle}`,
-      content: safeEncodeContent(content), // ✅ LIGTAS — WALANG SIRANG EMOJI
+      message: currentMode==="image" 
+        ? `🖼️ Imahe: ${filename}` 
+        : `📄 Bagong File: ${filePath}`,
+      content: fileContentBase64,
       branch: BRANCH
     };
     if (sha) body.sha = sha;
 
     const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
       method: "PUT",
-      headers: {
-        "Authorization": `token ${realToken}`,
-        "Content-Type": "application/json"
-      },
+      headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
 
-    return res.ok;
+    if (!res.ok) throw new Error(explainStatusCode(res.status));
+    showStatus(`✅ NAI-UPLOAD: ${filePath}`, "success");
+    markAsSynced(filePath);
+
   } catch (e) {
-    console.error("Upload fail:", e);
-    return false;
+    showStatus(`⚠️ Nai-save lokal — ${e.message}`, "warning");
   }
+
+  resetForm();
+  btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
 }
 
-function markAsSynced(filePath) {
+function markAsSynced(path) {
   let list = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
-  list = list.map(item => {
-    if (item.filePath === filePath) return { ...item, synced: true };
-    return item;
-  });
+  list = list.map(i => i.filePath===path ? {...i, synced:true} : i);
   localStorage.setItem(PENDING_KEY, JSON.stringify(list));
 }
 
 function resetForm() {
   document.getElementById("filename").value = "";
-  document.getElementById("page-name").value = "";
   document.getElementById("file-content").value = "";
   document.getElementById("location-select").value = "assets/pages/";
   document.getElementById("custom-path").value = "";
+  document.getElementById("image-preview").style.display = "none";
+  document.getElementById("image-info").style.display = "none";
+  document.getElementById("image-drop").classList.remove("has-image");
+  selectedImage = null;
   updatePathHint();
+  switchMode("text");
+  switchContentType("content");
 }
 
 function showStatus(txt, cls) {
@@ -330,7 +487,7 @@ function showStatus(txt, cls) {
   el.textContent = txt;
   el.className = `status ${cls}`;
   el.style.display = "block";
-  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 10000);
+  setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 12000);
 }
 
 window.onload = () => {
