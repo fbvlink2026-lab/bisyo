@@ -6,6 +6,22 @@
 <link rel="stylesheet" href="style.css">
 <title>🔢 Ayusin Pagkakasunod-sunod</title>
 <style>
+/* ✅ DAGDAG — PARA MAGING ABO ANG BUTTON HABANG GINAGAWA */
+.btn-primary:disabled,
+.btn-primary.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-success:disabled,
+.btn-success.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .show-hide-cb {
   width: 20px;
   height: 20px;
@@ -92,7 +108,7 @@
       <span id="load-status" class="last-saved">—</span>
     </div>
     <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Binabasa ang lahat ng <code>*.html</code> mula sa <code>assets/</code> at <code>assets/pages/</code> — <strong>hindi na nakasulat nang matigas!</strong></p>
-    <button class="btn btn-primary" onclick="loadFromGitHub()">🔄 BASAHIN MULI MULA SA GITHUB</button>
+    <button id="load-btn" class="btn btn-primary" onclick="loadFromGitHub()">🔄 BASAHIN MULI MULA SA GITHUB</button>
   </div>
 
   <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb">
@@ -106,8 +122,8 @@
   </div>
 
   <div class="action-bar">
-    <button class="btn btn-primary" onclick="saveOrder()">💾 I-save LOKAL</button>
-    <button class="btn btn-success" onclick="saveToGitHub()">☁️ I-SAVE SA GITHUB → i-update ang listahan</button>
+    <button id="save-local-btn" class="btn btn-primary" onclick="saveOrder()">💾 I-save LOKAL</button>
+    <button id="save-gh-btn" class="btn btn-success" onclick="saveToGitHub()">☁️ I-SAVE SA GITHUB → i-update ang listahan</button>
     <button class="btn btn-secondary" onclick="resetOrder()">↩️ Ibalik sa Orihinal</button>
   </div>
 
@@ -115,11 +131,6 @@
 </div>
 
 <script>
-// ==============================================
-// ✅ GITHUB ANG DATABASE — WALANG HARDCODED!
-// ✅ KAYA NA ANG assets/ AT LAHAT NG SUBFOLDERS
-// ✅ LIGTAS SA EMOJI — GINAMIT ANG PAREHONG PAMAMARAAN
-// ==============================================
 const ORDER_KEY = "bisyo_page_order";
 const VISIBLE_KEY = "bisyo_page_visible";
 const SESSION_KEY = "bisyo_admin_session";
@@ -135,7 +146,7 @@ const SCAN_FOLDERS = [ "", "pages/" ];
 
 let allPages = [];
 
-// ✅ PAREHONG LIGTAS NA PAGBASA — WALANG SIRANG EMOJI!
+// ✅ LIGTAS NA PAGBASA — WALANG SIRANG EMOJI!
 function safeDecodeBase64(base64) {
   try {
     return decodeURIComponent(escape(atob(base64)));
@@ -175,12 +186,23 @@ function getToken() {
 }
 
 async function loadFromGitHub() {
+  const btn = document.getElementById("load-btn");
+  btn.disabled = true;
+  btn.classList.add("saving");
+  btn.textContent = "⏳ Binabasa...";
+
   if (!navigator.onLine) {
+    btn.disabled = false;
+    btn.classList.remove("saving");
+    btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
     showStatus("📴 Walang internet — hindi mabasa ang GitHub", "warning");
     return;
   }
   const token = getToken();
   if (!token) {
+    btn.disabled = false;
+    btn.classList.remove("saving");
+    btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
     showStatus("❌ Walang token — i-setup muna sa Token page", "error");
     return;
   }
@@ -223,6 +245,11 @@ async function loadFromGitHub() {
     document.getElementById("load-status").textContent = "❌ Nabigo";
     showStatus("❌ Nabigo: " + e.message, "error");
   }
+
+  // ✅ BALIK SA PULA
+  btn.disabled = false;
+  btn.classList.remove("saving");
+  btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
 }
 
 function updateOrderWithNewPages() {
@@ -313,15 +340,31 @@ function removeFromList(id) {
 }
 
 function saveOrder() {
+  const btn = document.getElementById("save-local-btn");
+  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Nag-i-save...";
+
   localStorage.setItem(ORDER_KEY, JSON.stringify(getOrder()));
   localStorage.setItem(VISIBLE_KEY, JSON.stringify([...getVisibleSet()]));
-  showStatus("✅ Nai-save sa LOKAL", "success");
+
+  setTimeout(() => {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "💾 I-save LOKAL";
+    showStatus("✅ Nai-save sa LOKAL", "success");
+  }, 400);
 }
 
 async function saveToGitHub() {
-  if (!navigator.onLine) return showStatus("📴 Walang internet", "error");
+  const btn = document.getElementById("save-gh-btn");
+  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Nag-i-save...";
+
+  if (!navigator.onLine) {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
+    return showStatus("📴 Walang internet", "error");
+  }
   const token = getToken();
-  if (!token) return showStatus("❌ Walang token", "error");
+  if (!token) {
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
+    return showStatus("❌ Walang token", "error");
+  }
 
   showStatus("🔨 Binabago ang main.html...", "info");
 
@@ -332,7 +375,6 @@ async function saveToGitHub() {
     if (!getRes.ok) throw new Error(`Hindi makuha ang main.html`);
     const fileData = await getRes.json();
 
-    // ✅ GINAMIT ANG LIGTAS NA PAGBASA — HINDI NA SISIRA ANG EMOJI SA MAIN.HTML!
     const htmlContent = safeDecodeBase64(fileData.content);
 
     const order = getOrder();
@@ -348,6 +390,7 @@ async function saveToGitHub() {
 
     const listPattern = /<!--\s*AUTO-LIST-START\s*-->[\s\S]*?<!--\s*AUTO-LIST-END\s*-->/;
     if (!listPattern.test(htmlContent)) {
+      btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
       return showStatus("❌ Walang nakitang marka sa main.html — ilagay ang <!-- AUTO-LIST-START / END -->", "error");
     }
     const newHTML = htmlContent.replace(listPattern, 
@@ -375,6 +418,11 @@ async function saveToGitHub() {
   } catch (err) {
     showStatus("❌ Nabigo: " + err.message, "error");
   }
+
+  // ✅ BALIK SA KULAY PAGKATAPUS
+  btn.disabled = false;
+  btn.classList.remove("saving");
+  btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
 }
 
 function resetOrder() {
