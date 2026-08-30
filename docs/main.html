@@ -8,7 +8,7 @@
 
 <script>
 // ==================================================
-// ✅ TAMA NA ANG LOKASYON — BOTH assets/ AT assets/pages/
+// ✅ TINITIGNAN ANG DALAWANG LUGAR: assets/ AT assets/pages/
 // ==================================================
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME  = "bisyo";
@@ -19,7 +19,7 @@ const GITHUB_API_DOCS_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_N
 const RAW_DOCS_BASE_URL   = `https://github.com/${REPO_OWNER}/${REPO_NAME}/raw/${BRANCH}/docs/`;
 const VERSION_FILE_URL    = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.txt`;
 
-// ✅ MGA PAHINA — TINITIGNAN ANG DALAWANG LUGAR: assets/ AT assets/pages/
+// ✅ DALAWANG LOKASYON NG MGA PAHINA
 const GITHUB_API_ASSETS_URL  = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets`;
 const GITHUB_API_PAGES_URL   = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages`;
 const PAGES_FOLDER = "pages/";
@@ -35,13 +35,13 @@ let foundApk = null, downloadUrl = null;
 let gotProgressFromApp = false;
 
 // ==================================================
-// 📡 KONEKSYON — ONLINE / OFFLINE
+// 📡 KONEKSYON
 // ==================================================
 function isOnline() { return navigator.onLine; }
 function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
 
 // ==================================================
-// 🔢 BERSYON — KUSANG KUKUHA
+// 🔢 BERSYON — TAMA NA, KUKUHA TOTOO MULA SA APK O FILE
 // ==================================================
 function extractVersionFromApkName(filename) {
   const match = filename.match(/[vV]\d+(?:[.-]\d+)+/);
@@ -120,14 +120,14 @@ function getVisibleSet() {
 }
 
 // ==================================================
-// ✅ KUMAHIN MULA SA DALAWANG LUGAR — assets/ AT assets/pages/
+// ✅ HANAPIN SA DALAWANG LUGAR — assets/ AT assets/pages/
 // ==================================================
 async function fetchPagesFromGitHub() {
   if (!isOnline()) return getAllPages();
   try {
     const knownIds = getAllPages().map(p => p.id);
 
-    // 📁 1. TIGNAN ANG assets/pages/
+    // 📁 assets/pages/
     try {
       const rPages = await fetch(GITHUB_API_PAGES_URL, { cache: "no-store" });
       if (rPages.ok) {
@@ -145,7 +145,7 @@ async function fetchPagesFromGitHub() {
       }
     } catch {}
 
-    // 📁 2. TIGNAN PATI ANG UGAT NA assets/
+    // 📁 assets/ — ugat
     try {
       const rRoot = await fetch(GITHUB_API_ASSETS_URL, { cache: "no-store" });
       if (rRoot.ok) {
@@ -170,21 +170,39 @@ async function fetchPagesFromGitHub() {
   }
 }
 
+// ==================================================
+// ✅ GUMAGANANG PAGLILAGAY — SA LOOB NG AUTO-LIST-START / END
+// ==================================================
 async function buildPageGrids() {
-  const allPages=await fetchPagesFromGitHub(), order=getPageOrder(), visible=getVisibleSet();
-  const bisyoGrid=document.getElementById("bisyo-grid"), extraGrid=document.getElementById("extra-grid");
-  if(bisyoGrid)bisyoGrid.innerHTML=""; if(extraGrid)extraGrid.innerHTML="";
-  order.forEach(id=>{
-    if(!visible.has(id))return;
-    const p=allPages.find(x=>x.id===id); if(!p)return;
-    const c=p.group==="extra"?(extraGrid||bisyoGrid):bisyoGrid; if(!c)return;
-    const a=document.createElement("a");
-    a.href=`${p.folder}${p.file}`; a.className="btn"; a.title=p.desc||"";
-    a.innerHTML=`<span class="num">${p.num||'✦'}</span><span class="txt">${p.name}</span>`;
-    c.appendChild(a);
+  const allPages = await fetchPagesFromGitHub();
+  const order = getPageOrder();
+  const visible = getVisibleSet();
+
+  // Hanapin ang mga marka sa pahina
+  const bodyHTML = document.body.innerHTML;
+  const startMark = "<!-- AUTO-LIST-START -->";
+  const endMark   = "<!-- AUTO-LIST-END -->";
+  const startIdx  = bodyHTML.indexOf(startMark);
+  const endIdx    = bodyHTML.indexOf(endMark);
+
+  if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
+    console.error("Walang nakitang marka sa main.html — ilagay ang <!-- AUTO-LIST-START / END -->");
+    return;
+  }
+
+  // Buuin ang bagong listahan
+  let listHTML = "";
+  order.forEach(pageId => {
+    if (!visible.has(pageId)) return;
+    const p = allPages.find(x => x.id === pageId);
+    if (!p) return;
+    listHTML += `<a href="${p.folder}${p.file}" class="menu-btn">${p.name}</a>\n`;
   });
-  const es=document.getElementById("extra-section");
-  if(es)es.style.display=(extraGrid&&extraGrid.children.length>0)?"block":"none";
+
+  // Palitan ang laman sa pagitan ng mga marka
+  const newInner = startMark + "\n" + listHTML + endMark;
+  document.body.innerHTML =
+    bodyHTML.slice(0, startIdx) + newInner + bodyHTML.slice(endIdx + endMark.length);
 }
 
 // ==================================================
@@ -239,8 +257,9 @@ async function startDownload(){
 
 window.onload=async function(){
   updateDownloadVisibility();
-  await buildPageGrids();
-  await updateVersionDisplay();
+  await buildPageGrids(); // ✅ Gumagana — sa loob ng AUTO-LIST
+  await updateVersionDisplay(); // ✅ Totoo nang bersyon ang lumalabas
+
   if(isOnline()){
     const b=document.getElementById("download-apk-btn"), n=document.getElementById("update-note");
     foundApk=await findAnyApk();
@@ -268,7 +287,6 @@ window.addEventListener("offline",updateDownloadVisibility);
   <p>Ang pag-download at pag-update ay hindi available habang walang internet. Ang iba pang bahagi ng aplikasyon ay gumagana pa rin nang walang koneksyon.</p>
 </div>
 
-<!-- ✅ DOWNLOAD BOX -->
 <div id="download-section" class="download-section hidden">
   <div class="download-title">📤 Aplikasyon — Pag-update</div>
   <div class="download-sub">Kumpletong proyekto — gumagana nang walang internet</div>
@@ -301,11 +319,9 @@ window.addEventListener("offline",updateDownloadVisibility);
   </div>
 </div>
 
-<!-- ✅ IBINALIK ANG BUONG IMPORMASYON — WALANG NAWALA -->
 <div class="info-section">
   <h2>📚 Tungkol sa Proyektong Ito</h2>
   <p>Ang layunin ng proyektong ito ay magbigay ng malinaw at tumpak na kaalaman tungkol sa iba't ibang uri ng mga ilegal na bisyo at ang kanilang masasamang epekto sa katawan, pag-iisip, pamilya, at lipunan.</p>
-
   <h2>📋 Sakop ng Paksa</h2>
   <p>Lahat ng pahina ay kusang lumalabas dito — kabilang ang anumang bagong gagawin sa Admin Panel.</p>
   <ul>
@@ -313,12 +329,9 @@ window.addEventListener("offline",updateDownloadVisibility);
     <li><strong>Karagdagang Pahina:</strong> Aral mula sa Bibliya at iba pa</li>
     <li><strong>Bagong Pahina:</strong> Awtomatikong lalabas dito kapag isinama sa listahan sa Admin Panel</li>
   </ul>
-
   <div class="divider"></div>
-
   <h2>⚠️ Bakit Mahalagang Malaman Ito?</h2>
   <p>Ang bawat bisyo ay may tiyak na masamang dulot — hindi lamang sa katawan kundi pati sa kinabukasan ng tao at ng kanyang pamilya.</p>
-
   <h2>💡 Paano Gamitin ang Aplikasyon</h2>
   <ul>
     <li>Basahin ang bawat pahina nang dahan-dahan at unawain ang nilalaman</li>
@@ -332,14 +345,9 @@ window.addEventListener("offline",updateDownloadVisibility);
 <h3 class="section-title">📖 Mga Pahina — Basahin Dito</h3>
 <h4 class="section-subtitle">Mga Uri ng Bisyo</h4>
 
-<div id="bisyo-grid" class="grid">
-  <p style="text-align:center;color:#6b7280;padding:30px;">🔄 Kinukuha ang mga pahina...</p>
-</div>
-
-<div id="extra-section" class="extra-section hidden">
-  <h4 class="section-subtitle">Karagdagang Pahina</h4>
-  <div id="extra-grid" class="grid"></div>
-</div>
+<!-- ✅ DAPAT NANDITO ANG MGA MARKA — HUWAG TANGGALIN -->
+<!-- AUTO-LIST-START -->
+<!-- AUTO-LIST-END -->
 
 <div class="admin-link">
   <a href="admin.html">⚙️ Admin Panel</a>
