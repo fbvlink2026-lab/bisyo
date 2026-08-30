@@ -1,0 +1,21 @@
+{
+  "project": "Mga Ilegal na Bisyo",
+  "owner": "fbvlink2026-lab",
+  "repo": "bisyo",
+  "assets": "app/src/main/assets/",
+  "copyright": {
+    "owner": "MartoDosko",
+    "year": "2026",
+    "extra": "Powered by Dev. MartoDosko lahat ng karapatan 2026",
+    "autoInsert": true,
+    "savedAt": "2026-08-30T17:01:41.776Z"
+  },
+  "coAdmins": [
+    {
+      "id": 1788090578794,
+      "name": "Mark Jann Tampok",
+      "role": "content-editor"
+    }
+  ],
+  "updatedAt": "2026-08-30T22:00:41.677Z"
+}
