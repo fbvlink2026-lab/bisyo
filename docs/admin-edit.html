@@ -110,6 +110,8 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 .theme-bar { display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center }
 .theme-btn { padding:6px 12px;border-radius:6px;border:2px solid #e5e7eb;cursor:pointer;font-size:14px;background:white }
 .theme-btn.active { border-color:#b91c1c;background:#fef2f2;color:#b91c1c;font-weight:bold }
+
+/* ===== 🎨 HIWALAY NA VISUAL EDITOR ===== */
 .visual-toolbar {
   display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;padding:8px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb
 }
@@ -131,9 +133,6 @@ h1 { font-size: 24px; color: #b91c1c; margin-bottom: 6px; }
 </head>
 <body>
 
-<!-- ==================================================
-     🧩 WIDGET SYSTEM — IISANG PINAGMULAN LANG
-     ================================================== -->
 <script>
 window.WIDGETS = {
   "nav-bar": `
@@ -160,7 +159,6 @@ function expandWidgets(html) {
 }
 </script>
 
-<!-- ✅ WIDGET — HINDI NA ULITIN ANG BUONG NAV-BAR -->
 <!-- WIDGET:nav-bar -->
 
 <div class="container">
@@ -182,6 +180,7 @@ function expandWidgets(html) {
   <div id="editor-area" style="display:none">
     <label id="editor-label">📝 Nilalaman:</label>
 
+    <!-- ✅ TATLONG PILI — HINDI NAGTUTUNGGALI -->
     <div class="mode-tabs">
       <div class="mode-tab active" data-mode="full" onclick="switchMode('full')">📄 Buong File</div>
       <div class="mode-tab" data-mode="content" onclick="switchMode('content')">📝 Nilalaman Lamang</div>
@@ -198,6 +197,10 @@ function expandWidgets(html) {
       <button class="theme-btn" data-theme="compact" onclick="setTheme('compact')">Maikli</button>
     </div>
 
+    <!-- 📄 CODE EDITOR — PARA SA Buong File at Nilalaman Lamang -->
+    <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..." oninput="updatePreview()"></textarea>
+
+    <!-- 🎨 HIWALAY NA VISUAL EDITOR — HINDI NAHALO SA CODE -->
     <div id="visual-toolbar" class="visual-toolbar" style="display:none">
       <button onclick="execCmd('bold')"><b>B</b></button>
       <button onclick="execCmd('italic')"><i>I</i></button>
@@ -214,9 +217,6 @@ function expandWidgets(html) {
       <button onclick="insertLink()">🔗 Link</button>
       <button onclick="insertImage()">🖼️ Imahe</button>
     </div>
-
-    <textarea id="content-editor" placeholder="Ipasok o i-edit ang nilalaman dito..." oninput="updatePreview()"></textarea>
-
     <div id="visual-editor" contenteditable="true" style="display:none" oninput="syncVisualToText()"></div>
 
     <div class="btn-group">
@@ -285,6 +285,9 @@ function getDecryptedToken() {
   } catch { return null; }
 }
 
+// ==================================================
+// ✅ SWITCH MODE — MALINAW NA HINDI NAGTUTUNGGALI
+// ==================================================
 function switchMode(mode) {
   editMode = mode;
   document.querySelectorAll(".mode-tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
@@ -295,24 +298,27 @@ function switchMode(mode) {
   const visualEditor = document.getElementById("visual-editor");
   const visualToolbar = document.getElementById("visual-toolbar");
 
+  // ✅ Bago lumipat — i-save ang kasalukuyang laman
   if (mode !== "visual") syncVisualToText();
 
   if (mode === "full") {
     desc.innerHTML = "📄 <strong>Buong File:</strong> I-edit ang buong code — gamitin para sa <code>main.html</code>, <code>style.css</code>, at iba pa. Mag-ingat.";
     themeBar.style.display = "none";
     visualToolbar.style.display = "none";
-    textarea.style.display = "block";
     visualEditor.style.display = "none";
+    textarea.style.display = "block";
     if (originalFullContent) textarea.value = originalFullContent;
-  } else if (mode === "content") {
+  }
+  else if (mode === "content") {
     desc.innerHTML = "📝 <strong>Nilalaman Lamang:</strong> I-edit lamang ang laman — ang menu at istruktura ay mananatili. Ligtas gamitin.";
     themeBar.style.display = "flex";
     visualToolbar.style.display = "none";
-    textarea.style.display = "block";
     visualEditor.style.display = "none";
+    textarea.style.display = "block";
     extractContentForEdit();
-  } else {
-    desc.innerHTML = "🎨 <strong>Visual Editor:</strong> I-click at baguhin direkta — parang Word!";
+  }
+  else if (mode === "visual") {
+    desc.innerHTML = "🎨 <strong>Visual Editor:</strong> I-click at baguhin direkta — parang Word! Hindi kailangang alam ang HTML.";
     themeBar.style.display = "flex";
     visualToolbar.style.display = "flex";
     textarea.style.display = "none";
@@ -324,6 +330,9 @@ function switchMode(mode) {
   saveEditorState();
 }
 
+// ==================================================
+// 🎨 VISUAL EDITOR — SARILI AT HIWALAY
+// ==================================================
 function execCmd(cmd, val=null) {
   document.execCommand(cmd, false, val);
   document.getElementById("visual-editor").focus();
@@ -333,7 +342,10 @@ function formatBlock(tag) { execCmd('formatBlock', `<${tag}>`); }
 function insertLink() { const u=prompt("Ipasok ang URL:"); if(u)execCmd('createLink',u); }
 function insertImage() { const u=prompt("Ipasok ang URL ng imahe:"); if(u)execCmd('insertImage',u); }
 function syncVisualToText() {
-  if (editMode === "visual") document.getElementById("content-editor").value = document.getElementById("visual-editor").innerHTML;
+  // ✅ Kopyahin mula Visual → Textarea bago lumipat
+  if (editMode === "visual") {
+    document.getElementById("content-editor").value = document.getElementById("visual-editor").innerHTML;
+  }
   updatePreview();
 }
 
@@ -375,7 +387,10 @@ function setTheme(theme) {
 function updatePreview() {
   const iframe = document.getElementById("preview-frame");
   if (!iframe.contentDocument) return;
-  let content = editMode === "visual" ? document.getElementById("visual-editor").innerHTML : document.getElementById("content-editor").value;
+  let content = editMode === "visual"
+    ? document.getElementById("visual-editor").innerHTML
+    : document.getElementById("content-editor").value;
+
   let bodyStyle = "margin:0;padding:20px;max-width:700px;margin:0 auto;background:#fff;color:#1f2937;line-height:1.6";
   if (currentTheme === "serif") bodyStyle += " font-family:Georgia,'Times New Roman',serif;font-size:18px";
   else if (currentTheme === "compact") bodyStyle += " font-size:14px;line-height:1.4;padding:10px";
@@ -424,11 +439,7 @@ async function loadFileList() {
     showStatus(`✅ Nabasa: ${files.length} file sa ${currentFolder || 'assets/'}`, "success");
   } catch(e) {
     sel.innerHTML = `<option value="">❌ Hindi Mabasa</option>`;
-    if (e.message.includes("Failed to fetch") || e.message.includes("NetworkError")) {
-      showStatus(explainStatusCode(0), "error");
-    } else {
-      showStatus(`❌ ${e.message}`, "error");
-    }
+    showStatus(`❌ ${e.message}`, "error");
   }
 }
 
@@ -499,11 +510,15 @@ async function saveContent() {
   const btn = document.getElementById("save-btn");
   let contentToSave = editMode === "full"
     ? document.getElementById("content-editor").value
-    : rebuildFullFileWithNewContent(editMode === "visual"
-        ? document.getElementById("visual-editor").innerHTML
-        : document.getElementById("content-editor").value);
+    : rebuildFullFileWithNewContent(
+        editMode === "visual"
+          ? document.getElementById("visual-editor").innerHTML
+          : document.getElementById("content-editor").value
+      );
 
-  if (!currentFilename || !contentToSave.trim()) return showStatus("❌ Walang napiling file o walang laman", "error");
+  if (!currentFilename || !contentToSave.trim())
+    return showStatus("❌ Walang napiling file o walang laman", "error");
+
   contentToSave = expandWidgets(contentToSave);
 
   btn.disabled = true;
@@ -515,7 +530,10 @@ async function saveContent() {
   originalFullContent = contentToSave;
 
   const pending = JSON.parse(localStorage.getItem("bisyo_offline_changes") || "[]");
-  pending.push({ id: Date.now(), path: fullPath, content: contentToSave, sha: currentSha, timestamp: new Date().toISOString(), synced: false });
+  pending.push({
+    id: Date.now(), path: fullPath, content: contentToSave,
+    sha: currentSha, timestamp: new Date().toISOString(), synced: false
+  });
   localStorage.setItem("bisyo_offline_changes", JSON.stringify(pending));
 
   if (!navigator.onLine) {
@@ -556,18 +574,19 @@ async function saveContent() {
 }
 
 function explainStatusCode(status) {
-  const explanations = {
+  return {
     401: "🔑 Walang pahintulot — Kailangan ng Token o hindi tama ang Token.",
     403: "⚠️ Limitasyon ng GitHub — Naubos na ang bilang ng kahilingan o kulang ang pahintulot.",
     404: "📂 Hindi Natagpuan — Ang file o folder ay wala sa repositori.",
     500: "☁️ Problema sa GitHub — Subukan muli mamaya.",
     0: "📴 Walang Koneksyon — Nai-save lamang lokal, isesync kapag online."
-  };
-  return explanations[status] || `⚠️ Katayuan: HTTP ${status}`;
+  }[status] || `⚠️ Katayuan: HTTP ${status}`;
 }
 
 function copyContent() {
-  const val = editMode === "visual" ? document.getElementById("visual-editor").innerHTML : document.getElementById("content-editor").value;
+  const val = editMode === "visual"
+    ? document.getElementById("visual-editor").innerHTML
+    : document.getElementById("content-editor").value;
   navigator.clipboard.writeText(val).then(() => showStatus("📋 Nakopya!", "success"));
 }
 function togglePreview() {
@@ -584,7 +603,9 @@ function clearCache() {
   loadFileContent();
 }
 function saveEditorState() {
-  localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({ folder: currentFolder, filename: currentFilename, mode: editMode }));
+  localStorage.setItem(EDITOR_STATE_KEY, JSON.stringify({
+    folder: currentFolder, filename: currentFilename, mode: editMode
+  }));
 }
 async function restoreEditorState() {
   try {
