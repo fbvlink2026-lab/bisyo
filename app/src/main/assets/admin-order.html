@@ -45,6 +45,11 @@
   flex: 1;
   font-size: 15px;
 }
+.order-path {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 8px;
+}
 .order-row .btn {
   padding: 6px 10px;
   font-size: 13px;
@@ -79,15 +84,14 @@
 
 <div class="container">
   <h1>🔢 Ayusin ang Pagkakasunod-sunod</h1>
-  <p style="color:#6b7280;margin-bottom:16px">⬆️⬇️ Ilipat • ✅ Ipakita/Itago • ✏️ I-edit • 🗑️ Alisin — <strong>Mula sa GitHub!</strong></p>
+  <p style="color:#6b7280;margin-bottom:16px">⬆️⬇️ Ilipat • ✅ Ipakita/Itago • ✏️ I-edit • 🗑️ Alisin — <strong>Mula sa assets/ at lahat ng subfolder!</strong></p>
 
-  <!-- ✅ KUSANG BABASA MULA SA GITHUB — ITO ANG DATABASE MO -->
   <div class="panel-card">
     <div class="top-bar">
-      <strong>📂 Mga Pahina — Mula sa GitHub</strong>
+      <strong>📂 Mga Pahina — Mula sa assets/ at subfolders</strong>
       <span id="load-status" class="last-saved">—</span>
     </div>
-    <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Kusang binabasa ang lahat ng <code>*.html</code> mula sa <code>assets/pages/</code> — <strong>hindi na nakasulat nang matigas!</strong></p>
+    <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Binabasa ang lahat ng <code>*.html</code> mula sa <code>assets/</code> at <code>assets/pages/</code> — <strong>hindi na nakasulat nang matigas!</strong></p>
     <button class="btn btn-primary" onclick="loadFromGitHub()">🔄 BASAHIN MULI MULA SA GITHUB</button>
   </div>
 
@@ -103,7 +107,7 @@
 
   <div class="action-bar">
     <button class="btn btn-primary" onclick="saveOrder()">💾 I-save LOKAL</button>
-    <button class="btn btn-success" onclick="saveToGitHub()">☁️ I-SAVE SA GITHUB → main.html</button>
+    <button class="btn btn-success" onclick="saveToGitHub()">☁️ I-SAVE SA GITHUB → i-update ang listahan</button>
     <button class="btn btn-secondary" onclick="resetOrder()">↩️ Ibalik sa Orihinal</button>
   </div>
 
@@ -113,6 +117,7 @@
 <script>
 // ==============================================
 // ✅ GITHUB ANG DATABASE — WALANG HARDCODED!
+// ✅ KAYA NA ANG assets/ AT LAHAT NG SUBFOLDERS
 // ==============================================
 const ORDER_KEY = "bisyo_page_order";
 const VISIBLE_KEY = "bisyo_page_visible";
@@ -121,10 +126,18 @@ const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME = "bisyo";
 const BRANCH = "main";
-const PAGES_FOLDER = "app/src/main/assets/pages/";
-const MAIN_HTML_PATH = "app/src/main/assets/main.html";
 
-let allPages = []; // ✅ DITO ILALAGAY ANG MGA BASA MULA SA GITHUB
+// ✅ TAMA AYON SA PLANO — assets/ ANG PINAGMULAN
+const ASSETS_ROOT = "app/src/main/assets/";
+const MAIN_HTML_PATH = ASSETS_ROOT + "main.html";
+
+// ✅ LAHAT NG FOLDER NA BABASAHIN — MADAGDAG KUNG KAILANGAN
+const SCAN_FOLDERS = [
+  "",           // 📂 assets/ ROOT — main.html, atbp.
+  "pages/"      // 📂 assets/pages/ — mga nilalaman
+];
+
+let allPages = [];
 
 // === SESSION ===
 function checkSession() {
@@ -158,8 +171,7 @@ function getToken() {
 }
 
 // ==================================================
-// ✅ BASAHIN MULA SA GITHUB — ITO ANG DATABASE MO!
-// WALANG NAKASULAT SA LOOB NG KODIGO — LAHAT MULA SA GITHUB
+// ✅ BASAHIN MULA SA LAHAT NG FOLDER — assets/ + pages/
 // ==================================================
 async function loadFromGitHub() {
   if (!navigator.onLine) {
@@ -176,32 +188,34 @@ async function loadFromGitHub() {
   allPages = [];
 
   try {
-    // 📡 KUHAIN ANG LAHAT NG FILE SA pages/ FOLDER
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${PAGES_FOLDER}?ref=${BRANCH}`, {
-      headers: { "Authorization": `token ${token}` }
-    });
-    if (!res.ok) throw new Error(`Hindi mabasa: ${res.status}`);
-    const files = await res.json();
+    // ✅ BASAHIN ANG LAHAT NG TINUKOY NA FOLDER
+    for (const folder of SCAN_FOLDERS) {
+      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ASSETS_ROOT}${folder}?ref=${BRANCH}`, {
+        headers: { "Authorization": `token ${token}` }
+      });
+      if (!res.ok) continue; // laktawan kung walang laman o hindi umiiral
+      const files = await res.json();
 
-    // ✅ SALAIN — KUNIN LANG ANG .html AT BUUIN ANG IMPORMASYON
-    files.forEach(file => {
-      if (file.type === "file" && file.name.endsWith(".html")) {
-        const id = file.name.replace(/\.html$/i, "");
-        // Gawing pangalan mula sa pangalan ng file
-        const nameFromFile = id.replace(/-/g, ' ')
-          .replace(/\b\w/g, l => l.toUpperCase());
+      files.forEach(file => {
+        if (file.type === "file" && file.name.endsWith(".html")) {
+          const id = folder + file.name.replace(/\.html$/i, "");
+          const nameFromFile = file.name.replace(/\.html$/i, "")
+            .replace(/-/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase());
 
-        allPages.push({
-          id: id,
-          name: nameFromFile,
-          file: file.name,
-          folder: "pages/",
-          desc: "Pahina mula sa GitHub"
-        });
-      }
-    });
+          allPages.push({
+            id: id,           // ✅ kasama ang folder: "pages/alak" o "main"
+            name: nameFromFile,
+            file: file.name,
+            folder: folder,   // ✅ aling folder nanggaling
+            path: folder + file.name, // ✅ buong landas
+            desc: folder ? `Nasa: assets/${folder}` : "Nasa: assets/"
+          });
+        }
+      });
+    }
 
-    // ✅ I-UPDATE ANG KASALUKUYANG AYOS — KUNG MAY BAGO, IDADAGDAG
+    // ✅ I-UPDATE ANG AYOS — bagong pahina = idadagdag
     updateOrderWithNewPages();
 
     document.getElementById("load-status").textContent = `✅ ${allPages.length} pahina`;
@@ -214,15 +228,14 @@ async function loadFromGitHub() {
   }
 }
 
-// ✅ KUNG MAY BAGONG PAHINA — IDADAGDAG SA HULI NG AYOS
 function updateOrderWithNewPages() {
   let order = getOrder();
   const visible = getVisibleSet();
   
   allPages.forEach(page => {
     if (!order.includes(page.id)) {
-      order.push(page.id); // ✅ Bagong pahina — idadagdag sa dulo
-      visible.add(page.id); // ✅ Nakikita bilang default
+      order.push(page.id);
+      visible.add(page.id);
     }
   });
   
@@ -230,7 +243,6 @@ function updateOrderWithNewPages() {
   localStorage.setItem(VISIBLE_KEY, JSON.stringify([...visible]));
 }
 
-// === ALIN ANG LALABAS SA MAIN.HTML ===
 function getVisibleSet() {
   const s = localStorage.getItem(VISIBLE_KEY);
   if (s) try { return new Set(JSON.parse(s)) } catch {}
@@ -243,14 +255,13 @@ function setPageVisible(id, isVisible) {
   render();
 }
 
-// === PAGKAKASUNOD-SUNOD ===
 function getOrder() {
   const s = localStorage.getItem(ORDER_KEY);
   if (s) try { return JSON.parse(s) } catch {}
   return allPages.map(p => p.id);
 }
 
-// === ✅ RENDER NG LISTAHAN ===
+// === ✅ RENDER — KASAMA ANG FOLDER SA PAGPAPAKITA ===
 function render() {
   const list = document.getElementById("order-list");
   const order = getOrder();
@@ -274,19 +285,22 @@ function render() {
         <span class="order-pos">${idx+1}</span>
         <div class="order-name">
           ${page.name}
+          <span class="order-path">📁 ${page.folder || 'assets/'}</span>
           ${shown?'':'<span style="font-size:11px;color:#d97706;margin-left:6px">☐ Nakatago</span>'}
         </div>
         <button class="btn btn-sm btn-up" onclick="move(${idx},-1)" ${idx===0?'disabled':''}>⬆️</button>
         <button class="btn btn-sm btn-down" onclick="move(${idx},1)" ${idx===order.length-1?'disabled':''}>⬇️</button>
-        <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.file}')">✏️</button>
+        <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.path}')">✏️</button>
         <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')">🗑️</button>
       </div>`;
   });
 }
 
-function goEdit(filename) {
-  location.href = `admin-edit.html?file=${encodeURIComponent(filename)}`;
+// ✅ DUMIDIRETSO SA ADMIN-EDIT — KASAMA ANG TAMANG LANDAS
+function goEdit(filePath) {
+  location.href = `admin-edit.html?file=${encodeURIComponent(filePath)}`;
 }
+
 function move(i, dir) {
   const o = getOrder();
   [o[i], o[i+dir]] = [o[i+dir], o[i]];
@@ -305,14 +319,13 @@ function removeFromList(id) {
   showStatus("✅ Inalis sa listahan", "success");
 }
 
-// === 💾 I-SAVE LOKAL ===
 function saveOrder() {
   localStorage.setItem(ORDER_KEY, JSON.stringify(getOrder()));
   localStorage.setItem(VISIBLE_KEY, JSON.stringify([...getVisibleSet()]));
   showStatus("✅ Nai-save sa LOKAL", "success");
 }
 
-// === ☁️ I-SAVE SA GITHUB — DIRETSONG BAGUHIN ANG MAIN.HTML ===
+// === ☁️ I-SAVE SA GITHUB — I-UPDATE ANG MAIN.HTML ===
 async function saveToGitHub() {
   if (!navigator.onLine) return showStatus("📴 Walang internet", "error");
   const token = getToken();
@@ -321,17 +334,13 @@ async function saveToGitHub() {
   showStatus("🔨 Binabago ang main.html...", "info");
 
   try {
-    // Kunin ang kasalukuyang main.html
     const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MAIN_HTML_PATH}?ref=${BRANCH}`, {
       headers: { "Authorization": `token ${token}` }
     });
     if (!getRes.ok) throw new Error(`Hindi makuha ang main.html`);
     const fileData = await getRes.json();
-
-    // Basahin ang laman
     const htmlContent = atob(fileData.content);
 
-    // Buuin ang bagong listahan
     const order = getOrder();
     const visible = getVisibleSet();
     let newListHTML = "";
@@ -339,10 +348,11 @@ async function saveToGitHub() {
       if (!visible.has(id)) return;
       const p = allPages.find(x => x.id === id);
       if (!p) return;
-      newListHTML += `<a href="pages/${p.file}" class="menu-btn">${p.name}</a>\n`;
+      // ✅ Tamang landas: kung nasa pages/ → "pages/filename.html", kung nasa root → "filename.html"
+      const linkHref = p.folder ? `${p.folder}${p.file}` : p.file;
+      newListHTML += `<a href="${linkHref}" class="menu-btn">${p.name}</a>\n`;
     });
 
-    // Palitan ang bahagi ng listahan
     const listPattern = /<!--\s*AUTO-LIST-START\s*-->[\s\S]*?<!--\s*AUTO-LIST-END\s*-->/;
     if (!listPattern.test(htmlContent)) {
       return showStatus("❌ Walang nakitang marka sa main.html — ilagay ang <!-- AUTO-LIST-START / END -->", "error");
@@ -350,7 +360,6 @@ async function saveToGitHub() {
     const newHTML = htmlContent.replace(listPattern, 
       `<!-- AUTO-LIST-START -->\n${newListHTML}<!-- AUTO-LIST-END -->`);
 
-    // I-upload balik
     const updateRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MAIN_HTML_PATH}`, {
       method: "PUT",
       headers: {
@@ -386,12 +395,13 @@ function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt;
   el.className = `status ${cls}`;
+  el.style.display = "block";
   setTimeout(() => { el.style.display = "none"; el.className = "status"; }, 8000);
 }
 
 window.onload = () => {
   if (!checkSession()) return;
-  loadFromGitHub(); // ✅ KUSANG BABASA MULA SA GITHUB PAGBUKAS!
+  loadFromGitHub();
 };
 </script>
 </body>
