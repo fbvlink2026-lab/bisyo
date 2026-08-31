@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="style.css">
 <title>🔢 Ayusin Pagkakasunod-sunod</title>
 <style>
-/* ✅ DAGDAG — PARA MAGING ABO ANG BUTTON HABANG GINAGAWA */
 .btn-primary:disabled,
 .btn-primary.saving {
   background: #9ca3af !important;
@@ -30,6 +29,7 @@
   margin: 0;
   flex-shrink: 0;
 }
+
 .order-row {
   display: flex;
   align-items: center;
@@ -39,12 +39,46 @@
   border-radius: 10px;
   margin: 6px 0;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  transition: opacity 0.25s;
+  transition: all 0.25s;
+  cursor: grab;
 }
 .order-row.hidden-from-main {
   opacity: 0.55;
   background: #f3f4f6;
 }
+.order-row:active { cursor: grabbing; }
+
+/* ✅ DRAG STATES */
+.order-row.dragging {
+  opacity: 0.4;
+  transform: scale(0.98);
+  background: #e5e7eb;
+}
+.order-row.drag-target {
+  border: 2px dashed #dc2626;
+}
+
+/* ✅ HAWAK SA KALIWA */
+.drag-grip {
+  color: #9ca3af;
+  font-size: 20px;
+  padding: 0 2px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* ✅ DROPDOWN NG GRUPO */
+.group-select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.group-select:focus { outline: none; border-color: #b91c1c; }
+
 .order-pos {
   width: 30px;
   height: 30px;
@@ -100,14 +134,14 @@
 
 <div class="container">
   <h1>🔢 Ayusin ang Pagkakasunod-sunod</h1>
-  <p style="color:#6b7280;margin-bottom:16px">⬆️⬇️ Ilipat • ✅ Ipakita/Itago • ✏️ I-edit • 🗑️ Alisin — <strong>Mula sa assets/ at lahat ng subfolder!</strong></p>
+  <p style="color:#6b7280;margin-bottom:16px">🖱️ I-drag ang ⋮⋮ upang ilipat • ✅ Ipakita/Itago • 📖📘 Palitan ang Grupo • ✏️ I-edit • 🗑️ Alisin</p>
 
   <div class="panel-card">
     <div class="top-bar">
       <strong>📂 Mga Pahina — Mula sa assets/ at subfolders</strong>
       <span id="load-status" class="last-saved">—</span>
     </div>
-    <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Binabasa ang lahat ng <code>*.html</code> mula sa <code>assets/</code> at <code>assets/pages/</code> — <strong>hindi na nakasulat nang matigas!</strong></p>
+    <p style="font-size:14px;color:#6b7280;margin:8px 0 12px">Binabasa ang lahat ng <code>*.html</code> mula sa <code>assets/</code> at <code>assets/pages/</code></p>
     <button id="load-btn" class="btn btn-primary" onclick="loadFromGitHub()">🔄 BASAHIN MULI MULA SA GITHUB</button>
   </div>
 
@@ -133,6 +167,7 @@
 <script>
 const ORDER_KEY = "bisyo_page_order";
 const VISIBLE_KEY = "bisyo_page_visible";
+const GROUP_KEY = "bisyo_page_group";
 const SESSION_KEY = "bisyo_admin_session";
 const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
 const REPO_OWNER = "fbvlink2026-lab";
@@ -141,18 +176,15 @@ const BRANCH = "main";
 
 const ASSETS_ROOT = "app/src/main/assets/";
 const MAIN_HTML_PATH = ASSETS_ROOT + "main.html";
-
 const SCAN_FOLDERS = [ "", "pages/" ];
 
 let allPages = [];
+let pageGroups = {};
+let draggedIndex = null;
 
-// ✅ LIGTAS NA PAGBASA — WALANG SIRANG EMOJI!
 function safeDecodeBase64(base64) {
-  try {
-    return decodeURIComponent(escape(atob(base64)));
-  } catch {
-    return atob(base64);
-  }
+  try { return decodeURIComponent(escape(atob(base64))); }
+  catch { return atob(base64); }
 }
 
 function checkSession() {
@@ -168,43 +200,37 @@ function getPassword() {
   const s = sessionStorage.getItem(SESSION_KEY);
   return s ? JSON.parse(s).password : "";
 }
-function getEncryptedToken() {
-  return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
-}
+function getEncryptedToken() { return localStorage.getItem(TOKEN_STORAGE_KEY) || ""; }
 function decryptToken(encrypted, password) {
   try {
     const decoded = atob(encrypted);
     let result = "";
-    for (let i = 0; i < decoded.length; i++) {
+    for (let i=0; i<decoded.length; i++)
       result += String.fromCharCode(decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length));
-    }
     return result;
   } catch { return ""; }
 }
-function getToken() {
-  return decryptToken(getEncryptedToken(), getPassword());
+function getToken() { return decryptToken(getEncryptedToken(), getPassword()); }
+
+function loadGroups() {
+  try { const s = localStorage.getItem(GROUP_KEY); if (s) pageGroups = JSON.parse(s); }
+  catch { pageGroups = {}; }
 }
+function saveGroups() { localStorage.setItem(GROUP_KEY, JSON.stringify(pageGroups)); }
+function setGroup(id, value) { pageGroups[id] = value; saveGroups(); }
 
 async function loadFromGitHub() {
   const btn = document.getElementById("load-btn");
-  btn.disabled = true;
-  btn.classList.add("saving");
-  btn.textContent = "⏳ Binabasa...";
+  btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Binabasa...";
 
   if (!navigator.onLine) {
-    btn.disabled = false;
-    btn.classList.remove("saving");
-    btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
-    showStatus("📴 Walang internet — hindi mabasa ang GitHub", "warning");
-    return;
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
+    showStatus("📴 Walang internet — hindi mabasa ang GitHub", "warning"); return;
   }
   const token = getToken();
   if (!token) {
-    btn.disabled = false;
-    btn.classList.remove("saving");
-    btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
-    showStatus("❌ Walang token — i-setup muna sa Token page", "error");
-    return;
+    btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
+    showStatus("❌ Walang token — i-setup muna sa Token page", "error"); return;
   }
 
   document.getElementById("load-status").textContent = "🔍 Binabasa...";
@@ -217,52 +243,40 @@ async function loadFromGitHub() {
       });
       if (!res.ok) continue;
       const files = await res.json();
-
       files.forEach(file => {
         if (file.type === "file" && file.name.endsWith(".html")) {
           const id = folder + file.name.replace(/\.html$/i, "");
           const nameFromFile = file.name.replace(/\.html$/i, "")
-            .replace(/-/g, ' ')
-            .replace(/\b\w/g, l => l.toUpperCase());
-
-          allPages.push({
-            id: id,
-            name: nameFromFile,
-            file: file.name,
-            folder: folder,
-            path: folder + file.name
-          });
+            .replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          allPages.push({ id, name: nameFromFile, file: file.name, folder, path: folder + file.name });
         }
       });
     }
-
     updateOrderWithNewPages();
     document.getElementById("load-status").textContent = `✅ ${allPages.length} pahina`;
     showStatus(`✅ Nabasa mula sa GitHub: ${allPages.length} pahina`, "success");
     render();
-
   } catch (e) {
     document.getElementById("load-status").textContent = "❌ Nabigo";
     showStatus("❌ Nabigo: " + e.message, "error");
   }
-
-  // ✅ BALIK SA PULA
-  btn.disabled = false;
-  btn.classList.remove("saving");
-  btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
+  btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "🔄 BASAHIN MULI MULA SA GITHUB";
 }
 
 function updateOrderWithNewPages() {
   let order = getOrder();
   const visible = getVisibleSet();
   allPages.forEach(page => {
-    if (!order.includes(page.id)) {
-      order.push(page.id);
-      visible.add(page.id);
+    if (!order.includes(page.id)) { order.push(page.id); visible.add(page.id); }
+    if (!pageGroups[page.id]) {
+      const baseId = page.file.replace(/\.html$/i, "");
+      const isBisyo = /^(alak|sigarilyo|shabu|heroin|marijuana|ecstasy|cocaine|tinuturok-gamot|tuklaw|sugal|inhalants|pag-aabuso-gamot|lsd|ketamine|ibang-sugal|internet-laro|labis-pagkain|vaping)$/.test(baseId);
+      pageGroups[page.id] = isBisyo ? "bisyo" : "extra";
     }
   });
   localStorage.setItem(ORDER_KEY, JSON.stringify(order));
   localStorage.setItem(VISIBLE_KEY, JSON.stringify([...visible]));
+  saveGroups();
 }
 
 function getVisibleSet() {
@@ -276,13 +290,13 @@ function setPageVisible(id, isVisible) {
   localStorage.setItem(VISIBLE_KEY, JSON.stringify([...visible]));
   render();
 }
-
 function getOrder() {
   const s = localStorage.getItem(ORDER_KEY);
   if (s) try { return JSON.parse(s) } catch {}
   return allPages.map(p => p.id);
 }
 
+// ✅ TAMANG RENDER — WALANG ARROW, MAY GRUPO, MAY DRAG
 function render() {
   const list = document.getElementById("order-list");
   const order = getOrder();
@@ -298,34 +312,69 @@ function render() {
     const page = allPages.find(p => p.id === id);
     if (!page) return;
     const shown = visible.has(id);
-    list.innerHTML += `
-      <div class="order-row ${shown?'':'hidden-from-main'}">
-        <input type="checkbox" class="show-hide-cb" 
-               ${shown?'checked':''} 
-               onchange="setPageVisible('${id}', this.checked)">
-        <span class="order-pos">${idx+1}</span>
-        <div class="order-name">
-          ${page.name}
-          <span class="order-path">📁 ${page.folder || 'assets/'}</span>
-          ${shown?'':'<span style="font-size:11px;color:#d97706;margin-left:6px">☐ Nakatago</span>'}
-        </div>
-        <button class="btn btn-sm btn-up" onclick="move(${idx},-1)" ${idx===0?'disabled':''}>⬆️</button>
-        <button class="btn btn-sm btn-down" onclick="move(${idx},1)" ${idx===order.length-1?'disabled':''}>⬇️</button>
-        <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.path}')">✏️</button>
-        <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')">🗑️</button>
-      </div>`;
+    const group = pageGroups[id] || "bisyo";
+
+    const row = document.createElement("div");
+    row.className = `order-row ${shown?'':'hidden-from-main'}`;
+    row.draggable = true;
+    row.dataset.index = idx;
+
+    // ✅ TAMANG AYOS: ⋮⋮ ✅ # Pangalan ✏️ [Grupo] 🗑️ — WALANG ARROW
+    row.innerHTML = `
+      <span class="drag-grip">⋮⋮</span>
+      <input type="checkbox" class="show-hide-cb" ${shown?'checked':''}
+             onchange="setPageVisible('${id}', this.checked)">
+      <span class="order-pos">${idx+1}</span>
+      <div class="order-name">
+        ${page.name}
+        <span class="order-path">📁 ${page.folder || 'assets/'}</span>
+        ${shown?'':'<span style="font-size:11px;color:#d97706;margin-left:6px">☐ Nakatago</span>'}
+      </div>
+      <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.path}')">✏️ I-edit</button>
+      <select class="group-select" onchange="setGroup('${id}', this.value)">
+        <option value="bisyo" ${group==='bisyo'?'selected':''}>📖 Bisyo</option>
+        <option value="extra" ${group==='extra'?'selected':''}>📘 Karagdagang</option>
+      </select>
+      <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')">🗑️</button>
+    `;
+
+    // ✅ DRAG & DROP — SIGURADONG GUMAGANA
+    row.ondragstart = e => {
+      draggedIndex = idx;
+      row.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", idx);
+    };
+    row.ondragend = () => {
+      draggedIndex = null;
+      row.classList.remove("dragging");
+      document.querySelectorAll(".order-row").forEach(r => r.classList.remove("drag-target"));
+    };
+    row.ondragover = e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (parseInt(row.dataset.index) !== draggedIndex) row.classList.add("drag-target");
+    };
+    row.ondragleave = () => row.classList.remove("drag-target");
+    row.ondrop = e => {
+      e.preventDefault();
+      row.classList.remove("drag-target");
+      const targetIdx = parseInt(row.dataset.index);
+      if (draggedIndex !== null && targetIdx !== draggedIndex) {
+        const o = getOrder();
+        const [moved] = o.splice(draggedIndex, 1);
+        o.splice(targetIdx, 0, moved);
+        localStorage.setItem(ORDER_KEY, JSON.stringify(o));
+        render();
+      }
+    };
+
+    list.appendChild(row);
   });
 }
 
 function goEdit(filePath) {
   location.href = `admin-edit.html?file=${encodeURIComponent(filePath)}`;
-}
-
-function move(i, dir) {
-  const o = getOrder();
-  [o[i], o[i+dir]] = [o[i+dir], o[i]];
-  localStorage.setItem(ORDER_KEY, JSON.stringify(o));
-  render();
 }
 function askRemove(id, name) {
   if (!confirm(`"${name}"\n\nItago lang gamit ang CHECKBOX kung ayaw mong burahin.\n\nAalisin ba TALAGA sa listahan?`)) return;
@@ -342,10 +391,9 @@ function removeFromList(id) {
 function saveOrder() {
   const btn = document.getElementById("save-local-btn");
   btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Nag-i-save...";
-
   localStorage.setItem(ORDER_KEY, JSON.stringify(getOrder()));
   localStorage.setItem(VISIBLE_KEY, JSON.stringify([...getVisibleSet()]));
-
+  saveGroups();
   setTimeout(() => {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "💾 I-save LOKAL";
     showStatus("✅ Nai-save sa LOKAL", "success");
@@ -355,7 +403,6 @@ function saveOrder() {
 async function saveToGitHub() {
   const btn = document.getElementById("save-gh-btn");
   btn.disabled = true; btn.classList.add("saving"); btn.textContent = "⏳ Nag-i-save...";
-
   if (!navigator.onLine) {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
     return showStatus("📴 Walang internet", "error");
@@ -365,18 +412,14 @@ async function saveToGitHub() {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
     return showStatus("❌ Walang token", "error");
   }
-
   showStatus("🔨 Binabago ang main.html...", "info");
-
   try {
     const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MAIN_HTML_PATH}?ref=${BRANCH}`, {
       headers: { "Authorization": `token ${token}` }
     });
     if (!getRes.ok) throw new Error(`Hindi makuha ang main.html`);
     const fileData = await getRes.json();
-
     const htmlContent = safeDecodeBase64(fileData.content);
-
     const order = getOrder();
     const visible = getVisibleSet();
     let newListHTML = "";
@@ -387,7 +430,6 @@ async function saveToGitHub() {
       const linkHref = p.folder ? `${p.folder}${p.file}` : p.file;
       newListHTML += `<a href="${linkHref}" class="menu-btn">${p.name}</a>\n`;
     });
-
     const listPattern = /<!--\s*AUTO-LIST-START\s*-->[\s\S]*?<!--\s*AUTO-LIST-END\s*-->/;
     if (!listPattern.test(htmlContent)) {
       btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
@@ -395,13 +437,9 @@ async function saveToGitHub() {
     }
     const newHTML = htmlContent.replace(listPattern, 
       `<!-- AUTO-LIST-START -->\n${newListHTML}<!-- AUTO-LIST-END -->`);
-
     const updateRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MAIN_HTML_PATH}`, {
       method: "PUT",
-      headers: {
-        "Authorization": `token ${token}`,
-        "Content-Type": "application/json"
-      },
+      headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         message: `🔄 Update listahan — ${new Date().toLocaleString('tl-PH')}`,
         content: btoa(unescape(encodeURIComponent(newHTML))),
@@ -409,26 +447,21 @@ async function saveToGitHub() {
         branch: BRANCH
       })
     });
-
     if (!updateRes.ok) throw new Error("Pagkabigo sa pag-upload");
-
     saveOrder();
     showStatus("☁️✅ NA-UPDATE ANG MAIN.HTML SA GITHUB!", "success");
-
   } catch (err) {
     showStatus("❌ Nabigo: " + err.message, "error");
   }
-
-  // ✅ BALIK SA KULAY PAGKATAPUS
-  btn.disabled = false;
-  btn.classList.remove("saving");
-  btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
+  btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
 }
 
 function resetOrder() {
   if (!confirm("Ibalik sa orihinal na ayos?")) return;
   localStorage.removeItem(ORDER_KEY);
   localStorage.removeItem(VISIBLE_KEY);
+  localStorage.removeItem(GROUP_KEY);
+  pageGroups = {};
   render();
   showStatus("↩️ Bumalik sa orihinal", "info");
 }
@@ -442,6 +475,7 @@ function showStatus(txt, cls) {
 
 window.onload = () => {
   if (!checkSession()) return;
+  loadGroups();
   loadFromGitHub();
 };
 </script>
