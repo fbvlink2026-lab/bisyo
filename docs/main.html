@@ -8,7 +8,7 @@
 
 <script>
 // ==================================================
-// ✅ TINITIGNAN ANG DALAWANG LUGAR: assets/ AT assets/pages/
+// ✅ TAMA NA ANG LOKASYON — assets/pages/ HINDI docs/
 // ==================================================
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME  = "bisyo";
@@ -19,9 +19,8 @@ const GITHUB_API_DOCS_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_N
 const RAW_DOCS_BASE_URL   = `https://github.com/${REPO_OWNER}/${REPO_NAME}/raw/${BRANCH}/docs/`;
 const VERSION_FILE_URL    = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.txt`;
 
-// ✅ DALAWANG LOKASYON NG MGA PAHINA
-const GITHUB_API_ASSETS_URL  = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets`;
-const GITHUB_API_PAGES_URL   = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages`;
+// ✅ MGA PAHINA — assets/pages/ ANG TAMA
+const GITHUB_API_PAGES_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages`;
 const PAGES_FOLDER = "pages/";
 
 const VERSION_CACHE_KEY = "bisyo_cached_version";
@@ -35,49 +34,7 @@ let foundApk = null, downloadUrl = null;
 let gotProgressFromApp = false;
 
 // ==================================================
-// 📡 KONEKSYON
-// ==================================================
-function isOnline() { return navigator.onLine; }
-function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
-
-// ==================================================
-// 🔢 BERSYON — TAMA NA, KUKUHA TOTOO MULA SA APK O FILE
-// ==================================================
-function extractVersionFromApkName(filename) {
-  const match = filename.match(/[vV]\d+(?:[.-]\d+)+/);
-  return match ? match[0] : null;
-}
-function getCachedVersion() {
-  return localStorage.getItem(VERSION_CACHE_KEY) || DEFAULT_VERSION;
-}
-async function fetchLatestVersion() {
-  if (!isOnline()) return getCachedVersion();
-  const apkName = await findAnyApk();
-  if (apkName) {
-    const verFromApk = extractVersionFromApkName(apkName);
-    if (verFromApk) {
-      localStorage.setItem(VERSION_CACHE_KEY, verFromApk);
-      return verFromApk;
-    }
-  }
-  try {
-    const res = await fetch(VERSION_FILE_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("Hindi mabasa");
-    const versionText = (await res.text()).trim();
-    if (versionText) {
-      localStorage.setItem(VERSION_CACHE_KEY, versionText);
-      return versionText;
-    }
-  } catch {}
-  return getCachedVersion();
-}
-async function updateVersionDisplay() {
-  const version = await fetchLatestVersion();
-  document.querySelectorAll(".version-display").forEach(el => el.textContent = version);
-}
-
-// ==================================================
-// 📋 BATAYANG LISTAHAN
+// ✅ BATAYANG LISTAHAN — KUSANG AYUSIN AYON SA ADMIN-ORDER
 // ==================================================
 const BASE_PAGES = [
   {id:"alak",           name:"Alak",                desc:"Labis na pag-inom at epekto", group:"bisyo", num:1, file:"alak.html", folder:PAGES_FOLDER},
@@ -101,205 +58,285 @@ const BASE_PAGES = [
   {id:"aral-sa-bibliya",name:"Aral mula sa Bibliya", desc:"Pag-asa at lakas laban sa bisyo", group:"extra", num:null, file:"aral-sa-bibliya.html", folder:PAGES_FOLDER}
 ];
 
+// ==================================================
+// 📡 KONEKSYON — ONLINE / OFFLINE
+// ==================================================
+function isOnline() { return navigator.onLine; }
+function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
+
+// ==================================================
+// 🔢 BERSYON — KUSANG KUKUHA
+// ==================================================
+function getCachedVersion() {
+  return localStorage.getItem(VERSION_CACHE_KEY) || DEFAULT_VERSION;
+}
+async function fetchLatestVersion() {
+  if (!isOnline()) return getCachedVersion();
+  try {
+    const res = await fetch(VERSION_FILE_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Hindi mabasa");
+    const versionText = (await res.text()).trim();
+    if (versionText) {
+      localStorage.setItem(VERSION_CACHE_KEY, versionText);
+      return versionText;
+    }
+    return DEFAULT_VERSION;
+  } catch {
+    return getCachedVersion();
+  }
+}
+async function updateVersionDisplay() {
+  const version = await fetchLatestVersion();
+  document.querySelectorAll(".version-display").forEach(el => el.textContent = version);
+}
+
+// ==================================================
+// 📋 LISTAHAN NG PAHINA — KUSANG LUMALAWAK
+// ==================================================
 function getAllPages() {
   const stored = localStorage.getItem(ALL_PAGES_KEY);
   let list = BASE_PAGES.slice();
-  if (stored) { try { JSON.parse(stored).forEach(p=>{if(!list.find(x=>x.id===p.id))list.push(p);}); } catch {} }
+  if (stored) {
+    try {
+      const extra = JSON.parse(stored);
+      extra.forEach(p => {
+        if (!list.find(x => x.id === p.id)) list.push(p);
+      });
+    } catch {}
+  }
   return list;
 }
 
+// ✅ BASAHIN ANG AYOS AT TINAGO MULA SA ADMIN-ORDER
 function getPageOrder() {
   const s = localStorage.getItem(ORDER_KEY);
-  if (s) try { const o=JSON.parse(s), a=getAllPages(); return o.filter(id=>a.find(p=>p.id===id)); } catch {}
-  return getAllPages().map(p=>p.id);
+  if (s) {
+    try {
+      const savedOrder = JSON.parse(s);
+      const allPages = getAllPages();
+      return savedOrder.filter(id => allPages.find(p => p.id === id));
+    } catch {}
+  }
+  return getAllPages().map(p => p.id);
 }
 function getVisibleSet() {
   const s = localStorage.getItem(HIDDEN_KEY);
-  if (s) try { return new Set(JSON.parse(s)); } catch {}
-  return new Set(getAllPages().map(p=>p.id));
+  if (s) {
+    try { return new Set(JSON.parse(s)); } catch {}
+  }
+  return new Set(getAllPages().map(p => p.id));
 }
 
-// ==================================================
-// ✅ HANAPIN SA DALAWANG LUGAR — assets/ AT assets/pages/
-// ==================================================
+// ✅ KUMAHIN NG MGA BAGONG PAHINA MULA SA GITHUB — KUNG ONLINE
 async function fetchPagesFromGitHub() {
   if (!isOnline()) return getAllPages();
   try {
+    const res = await fetch(GITHUB_API_PAGES_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Hindi mabasa");
+    const files = await res.json();
+    const htmlFiles = files.filter(f => f.name.endsWith(".html"));
+
     const knownIds = getAllPages().map(p => p.id);
-
-    // 📁 assets/pages/
-    try {
-      const rPages = await fetch(GITHUB_API_PAGES_URL, { cache: "no-store" });
-      if (rPages.ok) {
-        const files = await rPages.json();
-        files.filter(f => f.name.endsWith(".html")).forEach(f => {
-          const id = f.name.replace(".html", "");
-          if (!knownIds.includes(id)) {
-            BASE_PAGES.push({
-              id, name: id.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase()),
-              desc: "Karagdagang pahina", group: "bisyo", num: null, file: f.name, folder: PAGES_FOLDER
-            });
-            knownIds.push(id);
-          }
+    htmlFiles.forEach(f => {
+      const id = f.name.replace(".html", "");
+      if (!knownIds.includes(id)) {
+        BASE_PAGES.push({
+          id: id,
+          name: id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          desc: "Karagdagang pahina",
+          group: "bisyo",
+          num: null,
+          file: f.name,
+          folder: PAGES_FOLDER
         });
       }
-    } catch {}
-
-    // 📁 assets/ — ugat
-    try {
-      const rRoot = await fetch(GITHUB_API_ASSETS_URL, { cache: "no-store" });
-      if (rRoot.ok) {
-        const files = await rRoot.json();
-        files.filter(f => f.name.endsWith(".html") && f.name !== "main.html").forEach(f => {
-          const id = f.name.replace(".html", "");
-          if (!knownIds.includes(id)) {
-            BASE_PAGES.push({
-              id, name: id.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase()),
-              desc: "Pangunahing pahina", group: "extra", num: null, file: f.name, folder: ""
-            });
-            knownIds.push(id);
-          }
-        });
-      }
-    } catch {}
-
+    });
     return getAllPages();
   } catch(e) {
-    console.log("Lokal na listahan:", e);
+    console.log("Gamit ang lokal na listahan:", e);
     return getAllPages();
   }
 }
 
 // ==================================================
-// ✅ GUMAGANANG PAGLILAGAY — SA LOOB NG AUTO-LIST-START / END
+// 🧩 BUUIN ANG MGA BUTTON — SUNOD SA AYOS MULA SA ADMIN
 // ==================================================
 async function buildPageGrids() {
   const allPages = await fetchPagesFromGitHub();
   const order = getPageOrder();
   const visible = getVisibleSet();
 
-  // Hanapin ang mga marka sa pahina
-  const bodyHTML = document.body.innerHTML;
-  const startMark = "<!-- AUTO-LIST-START -->
-<a href="pages/alak.html" class="menu-btn">Alak</a>
-<a href="pages/cocaine.html" class="menu-btn">Cocaine</a>
-<a href="pages/ecstasy.html" class="menu-btn">Ecstasy</a>
-<a href="pages/heroin.html" class="menu-btn">Heroin</a>
-<a href="pages/ibang-sugal.html" class="menu-btn">Ibang Sugal</a>
-<a href="pages/inhalants.html" class="menu-btn">Inhalants</a>
-<a href="pages/internet-laro.html" class="menu-btn">Internet Laro</a>
-<a href="pages/ketamine.html" class="menu-btn">Ketamine</a>
-<a href="pages/labis-pagkain.html" class="menu-btn">Labis Pagkain</a>
-<a href="pages/lsd.html" class="menu-btn">Lsd</a>
-<a href="pages/marijuana.html" class="menu-btn">Marijuana</a>
-<a href="pages/pag-aabuso-gamot.html" class="menu-btn">Pag Aabuso Gamot</a>
-<a href="pages/shabu.html" class="menu-btn">Shabu</a>
-<a href="pages/sigarilyo.html" class="menu-btn">Sigarilyo</a>
-<a href="pages/sugal.html" class="menu-btn">Sugal</a>
-<a href="pages/tinuturok-gamot.html" class="menu-btn">Tinuturok Gamot</a>
-<a href="pages/tuklaw.html" class="menu-btn">Tuklaw</a>
-<a href="pages/vaping.html" class="menu-btn">Vaping</a>
-<a href="pages/aral-sa-bibliya.html" class="menu-btn">Aral Sa Bibliya</a>
-<a href="pages/araw-araw-babasahin.html" class="menu-btn">Araw Araw Babasahin</a>
-<!-- AUTO-LIST-END -->";
-  const startIdx  = bodyHTML.indexOf(startMark);
-  const endIdx    = bodyHTML.indexOf(endMark);
+  const bisyoGrid = document.getElementById("bisyo-grid");
+  const extraGrid = document.getElementById("extra-grid");
+  bisyoGrid.innerHTML = "";
+  extraGrid.innerHTML = "";
 
-  if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
-    console.error("Walang nakitang marka sa main.html — ilagay ang <!-- AUTO-LIST-START / END -->");
-    return;
-  }
-
-  // Buuin ang bagong listahan
-  let listHTML = "";
   order.forEach(pageId => {
-    if (!visible.has(pageId)) return;
-    const p = allPages.find(x => x.id === pageId);
-    if (!p) return;
-    listHTML += `<a href="${p.folder}${p.file}" class="menu-btn">${p.name}</a>\n`;
+    if (!visible.has(pageId)) return; // ✅ Itinago sa Admin — laktawan
+    const page = allPages.find(p => p.id === pageId);
+    if (!page) return;
+
+    const container = page.group === "extra" ? extraGrid : bisyoGrid;
+    const a = document.createElement("a");
+    a.href = `${page.folder}${page.file}`;
+    a.className = "btn";
+    a.title = page.desc || "";
+    a.innerHTML = `
+      <span class="num">${page.num || '✦'}</span>
+      <span class="txt">${page.name}</span>
+    `;
+    container.appendChild(a);
   });
 
-  // Palitan ang laman sa pagitan ng mga marka
-  const newInner = startMark + "\n" + listHTML + endMark;
-  document.body.innerHTML =
-    bodyHTML.slice(0, startIdx) + newInner + bodyHTML.slice(endIdx + endMark.length);
+  document.getElementById("extra-section").style.display =
+    extraGrid.children.length > 0 ? "block" : "none";
 }
 
 // ==================================================
-// 📥 DOWNLOAD
+// 📥 PAG-DOWNLOAD NG APK — docs/ LANG
 // ==================================================
 function updateDownloadVisibility() {
-  const ds=document.getElementById("download-section"), on=document.getElementById("offline-note");
-  if(isOnline()){
-    ds?.classList.remove("hidden");
-    if(on)on.style.display="none";
-  }else{
-    ds?.classList.add("hidden");
-    if(on)on.style.display="block";
+  const ds = document.getElementById("download-section");
+  const on = document.getElementById("offline-note");
+  if (isOnline()) {
+    ds.classList.remove("hidden");
+    on.style.display = "none";
+  } else {
+    ds.classList.add("hidden");
+    on.style.display = "block";
   }
 }
 
 async function findAnyApk() {
-  if(!isOnline())return null;
-  try{
-    const r=await fetch(GITHUB_API_DOCS_URL,{cache:"no-store"});
-    if(!r.ok)throw new Error("API Error");
-    const f=await r.json(), a=f.filter(x=>x.name.toLowerCase().endsWith(".apk"))[0];
-    if(a){foundApk=a.name; downloadUrl=RAW_DOCS_BASE_URL+foundApk; return foundApk;}
+  if (!isOnline()) return null;
+  try {
+    const res = await fetch(GITHUB_API_DOCS_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("API Error");
+    const files = await res.json();
+    const apk = files.filter(f => f.name.toLowerCase().endsWith(".apk"))[0];
+    if (apk) {
+      foundApk = apk.name;
+      downloadUrl = RAW_DOCS_BASE_URL + foundApk;
+      return foundApk;
+    }
     return null;
-  }catch(e){return null;}
+  } catch(e) { return null; }
 }
 
-function setProgress(p,t){
-  const c=document.getElementById("progress-container"), b=document.getElementById("progress-bar"), tx=document.getElementById("progress-text");
-  if(c&&b&&tx){ if(p>0){c.classList.remove("hidden");tx.classList.remove("hidden");b.style.width=p+"%";b.textContent=Math.round(p)+"%";tx.textContent=t||"";}
-  else{c.classList.add("hidden");tx.classList.add("hidden");}}
+function setProgress(percent, text) {
+  const c = document.getElementById("progress-container");
+  const b = document.getElementById("progress-bar");
+  const t = document.getElementById("progress-text");
+  if (percent > 0) {
+    c.style.display = "block";
+    t.style.display = "block";
+    b.style.width = percent + "%";
+    b.textContent = Math.round(percent) + "%";
+    t.textContent = text || "";
+  } else {
+    c.style.display = "none";
+    t.style.display = "none";
+  }
 }
-function showCompleteDialog(){document.getElementById("dialog-overlay")?.classList.remove("hidden");}
-function closeDialog(){document.getElementById("dialog-overlay")?.classList.add("hidden");}
-function confirmUpdate(){
+
+function showCompleteDialog() { document.getElementById("dialog-overlay").style.display = "flex"; }
+function closeDialog() { document.getElementById("dialog-overlay").style.display = "none"; }
+
+function confirmUpdate() {
   closeDialog();
-  if(isInsideApp()) setTimeout(()=>{
-    if(window.AndroidApp?.openDownloadedApk) AndroidApp.openDownloadedApk(), alert("✅ Sinisimulan ang pag-update!");
-    else alert(`✅ Tapos!\n📂 Downloads → ${foundApk||"BisyoApp.apk"}`);
-  },100);
-  else if(downloadUrl)window.location.href=downloadUrl;
-}
-async function startDownload(){
-  if(!downloadUrl)return;
-  const b=document.getElementById("download-apk-btn");
-  if(b){b.disabled=true;b.textContent="⏳ Sinisimulan...";}
-  setProgress(5,"Kumukuha ng impormasyon...");
-  if(isInsideApp()){setTimeout(()=>{window.location.href=downloadUrl;},400);return;}
-  window.location.href=downloadUrl;
-  setProgress(100,"✅ Sinisimulan ang pag-download...");
+  if (isInsideApp()) {
+    setTimeout(() => {
+      if (window.AndroidApp && typeof window.AndroidApp.openDownloadedApk === "function") {
+        AndroidApp.openDownloadedApk();
+        alert("✅ Sinisimulan ang awtomatikong pag-update!\n\n📱 Maghihintay...\n✅ Kusa mag-i-install\n✅ Magsasara ang app\n✅ Bubukas muli pagkatapos");
+      } else {
+        alert("✅ Tapos na ang pag-download!\n\n📂 Pumunta sa:\n👉 Downloads → BisyoApp-update.apk\n👉 Pindutin para i-install!\n\nO pindutin ang abiso sa itaas.");
+      }
+    }, 100);
+  } else {
+    if (downloadUrl) window.location.href = downloadUrl;
+  }
 }
 
-window.onload=async function(){
+function updateProgressFromApp(percent) {
+  gotProgressFromApp = true;
+  setProgress(percent, percent < 100 ? "Nagda-download mula sa server..." : "✅ Halos tapos na...");
+  document.getElementById("download-apk-btn").textContent = percent + "%";
+}
+
+function downloadCompleteFromApp() {
+  setProgress(100, "✅ Tapos na! Bububukas na ang installer...");
+  document.getElementById("download-apk-btn").textContent = "✅ Tapos na";
+  setTimeout(showCompleteDialog, 500);
+}
+
+function downloadErrorFromApp() {
+  setProgress(0, "❌ Nabigo — Subukan muli");
+  const btn = document.getElementById("download-apk-btn");
+  btn.textContent = "🔄 Subukan Muli";
+  btn.disabled = false;
+}
+
+async function startDownload() {
+  if (!downloadUrl) return;
+  const btn = document.getElementById("download-apk-btn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Sinisimulan...";
+  setProgress(5, "Kumukuha ng impormasyon...");
+  gotProgressFromApp = false;
+
+  if (isInsideApp()) {
+    setTimeout(() => {
+      window.location.href = downloadUrl;
+      setTimeout(() => {
+        if (!gotProgressFromApp) {
+          setProgress(0, "⬆️ Tignan ang abiso sa itaas ng telepono");
+          btn.textContent = "Nagda-download...";
+        }
+      }, 900);
+    }, 400);
+    return;
+  }
+
+  window.location.href = downloadUrl;
+  setProgress(100, "✅ Sinisimulan ang pag-download...");
+}
+
+// ==================================================
+// 🚀 PAGKABUKAS NG PAHINA
+// ==================================================
+window.onload = async function() {
   updateDownloadVisibility();
-  await buildPageGrids(); // ✅ Gumagana — sa loob ng AUTO-LIST
-  await updateVersionDisplay(); // ✅ Totoo nang bersyon ang lumalabas
+  await buildPageGrids(); // ✅ Kusang ayon sa Admin-Order
+  await updateVersionDisplay();
 
-  if(isOnline()){
-    const b=document.getElementById("download-apk-btn"), n=document.getElementById("update-note");
-    foundApk=await findAnyApk();
-    if(!foundApk){if(b){b.textContent="❌ Walang APK";b.disabled=true;}return;}
-    if(b)b.textContent=isInsideApp()?"🔄 I-update ang Aplikasyon":"⬇️ I-download ang APK";
-    if(n)n.classList.remove("hidden");
-    if(b)b.onclick=e=>{e.preventDefault();startDownload();};
-    const fn=document.getElementById("apk-filename");
-    if(fn)fn.textContent=foundApk;
+  if (isOnline()) {
+    const btn = document.getElementById("download-apk-btn");
+    const note = document.getElementById("update-note");
+    foundApk = await findAnyApk();
+    if (!foundApk) {
+      btn.textContent = "❌ Walang APK";
+      btn.disabled = true;
+      return;
+    }
+    btn.textContent = isInsideApp() ? "🔄 I-update ang Aplikasyon" : "⬇️ I-download ang APK";
+    note.style.display = isInsideApp() ? "block" : "none";
+    btn.onclick = e => { e.preventDefault(); startDownload(); };
   }
 };
-window.addEventListener("online",()=>{updateDownloadVisibility();buildPageGrids();});
-window.addEventListener("offline",updateDownloadVisibility);
+
+window.addEventListener("online", () => {
+  updateDownloadVisibility();
+  buildPageGrids();
+});
+window.addEventListener("offline", updateDownloadVisibility);
 </script>
 </head>
 <body>
 
 <div class="header">
-  <h1>MGA ILEGAL NA BISYO</h1>
-  <p>Proyekto ni Mark Jann Tampok — Edukasyon Laban sa Masamang Bisyo</p>
+<h1>MGA ILEGAL NA BISYO</h1>
+<p>Proyekto ni Mark Jann Tampok — Edukasyon Laban sa Masamang Bisyo</p>
 </div>
 
 <div id="offline-note" class="offline-note hidden">
@@ -319,9 +356,7 @@ window.addEventListener("offline",updateDownloadVisibility);
     📱 <strong>Nasa loob ka na ng aplikasyon!</strong> Tignan ang abiso sa itaas ng iyong telepono.
   </div>
   <div class="download-info">
-    📦 Bersyon: <strong class="version-display">v1.0</strong> &nbsp;|&nbsp;
-    📄 APK: <span id="apk-filename">Kinukuha...</span> &nbsp;|&nbsp;
-    📏 Tinatayang Laki: <strong>~3 MB</strong><br>
+    📦 Bersyon: <strong class="version-display">v1.0</strong> &nbsp;|&nbsp; 📏 Tinatayang Laki: <strong>~3 MB</strong><br>
     📱 Kinakailangan: Android 7.0 (API 24) o mas bagong bersyon<br>
     ✅ Libre — Walang Patalastas — Walang Karagdagang Bayad<br>
     📇 Opisyal — Proyekto ni Mark Jann Tampok
@@ -331,7 +366,10 @@ window.addEventListener("offline",updateDownloadVisibility);
 <div id="dialog-overlay" class="dialog-overlay hidden">
   <div class="dialog-box">
     <div class="dialog-title">✅ Handa na ang Pag-update!</div>
-    <div class="dialog-body">Matagumpay na na-download ang bagong bersyon.<br><br><strong>I-install na ba ngayon?</strong></div>
+    <div class="dialog-body">
+      Matagumpay na na-download ang bagong bersyon.<br><br>
+      <strong>Gusto mo bang i-install na ang pag-update ngayon?</strong>
+    </div>
     <div class="dialog-buttons">
       <button class="dialog-btn dialog-btn-cancel" onclick="closeDialog()">Mamaya Na</button>
       <button class="dialog-btn dialog-btn-confirm" onclick="confirmUpdate()">✅ I-install Ngayon</button>
@@ -365,8 +403,28 @@ window.addEventListener("offline",updateDownloadVisibility);
 <h3 class="section-title">📖 Mga Pahina — Basahin Dito</h3>
 <h4 class="section-subtitle">Mga Uri ng Bisyo</h4>
 
-<!-- ✅ DAPAT NANDITO ANG MGA MARKA — HUWAG TANGGALIN -->
+<!-- ✅ DITO ILALAGAY NG ADMIN-ORDER.HTML ANG LISTAHAN -->
 <!-- AUTO-LIST-START -->
+<a href="pages/alak.html" class="menu-btn">Alak</a>
+<a href="pages/aral-sa-bibliya.html" class="menu-btn">Aral Sa Bibliya</a>
+<a href="pages/araw-araw-babasahin.html" class="menu-btn">Araw Araw Babasahin</a>
+<a href="pages/cocaine.html" class="menu-btn">Cocaine</a>
+<a href="pages/ecstasy.html" class="menu-btn">Ecstasy</a>
+<a href="pages/heroin.html" class="menu-btn">Heroin</a>
+<a href="pages/ibang-sugal.html" class="menu-btn">Ibang Sugal</a>
+<a href="pages/inhalants.html" class="menu-btn">Inhalants</a>
+<a href="pages/internet-laro.html" class="menu-btn">Internet Laro</a>
+<a href="pages/ketamine.html" class="menu-btn">Ketamine</a>
+<a href="pages/labis-pagkain.html" class="menu-btn">Labis Pagkain</a>
+<a href="pages/lsd.html" class="menu-btn">Lsd</a>
+<a href="pages/marijuana.html" class="menu-btn">Marijuana</a>
+<a href="pages/pag-aabuso-gamot.html" class="menu-btn">Pag Aabuso Gamot</a>
+<a href="pages/shabu.html" class="menu-btn">Shabu</a>
+<a href="pages/sigarilyo.html" class="menu-btn">Sigarilyo</a>
+<a href="pages/sugal.html" class="menu-btn">Sugal</a>
+<a href="pages/tinuturok-gamot.html" class="menu-btn">Tinuturok Gamot</a>
+<a href="pages/tuklaw.html" class="menu-btn">Tuklaw</a>
+<a href="pages/vaping.html" class="menu-btn">Vaping</a>
 <!-- AUTO-LIST-END -->
 
 <div class="admin-link">
