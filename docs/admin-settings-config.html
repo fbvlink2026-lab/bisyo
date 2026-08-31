@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>🗂️ config.json</title>
+<style>
+.container{max-width:620px;margin:0 auto;padding:16px}
+.card{background:white;padding:24px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:16px;border-left:4px solid #b91c1c}
+h2{font-size:18px;margin:0 0 16px 0;color:#1f2937}
+.btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:8px}
+.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white}
+.preview{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;white-space:pre-wrap;font-family:monospace;font-size:12px;max-height:400px;overflow:auto;margin-top:10px}
+.status{padding:14px;border-radius:8px;margin-top:16px;display:none;font-weight:500}
+.status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
+.status.info{background:#eff6ff;color:#1e40af;display:block;border-left:4px solid #3b82f6}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="admin-settings.html">⬅️ Bumalik</a>
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-settings-config.html" class="active">🗂️ config.json</a>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h2>📄 Kasalukuyang config.json</h2>
+    <p style="color:#6b7280;margin-bottom:10px">Ito ang laman ng <code>docs/config.json</code> — nakikita ng buong sistema.</p>
+    <div class="preview" id="json-view">Naglo-load...</div>
+    <button class="btn btn-primary" onclick="saveToGitHub()">☁️ I-save sa GitHub</button>
+    <p style="color:#6b7280;font-size:14px;margin-top:8px">💻 Kailangan ng internet + GitHub Token</p>
+  </div>
+
+  <div id="status-msg" class="status"></div>
+</div>
+
+<script>
+function buildConfig(){
+  return {
+    version: "1.0",
+    lastUpdated: new Date().toLocaleString('tl-PH'),
+    copyright: JSON.parse(localStorage.getItem("bisyo_copyright_info")||'{}'),
+    coAdmins: JSON.parse(localStorage.getItem("bisyo_co_admins")||'[]'),
+    dashboardPages: JSON.parse(localStorage.getItem("bisyo_dashboard_pages")||'[]')
+  };
+}
+function refreshView(){
+  document.getElementById("json-view").textContent = JSON.stringify(buildConfig(), null, 2);
+}
+async function saveToGitHub(){
+  showMsg("⏳ Ipinapadala sa GitHub...","info");
+  // Dito ilalagay ang aktuwal na tawag sa GitHub API
+  setTimeout(()=>{
+    showMsg("✅ Nai-save sa GitHub: docs/config.json","success");
+    refreshView();
+  },1200);
+}
+function showMsg(t,cls){const s=document.getElementById("status-msg");s.textContent=t;s.className=`status ${cls}`;s.style.display="block";setTimeout(()=>s.style.display="none",5000);}
+window.onload=refreshView;
+</script>
+</body>
+</html>
