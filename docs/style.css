@@ -1,5 +1,5 @@
 /* ==========================================
-   ✅ style.css — INAYOS: PUTI ANG SULAT SA PULA
+   ✅ style.css — PINAGSAMA + TINANGGAL ANG DOBLE
    ========================================== */
 
 /* ---------- PANGKALAHATANG PANUNTUNAN ---------- */
@@ -17,26 +17,27 @@ body {
   padding-bottom: 30px;
 }
 
-/* ---------- NAKATAGONG LAMAN ---------- */
+a { text-decoration: none; color: inherit; }
 .hidden { display: none !important; }
 
 /* ---------- HEADER — PULA + PUTING SULAT ---------- */
 .header {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
   color: white !important;
-  padding: 20px 16px;
+  padding: 24px 16px;
+  text-align: center;
   box-shadow: 0 3px 8px rgba(0,0,0,.15);
 }
 .header h1 {
-  font-size: 20px;
+  font-size: 26px;
   color: white !important;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
 }
 .header p {
-  font-size: 13px;
-  opacity: 0.9;
+  font-size: 15px;
+  opacity: 0.92;
   color: white !important;
-  margin-top: 3px;
 }
 
 /* ---------- NABIGASYON / MENU SA ITAAS ---------- */
@@ -100,99 +101,122 @@ li {
 .offline-note {
   background: #fffbeb;
   border-left: 4px solid #f59e0b;
-  padding: 16px;
+  padding: 16px 20px;
   margin: 16px;
   border-radius: 10px;
   color: #78350f;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.offline-note h2 {
+  font-size: 17px;
+  color: #92400e;
+  margin-bottom: 4px;
 }
 
-/* ---------- DOWNLOAD SECTION — PULA + PUTING SULAT ---------- */
+/* ---------- DOWNLOAD SECTION ---------- */
 .download-section {
-  background: linear-gradient(135deg, #b91c1c, #dc2626);
-  color: white !important;
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 24px 20px;
+  background: white;
   border-radius: 14px;
-  padding: 22px;
-  margin: 16px;
-  box-shadow: 0 4px 12px rgba(185,28,28,.25);
-  transition: opacity 0.3s ease;
+  box-shadow: 0 3px 12px rgba(0,0,0,.08);
+  text-align: center;
 }
-.download-section.hidden { opacity: 0; display: none !important; }
 .download-title {
-  font-size: 19px;
+  font-size: 20px;
+  color: #b91c1c;
   font-weight: bold;
   margin-bottom: 6px;
-  color: white !important;
 }
 .download-sub {
   font-size: 14px;
-  opacity: 0.95;
+  color: #6b7280;
   margin-bottom: 16px;
-  color: white !important;
 }
 
 .download-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  color: #b91c1c !important;
+  width: 100%;
+  padding: 16px;
+  font-size: 17px;
   font-weight: bold;
-  font-size: 16px;
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  color: white !important;
   border: none;
   border-radius: 10px;
-  padding: 14px 24px;
   cursor: pointer;
-  width: 100%;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-.download-btn:hover { transform: scale(1.02); }
-.download-btn:disabled { opacity: 0.7; cursor: not-allowed; color: #b91c1c !important; }
+.download-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(185,28,28,.3);
+}
+.download-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
 
 .progress-container {
-  background: rgba(255,255,255,0.25);
-  border-radius: 999px;
-  height: 12px;
-  margin-top: 14px;
+  width: 100%;
+  height: 24px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  margin: 14px 0 6px;
   overflow: hidden;
-  display: none;
 }
 .progress-bar {
-  background: white;
-  color: #b91c1c !important;
-  font-size: 11px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 12px;
   height: 100%;
-  width: 0%;
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: width 0.3s ease;
-  border-radius: 999px;
+  border-radius: 12px;
+  width: 0%;
 }
 .progress-text {
-  font-size: 13px;
-  margin-top: 6px;
-  opacity: 0.95;
-  display: none;
-  color: white !important;
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 12px;
 }
 
 .download-info {
   margin-top: 16px;
-  font-size: 14px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #6b7280;
   line-height: 1.8;
-  background: rgba(255,255,255,0.12);
-  padding: 12px;
-  border-radius: 10px;
-  color: white !important;
 }
-.download-info strong { color: #fef2f2 !important; }
+.version-display {
+  color: #b91c1c;
+  font-weight: bold;
+}
+
+#update-note {
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  padding: 12px 16px;
+  margin: 14px 0;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 14px;
+  color: #1e40af;
+}
 
 /* ---------- DIALOG / POPUP ---------- */
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: none;
+  background: rgba(0,0,0,0.55);
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
@@ -201,21 +225,24 @@ li {
 .dialog-box {
   background: white;
   border-radius: 16px;
-  padding: 24px;
-  max-width: 400px;
+  padding: 26px 22px;
+  max-width: 360px;
   width: 100%;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
 }
 .dialog-title {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: bold;
   color: #b91c1c !important;
+  text-align: center;
   margin-bottom: 12px;
 }
 .dialog-body {
+  font-size: 15px;
   color: #374151;
+  text-align: center;
+  margin-bottom: 22px;
   line-height: 1.6;
-  margin-bottom: 20px;
 }
 .dialog-buttons {
   display: flex;
@@ -227,107 +254,137 @@ li {
   min-width: 120px;
   padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .dialog-btn-cancel {
   background: #e5e7eb;
   color: #374151;
 }
+.dialog-btn-cancel:hover { background: #d1d5db; }
 .dialog-btn-confirm {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
   color: white !important;
 }
+.dialog-btn-confirm:hover { filter: brightness(1.05); }
 
 /* ---------- IMPORMASYONG SEKSYON ---------- */
 .info-section {
   max-width: 900px;
-  margin: 0 auto;
-  padding: 0 16px 24px;
+  margin: 30px auto;
+  padding: 0 20px;
 }
 .info-section h2 {
   font-size: 19px;
   color: #b91c1c !important;
-  margin: 28px 0 10px;
-  padding-bottom: 6px;
-  border-bottom: 2px solid #f3f4f6;
+  margin: 24px 0 10px;
 }
 .info-section p {
   color: #374151;
-  font-size: 15px;
-  line-height: 1.7;
-  margin-bottom: 12px;
 }
 .divider {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
-  margin: 24px 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d1d5db, transparent);
+  margin: 28px 0;
 }
 
 /* ---------- PAMAGAT NG SEKSYON ---------- */
 .section-title {
-  font-size: 18px;
-  color: #1f2937;
-  margin: 30px 16px 12px;
+  font-size: 22px;
+  color: #b91c1c;
+  margin: 30px 16px 4px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.section-subtitle {
+  font-size: 17px;
+  color: #4b5563;
+  margin: 0 16px 12px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
   padding-bottom: 6px;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-/* ---------- GRID NG MGA BUTTON ---------- */
+/* ---------- GRID NG MGA BUTTON + PULANG BILOG ---------- */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 0 16px 24px;
   max-width: 900px;
   margin: 0 auto;
+  padding: 0 16px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
 }
 
-.grid > .btn {
+.btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 12px;
   background: white;
+  padding: 14px 18px;
   border-radius: 12px;
-  padding: 18px 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
   border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
   text-decoration: none;
-  transition: all 0.2s;
 }
-.grid > .btn:hover {
+.btn:hover {
   transform: translateY(-2px);
-  border-color: #b91c1c;
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  border-color: #dc2626;
   background: #fef2f2;
 }
-.grid > .btn:active { transform: scale(.96); }
 
 .num {
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  text-align: center;
-  background: #dc2626;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
   color: white !important;
   border-radius: 50%;
   font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 8px;
+  font-size: 15px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(185,28,28,.25);
 }
 .txt {
-  font-size: 15px;
+  font-size: 16px;
   color: #1f2937;
   font-weight: 500;
-  text-align: center;
 }
 
 .loading-text {
   text-align: center;
-  color: #6b7280;
   padding: 30px;
+  color: #6b7280;
+  font-size: 15px;
   grid-column: 1 / -1;
+}
+
+/* ---------- ADMIN LINK SA ILALIM ---------- */
+.admin-link {
+  text-align: center;
+  margin: 36px 0 20px;
+  padding: 20px 0;
+}
+.admin-link a {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #1f2937;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.admin-link a:hover {
+  background: #b91c1c;
 }
 
 /* ---------- BALIK BUTTON AT NILALAMAN NG PAHINA ---------- */
@@ -355,27 +412,6 @@ li {
   margin: 20px 0 8px;
   border-left: 3px solid #dc2626;
   padding-left: 10px;
-}
-
-/* ---------- ADMIN LINK SA ILALIM ---------- */
-.admin-link {
-  text-align: center;
-  padding: 20px;
-  margin-top: 10px;
-}
-.admin-link a {
-  color: #6b7280;
-  text-decoration: none;
-  font-size: 14px;
-  padding: 10px 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
-  transition: all 0.2s;
-}
-.admin-link a:hover {
-  color: #b91c1c !important;
-  background: #fef2f2;
 }
 
 /* ---------- KARD / FORM — PANG-ADMIN ---------- */
@@ -470,10 +506,10 @@ textarea {
   line-height: 1.5;
   font-family: monospace, 'Segoe UI', sans-serif;
 }
-textarea:placeholder { color: #9ca3af; }
+textarea::placeholder { color: #9ca3af; }
 
 /* ---------- MGA PINDUTAN ---------- */
-.btn, button {
+button {
   padding: 10px 16px;
   border: none;
   border-radius: 8px;
@@ -487,24 +523,52 @@ textarea:placeholder { color: #9ca3af; }
   text-decoration: none;
   transition: all 0.2s;
 }
-.btn:hover { transform: translateY(-1px); }
-.btn:active { transform: scale(.96); }
+button:hover { transform: translateY(-1px); }
+button:active { transform: scale(.96); }
 
 .btn-primary {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
   color: white !important;
 }
 .btn-primary:hover { background: #a81818; color: white !important; }
+.btn-primary:disabled,
+.btn-primary.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
 .btn-secondary {
   background: #e5e7eb;
   color: #374151;
   font-weight: 500;
 }
 .btn-secondary:hover { background: #d1d5db; }
+.btn-secondary:disabled,
+.btn-secondary.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
 .btn-success { background: #16a34a; color: white !important; }
+.btn-success:disabled,
+.btn-success.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
 .btn-warning { background: #f59e0b; color: #1f2937; }
 .btn-danger { background: #fee2e2; color: #dc2626 !important; }
 .btn-danger:hover { background: #fecaca; }
+.btn-danger:disabled,
+.btn-danger.saving {
+  background: #9ca3af !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
 .btn-sm { padding: 6px 12px; font-size: 13px; }
 .btn-group {
   display: flex;
@@ -540,7 +604,7 @@ textarea:placeholder { color: #9ca3af; }
   100% { opacity: 1; }
 }
 
-.status, .error {
+.status {
   padding: 12px 16px;
   border-radius: 8px;
   margin: 12px 0;
@@ -549,8 +613,8 @@ textarea:placeholder { color: #9ca3af; }
   line-height: 1.5;
 }
 .status.success { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
-.status.error, .error { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
-.status.info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+.status.error   { background: #fee2e2; color: #991b1b; border-left: 4px solid #dc2626; }
+.status.info    { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
 .status.warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
 
 /* ---------- DASHBOARD MENU ---------- */
@@ -604,6 +668,15 @@ textarea:placeholder { color: #9ca3af; }
 .order-name { flex: 1; font-size: 15px; }
 .btn-up, .btn-down { background: #e5e7eb; }
 .btn-del { background: #fee2e2; color: #dc2626 !important; }
+
+.show-hide-cb {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: #b91c1c;
+  margin: 0;
+  flex-shrink: 0;
+}
 
 /* ---------- NAKABINBING PAGBABAGO ---------- */
 .item {
@@ -827,9 +900,9 @@ pre {
 
 /* ---------- PAGKAKAPUTOL SA MOBILE ---------- */
 @media (max-width: 480px) {
-  .grid { grid-template-columns: 1fr 1fr; }
+  .grid { grid-template-columns: 1fr; }
   .header { padding: 20px 16px; }
-  .header h1 { font-size: 20px; }
+  .header h1 { font-size: 21px; }
   .download-section { padding: 18px; margin: 12px; }
   .dialog-buttons, .btn-group { flex-direction: column; }
   .nav-bar a { font-size: 13px; padding: 8px 9px; }
@@ -845,28 +918,4 @@ pre {
 .loading {
   opacity: 0.5;
   pointer-events: none;
-}
-/* ---------- PULANG BILOG — NUMERO SA BUTTON ---------- */
-.btn, .menu-btn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.btn .num, .menu-btn .num {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #b91c1c, #dc2626);
-  color: #ffffff !important;
-  font-weight: bold;
-  font-size: 15px;
-  flex-shrink: 0;
-  line-height: 1;
-}
-.btn .txt, .menu-btn .txt {
-  flex: 1;
 }
