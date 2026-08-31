@@ -1,5 +1,6 @@
 /* ==========================================
-   ✅ style.css — PINAGSAMA + TINANGGAL ANG DOBLE + PABILOG NA KANTO
+   ✅ style.css — PINAGSAMA + WALANG DOBLE
+   ✅ ORIHINAL NA ITSURA NG main.html NAKASAMA
    ========================================== */
 
 /* ---------- PANGKALAHATANG PANUNTUNAN ---------- */
@@ -24,20 +25,19 @@ a { text-decoration: none; color: inherit; }
 .header {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
   color: white !important;
-  padding: 24px 16px;
+  padding: 20px 16px;
   text-align: center;
   box-shadow: 0 3px 8px rgba(0,0,0,.15);
   border-radius: 0 0 20px 20px;
 }
 .header h1 {
-  font-size: 26px;
+  font-size: 20px;
   color: white !important;
-  margin-bottom: 6px;
-  letter-spacing: 1px;
+  margin-bottom: 4px;
 }
 .header p {
-  font-size: 15px;
-  opacity: 0.92;
+  font-size: 14px;
+  opacity: 0.85;
   color: white !important;
 }
 
@@ -116,19 +116,19 @@ li {
   margin-bottom: 4px;
 }
 
-/* ---------- DOWNLOAD SECTION — PULA + PABILOG NA KANTO ---------- */
+/* ---------- 📥 DOWNLOAD SECTION — PULA + PABILOG NA KANTO ---------- */
 .download-section {
   max-width: 600px;
   margin: 30px auto;
-  padding: 28px 24px;
+  padding: 22px;
   background: linear-gradient(135deg, #b91c1c, #dc2626);
-  border-radius: 24px;
+  border-radius: 14px;
   box-shadow: 0 6px 20px rgba(185,28,28,.35);
   text-align: center;
   color: white !important;
 }
 .download-title {
-  font-size: 20px;
+  font-size: 19px;
   color: white !important;
   font-weight: bold;
   margin-bottom: 6px;
@@ -136,24 +136,28 @@ li {
 .download-sub {
   font-size: 14px;
   color: rgba(255,255,255,0.95);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .download-btn {
   width: 100%;
-  padding: 16px;
-  font-size: 17px;
+  max-width: 320px;
+  padding: 14px 24px;
+  font-size: 16px;
   font-weight: bold;
   background: white;
   color: #b91c1c !important;
   border: none;
-  border-radius: 16px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s ease;
 }
 .download-btn:hover {
   transform: scale(1.02);
   box-shadow: 0 6px 16px rgba(0,0,0,.15);
+}
+.download-btn:active {
+  transform: scale(0.97);
 }
 .download-btn:disabled {
   background: #e5e7eb;
@@ -191,8 +195,8 @@ li {
 }
 
 .download-info {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid rgba(255,255,255,0.2);
   font-size: 13px;
   color: rgba(255,255,255,0.9);
@@ -274,24 +278,45 @@ li {
 }
 .dialog-btn-confirm:hover { filter: brightness(1.05); }
 
-/* ---------- IMPORMASYONG SEKSYON ---------- */
+/* ---------- 📄 IMPORMASYONG SEKSYON ---------- */
 .info-section {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  margin: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
   max-width: 900px;
-  margin: 30px auto;
-  padding: 0 20px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .info-section h2 {
-  font-size: 19px;
+  font-size: 18px;
   color: #b91c1c !important;
-  margin: 24px 0 10px;
+  margin: 0 0 12px;
+  border-left: 3px solid #dc2626;
+  padding-left: 10px;
 }
 .info-section p {
+  font-size: 15px;
+  line-height: 1.7;
   color: #374151;
+  margin: 0 0 10px;
 }
+.info-section ul {
+  margin: 0;
+  padding-left: 22px;
+}
+.info-section li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
 .divider {
   height: 1px;
-  background: linear-gradient(to right, transparent, #d1d5db, transparent);
-  margin: 28px 0;
+  background: #e5e7eb;
+  margin: 20px 0;
 }
 
 /* ---------- PAMAGAT NG SEKSYON ---------- */
@@ -314,53 +339,65 @@ li {
   border-bottom: 1px solid #e5e7eb;
 }
 
-/* ---------- GRID NG MGA BUTTON + PULANG BILOG ---------- */
+/* ==================================================
+   ✅ LISTAHAN NG MGA PAHINA — EKSAAKTONG ITSURA NG main.html
+   — 2 hanay sa malaking screen
+   — PULA + PUTING BILOG NA NUMERO SA ITAAS
+   — Puting kahon, may anino
+   ================================================== */
 .grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 16px 16px;
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 16px 24px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
 }
 
+/* ---------- 🟥 BUTTON SA LISTAHAN ---------- */
 .btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   background: white;
-  padding: 14px 18px;
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  padding: 16px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
   border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
   text-decoration: none;
+  transition: all 0.15s ease;
 }
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  background: #fef2f2;
   border-color: #dc2626;
+  transform: translateY(-2px);
+}
+.btn:active {
+  transform: scale(0.97);
   background: #fef2f2;
 }
 
+/* ---------- 🔴 PULANG BILOG — PUTING NUMERO ---------- */
 .num {
-  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  background: #dc2626;
   color: white !important;
   border-radius: 50%;
   font-weight: bold;
-  font-size: 15px;
-  flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(185,28,28,.25);
-}
-.txt {
   font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ---------- PANGALAN NG PAHINA SA BUTTON ---------- */
+.txt {
+  font-size: 14px;
   color: #1f2937;
-  font-weight: 500;
+  text-align: center;
 }
 
 .loading-text {
@@ -390,9 +427,11 @@ li {
   background: #b91c1c;
 }
 
-/* ---------- BALIK BUTTON AT NILALAMAN NG PAHINA ---------- */
+/* ---------- ↩️ BALIK BUTTON ---------- */
 .back {
   display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: #dc2626 !important;
   text-decoration: none;
   font-weight: 500;
@@ -402,6 +441,11 @@ li {
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,.06);
 }
+.back:hover {
+  background: #fef2f2;
+}
+
+/* ---------- 📖 NILALAMAN NG BAWAT PAHINA ---------- */
 .content {
   margin: 10px;
   background: white;
@@ -415,6 +459,17 @@ li {
   margin: 20px 0 8px;
   border-left: 3px solid #dc2626;
   padding-left: 10px;
+}
+.content p,
+.content li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #374151;
+  margin-bottom: 8px;
+}
+.content ul {
+  padding-left: 24px;
+  margin-bottom: 12px;
 }
 
 /* ---------- KARD / FORM — PANG-ADMIN ---------- */
@@ -901,20 +956,17 @@ pre {
 .icon-setup-page::before{content:"🔧 ";margin-right:4px}
 .icon-style-page::before{content:"🎨 ";margin-right:4px}
 
-/* ---------- PAGKAKAPUTOL SA MOBILE ---------- */
-@media (max-width: 480px) {
+/* ---------- 📱 SA MOBILE — NAGIGING ISANG HANAY ---------- */
+@media (max-width: 520px) {
   .grid { grid-template-columns: 1fr; }
   .header { padding: 20px 16px; }
-  .header h1 { font-size: 21px; }
-  .download-section { padding: 20px; margin: 12px; border-radius: 20px; }
+  .header h1 { font-size: 18px; }
+  .download-section { padding: 18px 16px; margin: 12px; border-radius: 20px; }
+  .info-section { padding: 16px; margin: 12px; }
   .dialog-buttons, .btn-group { flex-direction: column; }
   .nav-bar a { font-size: 13px; padding: 8px 9px; }
   .grid-menu { grid-template-columns: 1fr 1fr; }
   textarea { min-height: 200px; }
-}
-
-@media (min-width: 768px) {
-  .grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* ---------- LOADING STATE ---------- */
