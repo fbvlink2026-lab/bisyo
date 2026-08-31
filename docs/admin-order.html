@@ -33,7 +33,7 @@
 .order-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 12px;
   background: white;
   border-radius: 10px;
@@ -67,17 +67,30 @@
   flex-shrink: 0;
 }
 
-/* ✅ DROPDOWN NG GRUPO */
-.group-select {
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 13px;
-  background: white;
+/* ✅ PINDUTAN NG GRUPO — ICON LANG, MALIIT */
+.group-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  font-size: 18px;
   cursor: pointer;
   flex-shrink: 0;
+  transition: all 0.2s;
+  display: grid;
+  place-items: center;
 }
-.group-select:focus { outline: none; border-color: #b91c1c; }
+.group-toggle.group-bisyo {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.group-toggle.group-extra {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.group-toggle:hover {
+  transform: scale(1.15);
+}
 
 .order-pos {
   width: 30px;
@@ -118,6 +131,26 @@
   font-weight: bold;
 }
 .btn-success:hover { background: #15803d; }
+
+/* ✅ MENSAHE NG PAGBABAGO NG GRUPO */
+.group-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.group-toast.show {
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -134,7 +167,7 @@
 
 <div class="container">
   <h1>🔢 Ayusin ang Pagkakasunod-sunod</h1>
-  <p style="color:#6b7280;margin-bottom:16px">🖱️ I-drag ang ⋮⋮ upang ilipat • ✅ Ipakita/Itago • 📖📘 Palitan ang Grupo • ✏️ I-edit • 🗑️ Alisin</p>
+  <p style="color:#6b7280;margin-bottom:16px">🖱️ I-drag ang ⋮⋮ upang ilipat • ✅ Ipakita/Itago • 📖📘 Pindutan ng Grupo • ✏️ I-edit • 🗑️ Alisin</p>
 
   <div class="panel-card">
     <div class="top-bar">
@@ -163,6 +196,9 @@
 
   <div id="status-msg" class="status"></div>
 </div>
+
+<!-- ✅ MENSAHE SA ILALIM KAPAG NAGPALIT NG GRUPO -->
+<div id="group-toast" class="group-toast"></div>
 
 <script>
 const ORDER_KEY = "bisyo_page_order";
@@ -217,7 +253,27 @@ function loadGroups() {
   catch { pageGroups = {}; }
 }
 function saveGroups() { localStorage.setItem(GROUP_KEY, JSON.stringify(pageGroups)); }
-function setGroup(id, value) { pageGroups[id] = value; saveGroups(); }
+
+// ✅ PALITAN ANG GRUPO — PINDUTAN LANG, WALANG PILIAN
+function toggleGroup(id) {
+  const current = pageGroups[id] || "bisyo";
+  const next = current === "bisyo" ? "extra" : "bisyo";
+  pageGroups[id] = next;
+  saveGroups();
+  showGroupToast(next);
+  render();
+}
+
+// ✅ MENSAHE NA NAPALITAN NA ANG GRUPO
+function showGroupToast(groupName) {
+  const toast = document.getElementById("group-toast");
+  toast.textContent = groupName === "bisyo"
+    ? "📖 Napunta sa Grupo: Bisyo"
+    : "📘 Napunta sa Grupo: Karagdagang";
+  toast.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove("show"), 2000);
+}
 
 async function loadFromGitHub() {
   const btn = document.getElementById("load-btn");
@@ -296,7 +352,7 @@ function getOrder() {
   return allPages.map(p => p.id);
 }
 
-// ✅ TAMANG RENDER — WALANG ARROW, MAY GRUPO, MAY DRAG
+// ✅ RENDER — ICON LANG ANG GRUPO, WALANG DROPDOWN
 function render() {
   const list = document.getElementById("order-list");
   const order = getOrder();
@@ -313,13 +369,15 @@ function render() {
     if (!page) return;
     const shown = visible.has(id);
     const group = pageGroups[id] || "bisyo";
+    const groupIcon = group === "bisyo" ? "📖" : "📘";
+    const groupClass = group === "bisyo" ? "group-bisyo" : "group-extra";
 
     const row = document.createElement("div");
     row.className = `order-row ${shown?'':'hidden-from-main'}`;
     row.draggable = true;
     row.dataset.index = idx;
 
-    // ✅ TAMANG AYOS: ⋮⋮ ✅ # Pangalan ✏️ [Grupo] 🗑️ — WALANG ARROW
+    // ✅ AYOS: ⋮⋮ ✅ # Pangalan 📁 📖/📘 ✏️ 🗑️ — WALANG MAHABANG PILIAN
     row.innerHTML = `
       <span class="drag-grip">⋮⋮</span>
       <input type="checkbox" class="show-hide-cb" ${shown?'checked':''}
@@ -330,15 +388,14 @@ function render() {
         <span class="order-path">📁 ${page.folder || 'assets/'}</span>
         ${shown?'':'<span style="font-size:11px;color:#d97706;margin-left:6px">☐ Nakatago</span>'}
       </div>
-      <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.path}')">✏️ I-edit</button>
-      <select class="group-select" onchange="setGroup('${id}', this.value)">
-        <option value="bisyo" ${group==='bisyo'?'selected':''}>📖 Bisyo</option>
-        <option value="extra" ${group==='extra'?'selected':''}>📘 Karagdagang</option>
-      </select>
-      <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')">🗑️</button>
+      <button type="button" class="group-toggle ${groupClass}" onclick="toggleGroup('${id}')" title="Palitan ang Grupo">
+        ${groupIcon}
+      </button>
+      <button class="btn btn-sm btn-secondary" onclick="goEdit('${page.path}')" title="I-edit">✏️</button>
+      <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')" title="Alisin">🗑️</button>
     `;
 
-    // ✅ DRAG & DROP — SIGURADONG GUMAGANA
+    // ✅ DRAG & DROP
     row.ondragstart = e => {
       draggedIndex = idx;
       row.classList.add("dragging");
