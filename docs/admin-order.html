@@ -48,7 +48,6 @@
 }
 .order-row:active { cursor: grabbing; }
 
-/* ✅ DRAG STATES */
 .order-row.dragging {
   opacity: 0.4;
   transform: scale(0.98);
@@ -58,7 +57,6 @@
   border: 2px dashed #dc2626;
 }
 
-/* ✅ HAWAK SA KALIWA */
 .drag-grip {
   color: #9ca3af;
   font-size: 20px;
@@ -67,7 +65,6 @@
   flex-shrink: 0;
 }
 
-/* ✅ PINDUTAN NG GRUPO — ICON LANG, MALIIT */
 .group-toggle {
   width: 36px;
   height: 36px;
@@ -132,7 +129,6 @@
 }
 .btn-success:hover { background: #15803d; }
 
-/* ✅ MENSAHE NG PAGBABAGO NG GRUPO */
 .group-toast {
   position: fixed;
   bottom: 20px;
@@ -197,7 +193,6 @@
   <div id="status-msg" class="status"></div>
 </div>
 
-<!-- ✅ MENSAHE SA ILALIM KAPAG NAGPALIT NG GRUPO -->
 <div id="group-toast" class="group-toast"></div>
 
 <script>
@@ -254,7 +249,6 @@ function loadGroups() {
 }
 function saveGroups() { localStorage.setItem(GROUP_KEY, JSON.stringify(pageGroups)); }
 
-// ✅ PALITAN ANG GRUPO — PINDUTAN LANG, WALANG PILIAN
 function toggleGroup(id) {
   const current = pageGroups[id] || "bisyo";
   const next = current === "bisyo" ? "extra" : "bisyo";
@@ -264,7 +258,6 @@ function toggleGroup(id) {
   render();
 }
 
-// ✅ MENSAHE NA NAPALITAN NA ANG GRUPO
 function showGroupToast(groupName) {
   const toast = document.getElementById("group-toast");
   toast.textContent = groupName === "bisyo"
@@ -352,7 +345,6 @@ function getOrder() {
   return allPages.map(p => p.id);
 }
 
-// ✅ RENDER — ICON LANG ANG GRUPO, WALANG DROPDOWN
 function render() {
   const list = document.getElementById("order-list");
   const order = getOrder();
@@ -377,7 +369,6 @@ function render() {
     row.draggable = true;
     row.dataset.index = idx;
 
-    // ✅ AYOS: ⋮⋮ ✅ # Pangalan 📁 📖/📘 ✏️ 🗑️ — WALANG MAHABANG PILIAN
     row.innerHTML = `
       <span class="drag-grip">⋮⋮</span>
       <input type="checkbox" class="show-hide-cb" ${shown?'checked':''}
@@ -395,7 +386,6 @@ function render() {
       <button class="btn btn-sm btn-del" onclick="askRemove('${id}','${page.name}')" title="Alisin">🗑️</button>
     `;
 
-    // ✅ DRAG & DROP
     row.ondragstart = e => {
       draggedIndex = idx;
       row.classList.add("dragging");
@@ -479,21 +469,49 @@ async function saveToGitHub() {
     const htmlContent = safeDecodeBase64(fileData.content);
     const order = getOrder();
     const visible = getVisibleSet();
-    let newListHTML = "";
+    let bisyoHTML = "", extraHTML = "";
+    let bisyoCounter = 1;
+
     order.forEach(id => {
       if (!visible.has(id)) return;
       const p = allPages.find(x => x.id === id);
       if (!p) return;
-      const linkHref = p.folder ? `${p.folder}${p.file}` : p.file;
-      newListHTML += `<a href="${linkHref}" class="menu-btn">${p.name}</a>\n`;
+      const linkHref = (p.folder || "pages/") + p.file;
+      const group = pageGroups[p.id] || "bisyo";
+
+      // ✅ BAGONG ISTRUKTURA — TUMUTUGMA SA BAGONG style.css
+      const itemHTML = `<a href="${linkHref}" class="page-btn">
+  <span class="page-num">${group==="bisyo"?bisyoCounter++:"✦"}</span>
+  <span class="page-name">${p.name}</span>
+</a>`;
+
+      if (group === "bisyo") bisyoHTML += itemHTML + "\n";
+      else extraHTML += itemHTML + "\n";
     });
+
+    // ✅ BUUIN ANG BUONG LISTAHAN — may dalawang section
+    let newListHTML = "";
+    if (bisyoHTML) {
+      newListHTML += `<h3 class="section-title">📖 Mga Uri ng Bisyo</h3>
+<h4 class="section-subtitle">Basahin at unawain ang panganib</h4>
+<div class="grid">
+${bisyoHTML}</div>`;
+    }
+    if (extraHTML) {
+      newListHTML += `<div class="divider"></div>
+<h3 class="section-title">📘 Karagdagang Pahina</h3>
+<h4 class="section-subtitle">Inspirasyon at Aral</h4>
+<div class="grid">
+${extraHTML}</div>`;
+    }
+
     const listPattern = /<!--\s*AUTO-LIST-START\s*-->[\s\S]*?<!--\s*AUTO-LIST-END\s*-->/;
     if (!listPattern.test(htmlContent)) {
       btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "☁️ I-SAVE SA GITHUB → i-update ang listahan";
       return showStatus("❌ Walang nakitang marka sa main.html — ilagay ang <!-- AUTO-LIST-START / END -->", "error");
     }
     const newHTML = htmlContent.replace(listPattern, 
-      `<!-- AUTO-LIST-START -->\n${newListHTML}<!-- AUTO-LIST-END -->`);
+      `<!-- AUTO-LIST-START -->\n${newListHTML}\n<!-- AUTO-LIST-END -->`);
     const updateRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MAIN_HTML_PATH}`, {
       method: "PUT",
       headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
