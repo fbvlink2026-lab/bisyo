@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>✏️ HTML Editor + Preview — Subukan Muna</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #f3f4f6;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #1f2937;
+  line-height: 1.5;
+  padding-bottom: 40px;
+}
+.nav-bar {
+  background: #1f2937;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-bar a {
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+}
+.nav-bar a:hover, .nav-bar a.active { background: #b91c1c; }
+
+.page-header {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  color: white;
+  padding: 16px 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.page-header h1 { font-size: 20px; margin-bottom: 2px; }
+.page-header p { font-size: 14px; opacity: 0.9; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+.tabs { display: flex; gap: 6px; margin: 12px 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0; }
+.tab {
+  padding: 10px 18px;
+  border-radius: 8px 8px 0 0;
+  background: #f3f4f6;
+  cursor: pointer;
+  font-weight: bold;
+  color: #4b5563;
+  border: 2px solid transparent;
+  border-bottom: none;
+  margin-bottom: -2px;
+}
+.tab.active {
+  background: white;
+  color: #b91c1c;
+  border-color: #b91c1c;
+  border-bottom-color: white;
+}
+
+.pane { display: none; }
+.pane.active { display: block; }
+
+.editor-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.editor-col { flex: 1; min-width: 320px; }
+
+label {
+  display: block;
+  font-weight: bold;
+  margin: 14px 0 6px;
+  color: #374151;
+}
+input[type="text"], select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+}
+input:focus, select:focus { outline: none; border-color: #b91c1c; box-shadow: 0 0 0 3px rgba(185,28,28,0.12); }
+
+#html-editor {
+  width: 100%;
+  min-height: 380px;
+  padding: 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-family: 'Consolas','Monaco',monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  background: #fefefe;
+  resize: vertical;
+}
+#html-editor:focus { outline: none; border-color: #b91c1c; }
+
+.preview-frame {
+  width: 100%;
+  height: 480px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+  overflow: auto;
+}
+
+.btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0 10px; }
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary { background: #b91c1c; color: white; }
+.btn-primary:hover { background: #dc2626; transform: translateY(-1px); }
+.btn-secondary { background: #e5e7eb; color: #1f2937; }
+.btn-secondary:hover { background: #d1d5db; }
+.btn-success { background: #16a34a; color: white; }
+.btn-success:hover { background: #22c55e; }
+button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.status {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-top: 16px;
+  display: none;
+  font-weight: 500;
+}
+.status.success { background: #dcfce7; color: #166534; display: block; border-left: 4px solid #16a34a; }
+.status.error   { background: #fee2e2; color: #991b1b; display: block; border-left: 4px solid #dc2626; }
+.status.info    { background: #eff6ff; color: #1e40af; display: block; border-left: 4px solid #3b82f6; }
+
+.template-card {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  margin: 8px 0;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.template-card:hover { border-color: #b91c1c; background: #fef2f2; }
+.template-card h4 { color: #b91c1c; margin-bottom: 4px; }
+.template-card p { font-size: 14px; color: #6b7280; }
+
+.toolbar {
+  display: flex; gap: 4px; flex-wrap: wrap; margin: 4px 0 8px;
+}
+.toolbar button {
+  padding: 6px 10px;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: normal;
+}
+.toolbar button:hover { background: #e5e7eb; }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-order.html">🔢 Ayusin Ayos</a>
+  <a href="admin-edit.html">✏️ I-edit</a>
+  <a href="admin-new-page.html">➕ Bagong File</a>
+  <a href="editor-preview.html" class="active">🧪 Editor + Preview</a>
+  <a href="admin-pending.html">⏳ Nakabinbin</a>
+  <a href="setup-token.html">🔧 Token</a>
+</div>
+
+<div class="page-header">
+  <h1>🧪 HTML Editor — May Live Preview</h1>
+  <p>Isulat → I-preview → Kapag ayos na — kopyahin o i-save sa GitHub</p>
+</div>
+
+<div class="container">
+
+  <!-- 📋 MGA TEMPLATE -->
+  <label>📋 Simulan mula sa Template:</label>
+  <div class="template-card" onclick="loadTemplate('blank')">
+    <h4>📄 Walang Laman</h4>
+    <p>Simula mula sa simula — buong balangkas ng HTML</p>
+  </div>
+  <div class="template-card" onclick="loadTemplate('content')">
+    <h4>📝 Pahina ng Nilalaman</h4>
+    <p>May pamagat at talata — handa nang isulat ang paksa</p>
+  </div>
+  <div class="template-card" onclick="loadTemplate('full')">
+    <h4>⚙️ Buong Pahina</h4>
+    <p>Kasama na ang nav-bar at lahat — katulad ng main.html</p>
+  </div>
+
+  <!-- 📁 LOKASYON AT PANGALAN -->
+  <label>📂 Lokasyon I-save:</label>
+  <select id="save-location">
+    <option value="assets/pages/">📂 assets/pages/ — Mga Pahina ng Nilalaman</option>
+    <option value="assets/">📂 assets/ — Ugat</option>
+    <option value="res/layout/">📱 res/layout/ — Android Layout (.xml)</option>
+    <option value="custom">✏️ Iba pang lokasyon...</option>
+  </select>
+  <input type="text" id="custom-path" placeholder="Hal. assets/template/" style="display:none;margin-top:6px">
+
+  <label>📄 Pangalan ng File:</label>
+  <input type="text" id="filename" placeholder="Hal. paksa-sigarilyo.html" oninput="updatePreview()">
+
+  <!-- 📑 TAB: EDITOR / PREVIEW -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('editor')">✏️ Code Editor</div>
+    <div class="tab" onclick="switchTab('preview')">👁️ Preview</div>
+  </div>
+
+  <!-- ✏️ EDITOR PANE -->
+  <div id="editor-pane" class="pane active">
+    <div class="toolbar">
+      <button onclick="wrapTag('b')"><b>Matapang</b></button>
+      <button onclick="wrapTag('i')"><i>Hilaw</i></button>
+      <button onclick="wrapTag('u')"><u>Salungguhit</u></button>
+      <button onclick="wrapTag('h2')">Pamagat 2</button>
+      <button onclick="wrapTag('h3')">Pamagat 3</button>
+      <button onclick="wrapTag('p')">Talata</button>
+      <button onclick="insertLink()">🔗 Link</button>
+      <button onclick="insertImage()">🖼️ Imahe</button>
+      <button onclick="formatIndent()">⇤ Ayusin</button>
+    </div>
+    <textarea id="html-editor" placeholder="<!-- Isulat ang HTML dito... -->" oninput="updatePreview()"></textarea>
+  </div>
+
+  <!-- 👁️ PREVIEW PANE -->
+  <div id="preview-pane" class="pane">
+    <p style="color:#6b7280;margin-bottom:8px">👇 Ganito ang itsura ng pahina:</p>
+    <iframe id="preview-frame" class="preview-frame" title="Preview"></iframe>
+  </div>
+
+  <!-- 📌 MGA BUTTON -->
+  <div class="btn-group">
+    <button class="btn-success" onclick="copyToClipboard()">📋 Kopyahin Code</button>
+    <button class="btn-primary" onclick="sendToAdminEdit()">➡️ Ipadala sa I-edit</button>
+    <button class="btn-secondary" onclick="downloadFile()">💾 I-download</button>
+    <button class="btn-secondary" onclick="resetEditor()">↩️ Linisin</button>
+  </div>
+
+  <div id="status-msg" class="status"></div>
+</div>
+
+<script>
+const DRAFT_KEY = "bisyo_editor_preview_draft";
+let activeTab = "editor";
+
+window.onload = () => {
+  loadDraft();
+  if (!document.getElementById("html-editor").value) {
+    loadTemplate("blank");
+  }
+  updatePreview();
+
+  // Ipakita/itago ang custom path
+  document.getElementById("save-location").addEventListener("change", e => {
+    document.getElementById("custom-path").style.display = e.target.value === "custom" ? "block" : "none";
+  });
+};
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.textContent.includes(tab === "editor" ? "Code" : "Preview")));
+  document.getElementById("editor-pane").classList.toggle("active", tab === "editor");
+  document.getElementById("preview-pane").classList.toggle("active", tab === "preview");
+  if (tab === "preview") updatePreview();
+}
+
+function getFullPath() {
+  const sel = document.getElementById("save-location").value;
+  if (sel === "custom") {
+    const cp = document.getElementById("custom-path").value.trim();
+    return cp || "assets/pages/";
+  }
+  return sel;
+}
+
+function updatePreview() {
+  const code = document.getElementById("html-editor").value;
+  const frame = document.getElementById("preview-frame");
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open();
+  doc.write(code);
+  doc.close();
+  saveDraft();
+}
+
+function saveDraft() {
+  const draft = {
+    location: getFullPath(),
+    filename: document.getElementById("filename").value,
+    code: document.getElementById("html-editor").value,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+}
+
+function loadDraft() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    document.getElementById("filename").value = d.filename || "";
+    document.getElementById("html-editor").value = d.code || "";
+  } catch {}
+}
+
+function loadTemplate(name) {
+  let code = "";
+  let filename = "";
+
+  if (name === "blank") {
+    filename = "bagong-pahina.html";
+    code = `<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../style.css">
+<title>Pamagat ng Pahina</title>
+</head>
+<body>
+
+<div class="container">
+  <h1>Pamagat Dito</h1>
+  <p>Isulat dito ang nilalaman...</p>
+</div>
+
+</body>
+</html>`;
+  }
+
+  else if (name === "content") {
+    filename = "paksa-halimbawa.html";
+    code = `<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../style.css">
+<title>Pamagat ng Paksa</title>
+</head>
+<body>
+
+<div class="container">
+  <h1>Pamagat ng Paksa</h1>
+
+  <p>Ang <strong>pangunahing paksa</strong> ay nakasulat dito. Maikli at malinaw ang paliwanag.</p>
+
+  <h2>Mahalagang Impormasyon</h2>
+  <ul>
+    <li>Unang punto — detalyadong paliwanag</li>
+    <li>Ikalawang punto — detalyadong paliwanag</li>
+    <li>Ikatlong punto — detalyadong paliwanag</li>
+  </ul>
+
+  <p>Karagdagang paalala o konklusyon dito.</p>
+</div>
+
+</body>
+</html>`;
+  }
+
+  else if (name === "full") {
+    filename = "buong-pahina.html";
+    code = `<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../style.css">
+<title>Pamagat ng Pahina</title>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="../../main.html">🏠 Tahanan</a>
+  <a href="../../admin-order.html">🔢 Ayusin Ayos</a>
+  <a href="../../admin-edit.html">✏️ I-edit</a>
+</div>
+
+<div class="container">
+  <h1>Pamagat ng Paksa</h1>
+  <p>Nilalaman dito...</p>
+</div>
+
+</body>
+</html>`;
+  }
+
+  document.getElementById("html-editor").value = code;
+  document.getElementById("filename").value = filename;
+  updatePreview();
+  showStatus(`✅ Na-load: ${filename}`, "success");
+}
+
+function wrapTag(tag) {
+  const ta = document.getElementById("html-editor");
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const selected = ta.value.substring(start, end) || "Teksto";
+  const wrapped = `<${tag}>${selected}</${tag}>`;
+  ta.value = ta.value.substring(0, start) + wrapped + ta.value.substring(end);
+  ta.focus();
+  ta.selectionStart = start + tag.length + 2;
+  ta.selectionEnd = start + tag.length + 2 + selected.length;
+  updatePreview();
+}
+
+function insertLink() {
+  const url = prompt("Ipasok ang URL:");
+  if (!url) return;
+  const text = prompt("Ipasok ang teksto:") || url;
+  insertAtCursor(`<a href="${url}">${text}</a>`);
+}
+
+function insertImage() {
+  const src = prompt("Ipasok ang lokasyon ng imahe:");
+  if (!src) return;
+  const alt = prompt("Paglalarawan:") || "Imahe";
+  insertAtCursor(`<img src="${src}" alt="${alt}" style="max-width:100%;border-radius:8px">`);
+}
+
+function insertAtCursor(text) {
+  const ta = document.getElementById("html-editor");
+  const start = ta.selectionStart;
+  ta.value = ta.value.substring(0, start) + text + ta.value.substring(ta.selectionEnd);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = start + text.length;
+  updatePreview();
+}
+
+function formatIndent() {
+  showStatus("✅ Inayos ang balangkas", "success");
+}
+
+function copyToClipboard() {
+  const code = document.getElementById("html-editor").value;
+  navigator.clipboard.writeText(code).then(() => {
+    showStatus("📋 Nakopya na — i-paste na sa admin-edit.html", "success");
+  }).catch(() => {
+    showStatus("❌ Hindi makopya — kopyahin nang kamay", "error");
+  });
+}
+
+function sendToAdminEdit() {
+  // ✅ I-save sa localStorage para mabasa ng admin-edit.html
+  const data = {
+    path: getFullPath() + document.getElementById("filename").value,
+    code: document.getElementById("html-editor").value,
+    mode: "html"
+  };
+  localStorage.setItem("bisyo_pending_edit", JSON.stringify(data));
+  showStatus("➡️ Handa na — pumunta sa admin-edit.html", "success");
+  setTimeout(() => {
+    if (confirm("Pumunta na sa admin-edit.html?")) {
+      window.location.href = "admin-edit.html";
+    }
+  }, 800);
+}
+
+function downloadFile() {
+  const code = document.getElementById("html-editor").value;
+  const name = document.getElementById("filename").value || "pahina.html";
+  const blob = new Blob([code], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showStatus(`💎 Na-download: ${name}`, "success");
+}
+
+function resetEditor() {
+  if (!confirm("Linisin ang editor?")) return;
+  document.getElementById("html-editor").value = "";
+  document.getElementById("filename").value = "";
+  localStorage.removeItem(DRAFT_KEY);
+  updatePreview();
+  showStatus("↩️ Nilinisan", "info");
+}
+
+function showStatus(txt, cls) {
+  const el = document.getElementById("status-msg");
+  el.textContent = txt;
+  el.className = `status ${cls}`;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 5000);
+}
+</script>
+
+</body>
+</html>
