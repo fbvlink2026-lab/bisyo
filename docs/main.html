@@ -19,12 +19,61 @@ html, body {
 }
 
 /* ==========================================
+   ⚠️ MENSAHE — GALING SA LOKAL (ADMIN LANG)
+   ========================================== */
+.cache-notice {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border-bottom: 3px solid #f59e0b;
+  color: #78350f;
+  font-size: 14px;
+}
+.cache-notice-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cache-icon { font-size: 18px; }
+.publish-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  background: #b91c1c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+.publish-btn:hover { background: #dc2626; }
+.dismiss-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #78350f;
+  padding: 0 4px;
+  line-height: 1;
+}
+.hidden { display: none !important; }
+
+/* ==========================================
    📱 HEADER — PULA + PUTING SULAT
    ========================================== */
 .header {
   background: linear-gradient(90deg, #b91c1c, #dc2626);
   color: white;
   padding: 18px 18px 18px 56px;
+  margin-top: 44px; /* ✅ Magbigay ng espasyo kapag lumabas ang cache notice */
   box-shadow: 0 4px 12px rgba(0,0,0,.12);
   position: relative;
 }
@@ -333,7 +382,6 @@ html, body {
 .loading-state { color: #3b82f6; }
 .empty-state { color: #6b7280; }
 .error-state { color: #b91c1c; background: #fef2f2; border-radius: 10px; }
-.hidden { display: none !important; }
 
 /* ==========================================
    ⚙️ ADMIN LINK
@@ -354,6 +402,7 @@ html, body {
 .admin-footer a:hover { background: #b91c1c; }
 
 @media (max-width: 480px) {
+  .header { margin-top: 44px; }
   .grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
@@ -365,6 +414,16 @@ html, body {
 </style>
 </head>
 <body>
+
+<!-- ⚠️ MENSAHE — GALING SA LOKAL / HINDI PA NAI-PUBLISH (ADMIN LANG) -->
+<div id="cacheNotice" class="cache-notice hidden">
+  <div class="cache-notice-inner">
+    <span class="cache-icon">⚠️</span>
+    <span id="cacheNoticeText">Galing sa lokal — hindi pa nakikita ng publiko</span>
+    <button id="publishBtn" class="publish-btn">📤 I-publish sa GitHub</button>
+    <button id="dismissCacheNotice" class="dismiss-btn" title="Itago pansamantala">✕</button>
+  </div>
+</div>
 
 <!-- ☰ MENU BUTTON -->
 <div class="header">
@@ -457,91 +516,8 @@ html, body {
 <h4 class="section-subtitle">Basahin at unawain ang panganib</h4>
 
 <!-- AUTO-LIST-START -->
-<div class="grid">
-<a href="pages/alak.html" class="page-btn">
-  <span class="page-num">1</span>
-  <span class="page-name">Alak</span>
-</a>
-<a href="pages/cocaine.html" class="page-btn">
-  <span class="page-num">2</span>
-  <span class="page-name">Cocaine</span>
-</a>
-<a href="pages/ecstasy.html" class="page-btn">
-  <span class="page-num">3</span>
-  <span class="page-name">Ecstasy</span>
-</a>
-<a href="pages/heroin.html" class="page-btn">
-  <span class="page-num">4</span>
-  <span class="page-name">Heroin</span>
-</a>
-<a href="pages/ibang-sugal.html" class="page-btn">
-  <span class="page-num">5</span>
-  <span class="page-name">Ibang Sugal</span>
-</a>
-<a href="pages/inhalants.html" class="page-btn">
-  <span class="page-num">6</span>
-  <span class="page-name">Inhalants</span>
-</a>
-<a href="pages/internet-laro.html" class="page-btn">
-  <span class="page-num">7</span>
-  <span class="page-name">Internet Laro</span>
-</a>
-<a href="pages/ketamine.html" class="page-btn">
-  <span class="page-num">8</span>
-  <span class="page-name">Ketamine</span>
-</a>
-<a href="pages/labis-pagkain.html" class="page-btn">
-  <span class="page-num">9</span>
-  <span class="page-name">Labis Pagkain</span>
-</a>
-<a href="pages/lsd.html" class="page-btn">
-  <span class="page-num">10</span>
-  <span class="page-name">Lsd</span>
-</a>
-<a href="pages/marijuana.html" class="page-btn">
-  <span class="page-num">11</span>
-  <span class="page-name">Marijuana</span>
-</a>
-<a href="pages/pag-aabuso-gamot.html" class="page-btn">
-  <span class="page-num">12</span>
-  <span class="page-name">Pag Aabuso Gamot</span>
-</a>
-<a href="pages/shabu.html" class="page-btn">
-  <span class="page-num">13</span>
-  <span class="page-name">Shabu</span>
-</a>
-<a href="pages/sigarilyo.html" class="page-btn">
-  <span class="page-num">14</span>
-  <span class="page-name">Sigarilyo</span>
-</a>
-<a href="pages/sugal.html" class="page-btn">
-  <span class="page-num">15</span>
-  <span class="page-name">Sugal</span>
-</a>
-<a href="pages/tinuturok-gamot.html" class="page-btn">
-  <span class="page-num">16</span>
-  <span class="page-name">Tinuturok Gamot</span>
-</a>
-<a href="pages/tuklaw.html" class="page-btn">
-  <span class="page-num">17</span>
-  <span class="page-name">Tuklaw</span>
-</a>
-<a href="pages/vaping.html" class="page-btn">
-  <span class="page-num">18</span>
-  <span class="page-name">Vaping</span>
-</a>
-</div><div class="divider"></div>
-<h3 class="section-title">📘 Karagdagang Pahina</h3>
-<h4 class="section-subtitle">Inspirasyon at Aral</h4>
-<div class="grid">
-<a href="pages/aral-sa-bibliya.html" class="page-btn">
-  <span class="page-num">✦</span>
-  <span class="page-name">Aral Sa Bibliya</span>
-</a>
-<a href="pages/araw-araw-babasahin.html" class="page-btn">
-  <span class="page-num">✦</span>
-  <span class="page-name">Araw Araw Babasahin</span>
-</a>
+<div class="grid" id="bisyoGrid">
+  <div class="loading-state" id="loadingMsg">⏳ Naglo-load...</div>
 </div>
 <!-- AUTO-LIST-END -->
 
@@ -568,17 +544,172 @@ const GITHUB_API_ASSETS = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAM
 const GITHUB_API_PAGES  = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/app/src/main/assets/pages`;
 const PAGES_FOLDER = "pages/";
 
-const ORDER_KEY    = "bisyo_page_order";
-const HIDDEN_KEY   = "bisyo_page_visible";
-const CACHE_VER_KEY = "bisyo_cached_apk_ver";
-const CACHE_APK_NAME_KEY = "bisyo_last_apk_name";
-const CACHE_APK_URL_KEY  = "bisyo_last_apk_url";
-const DOWNLOADING_KEY    = "bisyo_downloading";
+// ✅ MGA SUSI SA LOKAL NA IMBAK
+const ORDER_KEY            = "bisyo_page_order";
+const HIDDEN_KEY           = "bisyo_page_visible";
+const PAGE_LIST_CACHE_KEY  = "bisyo_page_list";
+const PAGE_LIST_TIME_KEY   = "bisyo_list_timestamp";
+const ORDER_LAST_PUBLISHED = "bisyo_order_last_published";
+
+const CACHE_VER_KEY        = "bisyo_cached_apk_ver";
+const CACHE_APK_NAME_KEY   = "bisyo_last_apk_name";
+const CACHE_APK_URL_KEY    = "bisyo_last_apk_url";
+const DOWNLOADING_KEY      = "bisyo_downloading";
 
 let apkFilename = null, downloadLink = null, isDownloading = false;
 
 function isOnline() { return navigator.onLine; }
 function isInsideApp() { return location.href.startsWith("file:///android_asset/"); }
+
+// ==================================================
+// ✅ TINGNAN KUNG ADMIN ANG KASALUKUYANG GUMAGAMIT
+// ==================================================
+function isCurrentUserAdmin() {
+  return !!localStorage.getItem("admin_token") || 
+         !!sessionStorage.getItem("admin_logged_in") ||
+         localStorage.getItem("admin_is_logged_in") === "true";
+}
+
+// ==================================================
+// ✅ MENSAHE — KUNG MAY PAGBABAGONG LOKAL HINDI PA NAI-PUBLISH
+// ==================================================
+function showCacheNoticeIfNeeded() {
+  const notice = document.getElementById("cacheNotice");
+  if (!notice) return;
+
+  // ❌ Hindi admin — huwag ipakita
+  if (!isCurrentUserAdmin()) {
+    notice.classList.add("hidden");
+    return;
+  }
+
+  const localOrder = localStorage.getItem(ORDER_KEY);
+  const publishedOrder = localStorage.getItem(ORDER_LAST_PUBLISHED);
+
+  // ✅ May pagbabago na lokal pero hindi pa nai-publish
+  if (localOrder && publishedOrder && localOrder !== publishedOrder) {
+    notice.classList.remove("hidden");
+    document.getElementById("cacheNoticeText").textContent = 
+      "⚠️ Iyong lokal na ayos — hindi pa nakikita ng publiko hanggang hindi nai-publish sa GitHub";
+  }
+  // ✅ Wala pang naipublish pero may lokal na — bago pa rin
+  else if (localOrder && !publishedOrder) {
+    notice.classList.remove("hidden");
+    document.getElementById("cacheNoticeText").textContent = 
+      "⚠️ Iyong lokal na ayos — hindi pa nai-publish sa publiko";
+  }
+  // ✅ Pareho na — walang babala
+  else {
+    notice.classList.add("hidden");
+  }
+}
+
+// ==================================================
+// ✅ I-PUBLISH SA GITHUB — TAWAGIN MULA SA ADMIN-ORDER
+// ==================================================
+async function pushCurrentOrderToGitHub() {
+  // ⚠️ Ang aktuwal na pag-save sa GitHub ay nasa admin-order.html
+  // Dito — tandaan lang na nai-publish na
+  localStorage.setItem(ORDER_LAST_PUBLISHED, localStorage.getItem(ORDER_KEY) || "");
+  return true;
+}
+
+// ==================================================
+// ✅ LOKAL NA LISTAHAN — TINGNAN AGAD BAGO ANG GITHUB
+// ==================================================
+function loadCachedPageList() {
+  try {
+    const cached = localStorage.getItem(PAGE_LIST_CACHE_KEY);
+    if (!cached) return null;
+    return JSON.parse(cached);
+  } catch { return null; }
+}
+
+function savePageListToCache(pages) {
+  localStorage.setItem(PAGE_LIST_CACHE_KEY, JSON.stringify(pages));
+  localStorage.setItem(PAGE_LIST_TIME_KEY, Date.now().toString());
+}
+
+// ==================================================
+// ✅ PAGLALATAG NG LISTAHAN — HIWALAY PARA MAGAMIT AGAD
+// ==================================================
+function renderPageGrids(allPages) {
+  const bisyoGrid = document.getElementById("bisyoGrid");
+  const extraGrid = document.getElementById("extraGrid");
+  const extraSection = document.getElementById("extraSection");
+
+  const order = getOrder();
+  const visible = getVisibleSet();
+
+  bisyoGrid.innerHTML = "";
+  extraGrid.innerHTML = "";
+
+  let hasExtra = false, hasVisible = false;
+
+  order.forEach(id => {
+    if (!visible.has(id)) return;
+    const page = allPages.find(p => p.id === id);
+    if (!page) return;
+
+    hasVisible = true;
+    const target = page.group === "extra" ? extraGrid : bisyoGrid;
+    if (page.group === "extra") hasExtra = true;
+
+    const a = document.createElement("a");
+    a.href = (page.group === "extra" ? "" : PAGES_FOLDER) + page.file;
+    a.className = "page-btn";
+    a.innerHTML = `
+      <span class="page-num">${page.num||'✦'}</span>
+      <span class="page-name">${page.name}</span>
+    `;
+    target.appendChild(a);
+  });
+
+  if (!hasVisible) bisyoGrid.innerHTML = `<div class="empty-state">📭 Walang nakitang pahina.</div>`;
+  extraSection.classList.toggle("hidden", !hasExtra);
+}
+
+// ==================================================
+// ✅ PINAHUSAY NA renderGrids — AGAD ANG LOKAL, GITHUB SA LIKURAN
+// ==================================================
+async function renderGrids() {
+  const bisyoGrid = document.getElementById("bisyoGrid");
+
+  // ==================================================
+  // ✅ HAKBANG 1: IPakita AGAD ang nakasave sa lokal
+  // ==================================================
+  const cachedPages = loadCachedPageList();
+  if (cachedPages) {
+    renderPageGrids(cachedPages); // ✅ Lumabas AGAD — walang paghihintay!
+  } else {
+    bisyoGrid.innerHTML = `<div class="loading-state">⏳ Naglo-load...</div>`;
+  }
+
+  // ==================================================
+  // ✅ HAKBANG 2: Sa likuran — Kunin ang bago mula sa GitHub
+  // ==================================================
+  if (!isOnline()) {
+    showCacheNoticeIfNeeded();
+    return;
+  }
+
+  try {
+    const freshPages = await fetchPagesFromGitHubAssets();
+    
+    // ✅ I-save ang bago para sa susunod na bukas
+    savePageListToCache(freshPages);
+
+    // ✅ Ipakita ang bago — kung iba sa nakita na
+    if (!cachedPages || JSON.stringify(cachedPages) !== JSON.stringify(freshPages)) {
+      renderPageGrids(freshPages);
+    }
+  } catch (err) {
+    console.warn("Hindi makuha ang bago mula sa GitHub — gamit ang nakasave:", err);
+  }
+
+  // ✅ Ipakita ang mensahe kung may pagbabagong lokal na hindi pa nai-publish
+  showCacheNoticeIfNeeded();
+}
 
 function openSidebar() {
   document.getElementById("downloadSidebar").classList.add("show");
@@ -589,12 +720,8 @@ function closeSidebar() {
   document.getElementById("sidebarOverlay").classList.remove("show");
 }
 
-// ==================================================
-// ✅ IBALIK ANG BUTTON — LINISIN ANG ESTADO
-// ==================================================
 function clearDownloadState() {
   localStorage.removeItem(DOWNLOADING_KEY);
-  // Huwag burahin ang bersyon at APK — kailangan pa iyon!
   isDownloading = false;
   
   const btn = document.getElementById("dlBtn");
@@ -614,9 +741,6 @@ function extractVersion(name) {
   return v ? `v${v[1]}` : "v1.0";
 }
 
-// ==================================================
-// ✅ KUNIN ANG NAKASAVE NA IMPORMASYON
-// ==================================================
 function loadCachedApkInfo() {
   const savedVer = localStorage.getItem(CACHE_VER_KEY);
   const savedApk = localStorage.getItem(CACHE_APK_NAME_KEY);
@@ -630,9 +754,6 @@ function loadCachedApkInfo() {
   return null;
 }
 
-// ==================================================
-// ✅ PINAHUSAY NA findApk — HINDI NA NAWAWALA
-// ==================================================
 async function findApk() {
   const statusEl = document.getElementById("apkStatus");
   const apkEl = document.getElementById("apkDisplay");
@@ -640,7 +761,6 @@ async function findApk() {
   const btn = document.getElementById("dlBtn");
   const cachedNote = document.getElementById("cachedNote");
 
-  // ✅ UNANG-UNA: Ipakita agad ang nakasave habang tinitingnan ang bago
   const cached = loadCachedApkInfo();
   if (cached) {
     verEl.textContent = cached.version;
@@ -671,16 +791,13 @@ async function findApk() {
       headers: { "Accept": "application/vnd.github.v3+json" }
     });
 
-    // ==================================================
-    // ✅ LIMITASYON NG GITHUB — GAMITIN ANG NAKASAVE
-    // ==================================================
     if (res.status === 403) {
       statusEl.className = "apk-status status-error";
       statusEl.textContent = "⚠️ GitHub abala — gamit ang huling bersyon";
       if (cached) {
         cachedNote.classList.remove("hidden");
         btn.disabled = false;
-        return cached.name; // ✅ HINDI BUMABALIK SA V1.0!
+        return cached.name;
       }
       btn.textContent = "⏳ Subukan mamaya";
       btn.disabled = true;
@@ -709,7 +826,6 @@ async function findApk() {
       downloadLink = RAW_DOCS_BASE + apk.name;
       const version = extractVersion(apk.name);
 
-      // ✅ I-SAVE — HINDI NA MAWAWALA KAHIT LIMITADO ANG GITHUB
       localStorage.setItem(CACHE_VER_KEY, version);
       localStorage.setItem(CACHE_APK_NAME_KEY, apk.name);
       localStorage.setItem(CACHE_APK_URL_KEY, downloadLink);
@@ -743,7 +859,6 @@ async function findApk() {
     statusEl.className = "apk-status status-error";
     statusEl.textContent = `⚠️ ${err.message} — gamit ang huling bersyon`;
     
-    // ✅ KAHIT MAY ERROR — GUMAMIT PA RIN NG NAKASAVE
     if (cached) {
       cachedNote.classList.remove("hidden");
       verEl.textContent = cached.version;
@@ -834,48 +949,6 @@ async function fetchPagesFromGitHubAssets() {
   } catch { return LOCAL_PAGES; }
 }
 
-async function renderGrids() {
-  const bisyoGrid = document.getElementById("bisyoGrid");
-  const extraGrid = document.getElementById("extraGrid");
-  const extraSection = document.getElementById("extraSection");
-
-  try {
-    const allPages = await fetchPagesFromGitHubAssets();
-    const order = getOrder();
-    const visible = getVisibleSet();
-
-    bisyoGrid.innerHTML = "";
-    extraGrid.innerHTML = "";
-
-    let hasExtra = false, hasVisible = false;
-
-    order.forEach(id => {
-      if (!visible.has(id)) return;
-      const page = allPages.find(p => p.id === id);
-      if (!page) return;
-
-      hasVisible = true;
-      const target = page.group === "extra" ? extraGrid : bisyoGrid;
-      if (page.group === "extra") hasExtra = true;
-
-      const a = document.createElement("a");
-      a.href = (page.group === "extra" ? "" : PAGES_FOLDER) + page.file;
-      a.className = "page-btn";
-      a.innerHTML = `
-        <span class="page-num">${page.num||'✦'}</span>
-        <span class="page-name">${page.name}</span>
-      `;
-      target.appendChild(a);
-    });
-
-    if (!hasVisible) bisyoGrid.innerHTML = `<div class="empty-state">📭 Walang nakitang pahina.</div>`;
-    extraSection.classList.toggle("hidden", !hasExtra);
-
-  } catch (err) {
-    bisyoGrid.innerHTML = `<div class="error-state">⚠️ Hindi maipakita ang listahan.</div>`;
-  }
-}
-
 function setProgress(percent, text) {
   const wrap = document.getElementById("progressWrap");
   const fill = document.getElementById("progressFill");
@@ -957,6 +1030,25 @@ window.onload = async function () {
     localStorage.removeItem(DOWNLOADING_KEY);
   }
 
+  // ✅ Ihanda ang mensahe — i-setup ang mga pindot
+  const notice = document.getElementById("cacheNotice");
+  const dismissBtn = document.getElementById("dismissCacheNotice");
+  const publishBtn = document.getElementById("publishBtn");
+
+  if (dismissBtn) {
+    dismissBtn.onclick = () => notice?.classList.add("hidden");
+  }
+  if (publishBtn) {
+    publishBtn.onclick = async () => {
+      if (!confirm("I-save at I-publish sa GitHub?\nMakikita na ito ng lahat ng bisita pagkatapos.")) return;
+      const ok = await pushCurrentOrderToGitHub();
+      if (ok) {
+        notice?.classList.add("hidden");
+        alert("✅ Nai-publish na! Makikita na ng lahat sa susunod nilang pag-refresh.");
+      }
+    };
+  }
+
   if (isInsideApp()) document.getElementById("inAppNote").classList.remove("hidden");
 
   if (!isOnline()) {
@@ -968,6 +1060,8 @@ window.onload = async function () {
     document.getElementById("offlineState").classList.add("hidden");
     await findApk();
   }
+
+  // ✅ Ipakita agad mula sa lokal, GitHub sa likuran
   await renderGrids();
 };
 
@@ -978,7 +1072,7 @@ window.addEventListener("online",  async () => {
 });
 window.addEventListener("offline", () => {
   document.getElementById("onlineState").classList.add("hidden");
-  document.getElementById("offlineState").classList.remove("hidden");
+  document.getElementById("offlineState").classList.add("hidden");
   loadCachedApkInfo();
 });
 </script>
