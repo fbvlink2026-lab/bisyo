@@ -479,7 +479,6 @@ async function saveToGitHub() {
       const linkHref = (p.folder || "pages/") + p.file;
       const group = pageGroups[p.id] || "bisyo";
 
-      // ✅ BAGONG ISTRUKTURA — TUMUTUGMA SA BAGONG style.css
       const itemHTML = `<a href="${linkHref}" class="page-btn">
   <span class="page-num">${group==="bisyo"?bisyoCounter++:"✦"}</span>
   <span class="page-name">${p.name}</span>
@@ -489,15 +488,19 @@ async function saveToGitHub() {
       else extraHTML += itemHTML + "\n";
     });
 
-    // ✅ BUUIN ANG BUONG LISTAHAN — may dalawang section
+    // ==================================================
+    // ✅ INAYOS — WALANG DOBLE NA PAMAGAT!
+    // Ang <h3>📖 Mga Uri ng Bisyo</h3> ay NASA LABAS NA
+    // sa loob ng main.html — kaya dito GRID LANG
+    // ==================================================
     let newListHTML = "";
     if (bisyoHTML) {
-      newListHTML += `<h3 class="section-title">📖 Mga Uri ng Bisyo</h3>
-<h4 class="section-subtitle">Basahin at unawain ang panganib</h4>
-<div class="grid">
+      // ✅ GRID LANG — WALANG PAMAGAT DITO
+      newListHTML += `<div class="grid">
 ${bisyoHTML}</div>`;
     }
     if (extraHTML) {
+      // ✅ Ito lang ang may pamagat — wala sa labas kaya hindi dadoble
       newListHTML += `<div class="divider"></div>
 <h3 class="section-title">📘 Karagdagang Pahina</h3>
 <h4 class="section-subtitle">Inspirasyon at Aral</h4>
