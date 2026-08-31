@@ -216,8 +216,16 @@ const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}
 const ASSETS_PATH = "assets/";
 const CONFIG_PATH = "docs/config.json";
 const HTML_FILES_KEY = "bisyo_detected_html_files";
+const SESSION_DURATION_KEY = "bisyo_session_duration";
+const REMEMBER_LOGIN_KEY = "bisyo_remember_login";
+const COPYRIGHT_KEY = "bisyo_copyright_info";
+const CO_ADMIN_KEY = "bisyo_co_admins";
+const DASHBOARD_PAGES_KEY = "bisyo_dashboard_pages";
+const ADMIN_PAGES_KEY = "bisyo_admin_panel_pages";
 
-let scannedHtmlFiles = []; // { path, sha, hasCopyright, showInDashboard, title }
+let scannedHtmlFiles = [];
+let configSha = null;
+let currentUser = null;
 
 function getDecryptedToken() {
   const encrypted = localStorage.getItem("bisyo_encrypted_token");
@@ -282,15 +290,11 @@ async function checkHtmlFile(filePath, sha, token) {
     const data = await res.json();
     const content = atob(data.content);
 
-    // ✨ ALAMIN KUNG MAY COPYRIGHT
     const hasCopyright = /©|copyright|karapatang-ari/i.test(content);
-
-    // ✨ KUNIN ANG PAMAGAT MULA SA <title>
     const titleMatch = content.match(/<title>([^<]+)<\/title>/i);
     const title = titleMatch ? titleMatch[1].trim() : filePath.split("/").pop();
 
-    // ✨ KUNIN ANG KASALUKUYANG SETTING KUNG LALABAS SA DASHBOARD
-    const savedList = JSON.parse(localStorage.getItem("bisyo_dashboard_pages") || "[]");
+    const savedList = JSON.parse(localStorage.getItem(DASHBOARD_PAGES_KEY) || "[]");
     const existing = savedList.find(p => p.path === filePath);
 
     scannedHtmlFiles.push({
@@ -332,7 +336,7 @@ function toggleDashboard(idx, value) {
 }
 
 // ==================================================
-// ✨ 2. AWTOMATIKONG IDAGDAG ANG COPYRIGHT SA LAHAT NA WALA
+// ✨ 2. AWTOMATIKONG IDAGDAG ANG COPYRIGHT
 // ==================================================
 async function batchAddCopyright() {
   const token = getDecryptedToken();
@@ -348,7 +352,6 @@ async function batchAddCopyright() {
   for (const file of filesToUpdate) {
     try {
       let newContent = file.content;
-      // Ipasok bago ang </body>
       if (newContent.includes("</body>")) {
         newContent = newContent.replace("</body>", `${copyrightText}\n</body>`);
       } else {
@@ -386,61 +389,193 @@ function buildCopyrightFooter() {
 }
 
 // ==================================================
-// ✨ 3. I-SAVE ANG DASHBOARD VISIBILITY — config.json
+// ✨ 3. I-SAVE ANG DASHBOARD VISIBILITY
 // ==================================================
 function saveDashboardVisibility() {
   const dashboardPages = scannedHtmlFiles
     .filter(f => f.showInDashboard)
     .map(f => ({ title: f.title, path: f.path }));
 
-  localStorage.setItem("bisyo_dashboard_pages", JSON.stringify(dashboardPages));
+  localStorage.setItem(DASHBOARD_PAGES_KEY, JSON.stringify(dashboardPages));
   localStorage.setItem(HTML_FILES_KEY, JSON.stringify(scannedHtmlFiles));
 
   showStatus(`✅ Nai-save: ${dashboardPages.length} pahina ang lalabas sa Dashboard`, "success");
 }
 
 // ==================================================
-// KARAPATANG-ARI — IBA PANG FUNGSYON
+// ✨ 4. MGA PAHINA SA ADMIN PANEL — I-ADD / EDIT / DELETE
+// ==================================================
+function getAllAdminPages() { return JSON.parse(localStorage.getItem(ADMIN_PAGES_KEY) || "[]"); }
+function saveAdminPages(list) { localStorage.setItem(ADMIN_PAGES_KEY, JSON.stringify(list)); renderAdminPages(); }
+
+function savePageEntry() {
+  const editId = document.getElementById("editing-page-id").value;
+  const icon = document.getElementById("page-icon").value.trim() || "📄";
+  const name = document.getElementById("page-name").value.trim();
+  const file = document.getElementById("page-file").value.trim();
+  const showDash = document.getElementById("page-show-dashboard").checked;
+  const showMenu = document.getElementById("page-show-menu").checked;
+
+  if (!name || !file) return showStatus("❌ Punan ang pangalan at file", "error");
+
+  let list = getAllAdminPages();
+  if (editId) {
+    const idx = list.findIndex(x => x.id == editId);
+    if (idx !== -1) Object.assign(list[idx], { icon, name, file, showDash, showMenu });
+    document.getElementById("editing-page-id").value = "";
+    document.getElementById("add-page-btn").textContent = "➕ Magdagdag ng Pahina";
+    showStatus("✅ Na-update ang pahina", "success");
+  } else {
+    list.push({ id: Date.now(), icon, name, file, showDash, showMenu });
+    showStatus("✅ Naidagdag ang pahina", "success");
+  }
+  saveAdminPages(list);
+  document.getElementById("page-icon").value = "";
+  document.getElementById("page-name").value = "";
+  document.getElementById("page-file").value = "";
+}
+
+function editPage(id) {
+  const page = getAllAdminPages().find(x => x.id == id);
+  if (!page) return;
+  document.getElementById("editing-page-id").value = id;
+  document.getElementById("page-icon").value = page.icon;
+  document.getElementById("page-name").value = page.name;
+  document.getElementById("page-file").value = page.file;
+  document.getElementById("page-show-dashboard").checked = page.showDash;
+  document.getElementById("page-show-menu").checked = page.showMenu;
+  document.getElementById("add-page-btn").textContent = "✅ I-update ang Pahina";
+}
+
+function deletePage(id, name) {
+  if (!confirm(`Alisin ang "${name}"?`)) return;
+  saveAdminPages(getAllAdminPages().filter(x => x.id != id));
+  showStatus(`🗑️ Tinanggal: ${name}`, "info");
+}
+
+function renderAdminPages() {
+  const list = getAllAdminPages();
+  const container = document.getElementById("admin-page-list");
+  if (!list.length) {
+    container.innerHTML = `<p style="color:#6b7280">Wala pang pahinang idinagdag</p>`;
+    return;
+  }
+  container.innerHTML = list.map(p => `
+    <div class="page-item">
+      <span class="page-icon">${p.icon}</span>
+      <div class="page-info">
+        <div class="page-name">${p.name}</div>
+        <div class="page-file">📄 ${p.file}</div>
+      </div>
+      <span class="page-visible ${p.showDash ? '' : 'hidden'}">${p.showDash ? 'Dashboard' : 'Nakatago'}</span>
+      <div class="co-admin-actions">
+        <button class="btn btn-small btn-secondary" onclick="editPage(${p.id})">✏️</button>
+        <button class="btn btn-small btn-danger" onclick="deletePage(${p.id}, '${p.name.replace(/'/g,"\\'")}')">🗑️</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ==================================================
+// ✨ 5. SESSION SETTINGS
+// ==================================================
+function formatDuration(sec) {
+  if (sec === 0) return "Walang Hanggan";
+  if (sec < 3600) return `${Math.floor(sec/60)} Minuto`;
+  if (sec < 86400) return `${Math.floor(sec/3600)} Oras`;
+  if (sec < 604800) return `${Math.floor(sec/86400)} Araw`;
+  return `${Math.floor(sec/2592000)} Buwan`;
+}
+function updateSessionPreview() {
+  const sec = parseInt(document.getElementById("session-duration").value);
+  document.getElementById("session-preview").textContent = `Kasalukuyang: ${formatDuration(sec)}`;
+}
+function saveSessionSetting() {
+  localStorage.setItem(SESSION_DURATION_KEY, parseInt(document.getElementById("session-duration").value));
+  localStorage.setItem(REMEMBER_LOGIN_KEY, document.getElementById("remember-login").checked);
+  showStatus("✅ Nai-save ang tagal ng session", "success");
+}
+
+// ==================================================
+// ✨ 6. COPYRIGHT SETTINGS
 // ==================================================
 function updateCopyrightPreview() {
   document.getElementById("copyright-render").textContent = buildCopyrightFooter().replace(/<[^>]+>/g, '');
 }
 function saveCopyright() {
-  updateCopyrightPreview();
-  localStorage.setItem("bisyo_copyright_info", JSON.stringify({
+  localStorage.setItem(COPYRIGHT_KEY, JSON.stringify({
     owner: document.getElementById("copy-owner").value,
     year: document.getElementById("copy-year").value,
     extra: document.getElementById("copy-extra").value
   }));
-  showStatus("✅ Nai-save — handa nang idagdag sa mga file", "success");
+  updateCopyrightPreview();
+  showStatus("✅ Nai-save ang Karapatang-ari", "success");
 }
 
 // ==================================================
-// IBA PANG KASALUKUYANG FUNGSYON — DITO KASAMA
+// ✨ 7. CO-ADMIN — BUONG SISTEMA
+// ==================================================
+function getAllCoAdmins() { return JSON.parse(localStorage.getItem(CO_ADMIN_KEY) || "[]"); }
+function saveCoAdmins(list) { localStorage.setItem(CO_ADMIN_KEY, JSON.stringify(list)); renderCoAdmins(); }
+function renderCoAdmins() {
+  const list = getAllCoAdmins();
+  const cont = document.getElementById("coadmin-list");
+  if (!list.length) { cont.innerHTML = `<p style="color:#6b7280">Wala pang Co-Admin</p>`; return; }
+  const roleLabels = { moderator: "🔵 Moderator", "content-editor": "🟡 Tagapamahala", full: "🟢 Buong Pag-access" };
+  cont.innerHTML = list.map(a => `
+    <div class="co-admin-item">
+      <div class="co-admin-info">
+        <div class="co-admin-name">${a.name} <span class="role-badge ${a.role}">${roleLabels[a.role]?.split(' ')[0] || a.role}</span></div>
+        <div class="co-admin-role">${roleLabels[a.role] || a.role}</div>
+      </div>
+      <div class="co-admin-actions">
+        <button class="btn btn-small btn-secondary">✏️ I-edit</button>
+        <button class="btn btn-small btn-danger">🗑️ Burahin</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ==================================================
+// KARANIWANG TULONG
 // ==================================================
 function showStatus(txt, cls) {
   const el = document.getElementById("status-msg");
   el.textContent = txt; el.className = `status ${cls}`; el.style.display="block";
-  setTimeout(()=>el.style.display="none", 8000);
+  setTimeout(()=>el.style.display="none", 10000);
 }
 
 window.onload = () => {
-  // I-load ang nakaraang scan kung mayroon
-  const saved = localStorage.getItem(HTML_FILES_KEY);
-  if (saved) {
-    scannedHtmlFiles = JSON.parse(saved);
+  // I-load ang nakaraang scan
+  const savedFiles = localStorage.getItem(HTML_FILES_KEY);
+  if (savedFiles) {
+    scannedHtmlFiles = JSON.parse(savedFiles);
     renderHtmlFilesList();
     if (scannedHtmlFiles.length) {
       document.getElementById("add-copyright-btn").classList.remove("hidden");
       document.getElementById("save-dashboard-btn").classList.remove("hidden");
     }
   }
-  // I-load copyright settings
-  const c = JSON.parse(localStorage.getItem("bisyo_copyright_info") || '{"owner":"Proyekto Bisyo","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba"}');
+
+  // Session
+  const savedDur = localStorage.getItem(SESSION_DURATION_KEY);
+  if (savedDur !== null) document.getElementById("session-duration").value = savedDur;
+  const savedRemember = localStorage.getItem(REMEMBER_LOGIN_KEY);
+  if (savedRemember !== null) document.getElementById("remember-login").checked = savedRemember === "true";
+  updateSessionPreview();
+
+  // Copyright
+  const c = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"owner":"Proyekto Bisyo","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba"}');
   document.getElementById("copy-owner").value = c.owner;
   document.getElementById("copy-year").value = c.year;
   document.getElementById("copy-extra").value = c.extra;
   updateCopyrightPreview();
+
+  // Admin Pages
+  renderAdminPages();
+
+  // Co-Admin
+  renderCoAdmins();
 };
 </script>
 </body>
