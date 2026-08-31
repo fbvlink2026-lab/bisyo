@@ -1,10 +1,10 @@
 # 📋 Talaan ng Pagbuo — Proyekto ni Mark Jann Tampok
 
 ---
-📅 **Petsa:** 2026-08-31 13:50:17 UTC
-🏷️ **Bersyon:** v1.0.173 (173)
+📅 **Petsa:** 2026-08-31 13:59:56 UTC
+🏷️ **Bersyon:** v1.0.174 (174)
 🎯 **Katayuan:** ✅ TAGUMPAY
-📝 **Detalye:** Matagumpay na nabuo ang APK — Bersyon v1.0.173
+📝 **Detalye:** Matagumpay na nabuo ang APK — Bersyon v1.0.174
 ---
 
 ## 📋 Buong Log ng Pagbuo
@@ -49,9 +49,9 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :app:checkDebugDuplicateClasses
 > Task :app:processDebugResources
 > Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
 > Task :app:mergeDebugNativeLibs NO-SOURCE
 > Task :app:stripDebugDebugSymbols NO-SOURCE
-> Task :app:mergeLibDexDebug
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
