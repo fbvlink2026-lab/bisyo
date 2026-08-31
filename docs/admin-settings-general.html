@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>🔧 Pangkalahatang Setting</title>
+<style>
+.container{max-width:580px;margin:0 auto;padding:16px}
+.card{background:white;padding:24px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:16px;border-left:4px solid #b91c1c}
+h2{font-size:18px;margin:0 0 16px 0;color:#1f2937}
+label{font-weight:bold;margin:16px 0 4px 0;display:block}
+input,select{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px}
+input:focus,select:focus{outline:none;border-color:#b91c1c;box-shadow:0 0 0 3px rgba(185,28,28,0.12)}
+.btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:12px}
+.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white}
+.check-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.check-row input{width:20px;height:20px;cursor:pointer}
+.status{padding:14px;border-radius:8px;margin-top:16px;display:none;font-weight:500}
+.status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
+.copyright-preview{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-top:12px;text-align:center;color:#6b7280}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="admin-settings.html">⬅️ Bumalik</a>
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-settings-general.html" class="active">🔧 Pangkalahatan</a>
+</div>
+
+<div class="container">
+  <!-- ⏰ SESSION -->
+  <div class="card">
+    <h2>⏰ Tagal ng Login Session</h2>
+    <label>Piliin kung gaano katagal mananatiling naka-login:</label>
+    <select id="session-duration" onchange="updatePreview()">
+      <option value="1800">30 Minuto</option>
+      <option value="3600">1 Oras</option>
+      <option value="86400">1 Araw (24 Oras)</option>
+      <option value="604800">1 Linggo</option>
+      <option value="2592000">1 Buwan</option>
+      <option value="0">Walang Hanggan</option>
+    </select>
+    <div class="check-row">
+      <input type="checkbox" id="remember-login">
+      <label for="remember-login">🔄 Tandaan ako — laging handang mag-login</label>
+    </div>
+    <p id="preview" style="color:#6b7280;margin-top:8px">Kasalukuyang: 30 Minuto</p>
+    <button class="btn btn-primary" onclick="saveSession()">✅ I-save</button>
+  </div>
+
+  <!-- © COPYRIGHT -->
+  <div class="card">
+    <h2>📄 Karapatang-ari at May-ari</h2>
+    <p style="color:#6b7280;margin-bottom:10px">Ilagay nang isang beses — gagamitin sa lahat ng pahina.</p>
+    <label>👤 Pangalan ng May-ari:</label>
+    <input type="text" id="copy-owner" oninput="updateCopyPreview()" placeholder="Hal. Proyekto Bisyo">
+    <label>📅 Taon:</label>
+    <input type="text" id="copy-year" value="2026" oninput="updateCopyPreview()">
+    <label>📝 Karagdagang Teksto:</label>
+    <input type="text" id="copy-extra" value="Lahat ng Karapatan ay Nakareserba" oninput="updateCopyPreview()">
+    <div class="copyright-preview" id="copy-view">
+      © 2026 May-ari — Lahat ng Karapatan ay Nakareserba
+    </div>
+    <button class="btn btn-primary" onclick="saveCopyright()">✅ I-save</button>
+  </div>
+
+  <div id="status-msg" class="status"></div>
+</div>
+
+<script>
+const SESSION_KEY = "bisyo_session_duration";
+const REMEMBER_KEY = "bisyo_remember_login";
+const COPYRIGHT_KEY = "bisyo_copyright_info";
+
+function formatSec(sec) {
+  if (sec == 0) return "Walang Hanggan";
+  if (sec < 3600) return `${Math.floor(sec/60)} Minuto`;
+  if (sec < 86400) return `${Math.floor(sec/3600)} Oras`;
+  if (sec < 604800) return `${Math.floor(sec/86400)} Araw`;
+  return `${Math.floor(sec/2592000)} Buwan`;
+}
+function updatePreview(){
+  document.getElementById("preview").textContent = "Kasalukuyang: " + formatSec(parseInt(document.getElementById("session-duration").value));
+}
+function saveSession(){
+  localStorage.setItem(SESSION_KEY, parseInt(document.getElementById("session-duration").value));
+  localStorage.setItem(REMEMBER_KEY, document.getElementById("remember-login").checked);
+  showOk("✅ Nai-save ang tagal ng session");
+}
+function updateCopyPreview(){
+  const o=document.getElementById("copy-owner").value||"May-ari";
+  const y=document.getElementById("copy-year").value||"2026";
+  const e=document.getElementById("copy-extra").value||"";
+  document.getElementById("copy-view").textContent = `© ${y} ${o} — ${e}`;
+}
+function saveCopyright(){
+  localStorage.setItem(COPYRIGHT_KEY, JSON.stringify({
+    owner: document.getElementById("copy-owner").value,
+    year: document.getElementById("copy-year").value,
+    extra: document.getElementById("copy-extra").value
+  }));
+  showOk("✅ Nai-save ang karapatang-ari");
+}
+function showOk(t){
+  const s=document.getElementById("status-msg");
+  s.textContent=t; s.style.display="block";
+  setTimeout(()=>s.style.display="none",3000);
+}
+window.onload=()=>{
+  const sd=localStorage.getItem(SESSION_KEY); if(sd)document.getElementById("session-duration").value=sd;
+  const rm=localStorage.getItem(REMEMBER_KEY); if(rm)document.getElementById("remember-login").checked=rm==="true";
+  const c=JSON.parse(localStorage.getItem(COPYRIGHT_KEY)||'{"owner":"","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba"}');
+  document.getElementById("copy-owner").value=c.owner;
+  document.getElementById("copy-year").value=c.year;
+  document.getElementById("copy-extra").value=c.extra;
+  updatePreview(); updateCopyPreview();
+}
+</script>
+</body>
+</html>
