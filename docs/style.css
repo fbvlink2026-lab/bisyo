@@ -1,5 +1,5 @@
 /* ==========================================
-   ✅ style.css — PINAGSAMA + TINANGGAL ANG DOBLE
+   ✅ style.css — PINAGSAMA + TINANGGAL ANG DOBLE + PABILOG NA KANTO
    ========================================== */
 
 /* ---------- PANGKALAHATANG PANUNTUNAN ---------- */
@@ -27,6 +27,7 @@ a { text-decoration: none; color: inherit; }
   padding: 24px 16px;
   text-align: center;
   box-shadow: 0 3px 8px rgba(0,0,0,.15);
+  border-radius: 0 0 20px 20px;
 }
 .header h1 {
   font-size: 26px;
@@ -54,7 +55,7 @@ a { text-decoration: none; color: inherit; }
 .nav-bar a {
   color: white;
   padding: 8px 12px;
-  border-radius: 6px;
+  border-radius: 10px;
   text-decoration: none;
   font-size: 14px;
 }
@@ -99,11 +100,11 @@ li {
 
 /* ---------- PAHABANG PAUNAWA — WALANG INTERNET ---------- */
 .offline-note {
-  background: #fffbeb;
+  background: #fef3c7;
   border-left: 4px solid #f59e0b;
   padding: 16px 20px;
   margin: 16px;
-  border-radius: 10px;
+  border-radius: 16px;
   color: #78350f;
   max-width: 900px;
   margin-left: auto;
@@ -115,26 +116,27 @@ li {
   margin-bottom: 4px;
 }
 
-/* ---------- DOWNLOAD SECTION ---------- */
+/* ---------- DOWNLOAD SECTION — PULA + PABILOG NA KANTO ---------- */
 .download-section {
   max-width: 600px;
   margin: 30px auto;
-  padding: 24px 20px;
-  background: white;
-  border-radius: 14px;
-  box-shadow: 0 3px 12px rgba(0,0,0,.08);
+  padding: 28px 24px;
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  border-radius: 24px;
+  box-shadow: 0 6px 20px rgba(185,28,28,.35);
   text-align: center;
+  color: white !important;
 }
 .download-title {
   font-size: 20px;
-  color: #b91c1c;
+  color: white !important;
   font-weight: bold;
   margin-bottom: 6px;
 }
 .download-sub {
   font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 16px;
+  color: rgba(255,255,255,0.95);
+  margin-bottom: 20px;
 }
 
 .download-btn {
@@ -142,19 +144,20 @@ li {
   padding: 16px;
   font-size: 17px;
   font-weight: bold;
-  background: linear-gradient(90deg, #b91c1c, #dc2626);
-  color: white !important;
+  background: white;
+  color: #b91c1c !important;
   border: none;
-  border-radius: 10px;
+  border-radius: 16px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .download-btn:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(185,28,28,.3);
+  box-shadow: 0 6px 16px rgba(0,0,0,.15);
 }
 .download-btn:disabled {
-  background: #9ca3af;
+  background: #e5e7eb;
+  color: #9ca3af !important;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -163,15 +166,15 @@ li {
 .progress-container {
   width: 100%;
   height: 24px;
-  background: #e5e7eb;
+  background: rgba(255,255,255,0.25);
   border-radius: 12px;
   margin: 14px 0 6px;
   overflow: hidden;
 }
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #b91c1c, #dc2626);
-  color: white;
+  background: white;
+  color: #b91c1c !important;
   font-size: 12px;
   font-weight: bold;
   display: flex;
@@ -183,32 +186,32 @@ li {
 }
 .progress-text {
   font-size: 14px;
-  color: #4b5563;
+  color: rgba(255,255,255,0.95);
   margin-bottom: 12px;
 }
 
 .download-info {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.2);
   font-size: 13px;
-  color: #6b7280;
+  color: rgba(255,255,255,0.9);
   line-height: 1.8;
 }
 .version-display {
-  color: #b91c1c;
+  color: #fef2f2 !important;
   font-weight: bold;
 }
 
 #update-note {
-  background: #eff6ff;
-  border-left: 4px solid #3b82f6;
-  padding: 12px 16px;
-  margin: 14px 0;
-  border-radius: 8px;
+  background: rgba(255,255,255,0.18);
+  border-left: 4px solid white;
+  padding: 14px 18px;
+  margin: 16px 0 0;
+  border-radius: 12px;
   text-align: left;
   font-size: 14px;
-  color: #1e40af;
+  color: white !important;
 }
 
 /* ---------- DIALOG / POPUP ---------- */
@@ -224,7 +227,7 @@ li {
 }
 .dialog-box {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 26px 22px;
   max-width: 360px;
   width: 100%;
@@ -254,7 +257,7 @@ li {
   min-width: 120px;
   padding: 12px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -327,7 +330,7 @@ li {
   gap: 12px;
   background: white;
   padding: 14px 18px;
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 2px 6px rgba(0,0,0,.06);
   border: 1px solid #e5e7eb;
   transition: all 0.2s ease;
@@ -379,7 +382,7 @@ li {
   padding: 10px 20px;
   background: #1f2937;
   color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
   transition: background 0.2s;
 }
@@ -396,7 +399,7 @@ li {
   padding: 12px 16px;
   margin: 10px;
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,.06);
 }
 .content {
@@ -470,7 +473,7 @@ li {
 .session-setting {
   background: #eff6ff;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 14px 0;
   border-left: 3px solid #3b82f6;
 }
@@ -492,7 +495,7 @@ input, select, textarea, .input {
   width: 100%;
   padding: 12px;
   border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
   background: white;
 }
@@ -512,7 +515,7 @@ textarea::placeholder { color: #9ca3af; }
 button {
   padding: 10px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
@@ -606,7 +609,7 @@ button:active { transform: scale(.96); }
 
 .status {
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: 10px;
   margin: 12px 0;
   min-height: 18px;
   white-space: pre-wrap;
@@ -631,7 +634,7 @@ button:active { transform: scale(.96); }
   gap: 6px;
   padding: 20px;
   background: white;
-  border-radius: 12px;
+  border-radius: 16px;
   text-decoration: none;
   color: #1f2937;
   box-shadow: 0 2px 6px rgba(0,0,0,.08);
@@ -650,7 +653,7 @@ button:active { transform: scale(.96); }
   gap: 10px;
   padding: 12px;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   margin: 6px 0;
   box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
@@ -682,7 +685,7 @@ button:active { transform: scale(.96); }
 .item {
   background: white;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 8px 0;
   box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
@@ -703,7 +706,7 @@ button:active { transform: scale(.96); }
   border-left: 4px solid #f59e0b;
   padding: 12px;
   margin-top: 8px;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #78350f;
   font-size: 14px;
 }
@@ -717,7 +720,7 @@ button:active { transform: scale(.96); }
 .page-item {
   padding: 12px 14px;
   background: #f9fafb;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   border: 2px solid transparent;
   transition: all 0.2s;
@@ -759,7 +762,7 @@ button:active { transform: scale(.96); }
 textarea#editor {
   min-height: 320px;
   border: 2px solid #e5e7eb;
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: monospace;
 }
 textarea#editor:focus { border-color: #b91c1c; }
@@ -772,7 +775,7 @@ textarea#editor.unsaved {
 .template-section {
   background: #fef3c7;
   border: 1px solid #fcd34d;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 14px;
   margin: 10px;
 }
@@ -794,7 +797,7 @@ textarea#editor.unsaved {
   background: #fff;
   border: 1px solid #f59e0b;
   color: #92400e;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
   transition: all 0.2s;
@@ -808,7 +811,7 @@ textarea#editor.unsaved {
 .pending-section {
   background: #fffbeb;
   border: 1px solid #fcd34d;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 14px;
   margin: 10px;
 }
@@ -864,7 +867,7 @@ textarea#editor.unsaved {
 pre {
   background: #f3f4f6;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   border-left: 4px solid #b91c1c;
   overflow-x: auto;
   margin: 12px 0;
@@ -903,7 +906,7 @@ pre {
   .grid { grid-template-columns: 1fr; }
   .header { padding: 20px 16px; }
   .header h1 { font-size: 21px; }
-  .download-section { padding: 18px; margin: 12px; }
+  .download-section { padding: 20px; margin: 12px; border-radius: 20px; }
   .dialog-buttons, .btn-group { flex-direction: column; }
   .nav-bar a { font-size: 13px; padding: 8px 9px; }
   .grid-menu { grid-template-columns: 1fr 1fr; }
