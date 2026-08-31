@@ -137,6 +137,7 @@ html, body {
 .status-found { color: #16a34a; }
 .status-none { color: #dc2626; }
 .status-error { color: #d97706; }
+.status-cached { color: #7c3aed; }
 
 .download-btn {
   width: 100%;
@@ -157,6 +158,22 @@ html, body {
   cursor: not-allowed;
   transform: none;
 }
+
+/* ✅ IBALIK BUTTON */
+.clear-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #374151;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+.clear-btn:hover { background: #e5e7eb; }
 
 .progress-wrap { margin-top: 16px; }
 .progress-bar-bg {
@@ -204,6 +221,15 @@ html, body {
   margin-top: 14px;
   font-size: 13px;
 }
+.cached-note {
+  background: #faf5ff;
+  border-left: 4px solid #8b5cf6;
+  padding: 10px;
+  border-radius: 8px;
+  color: #5b21b6;
+  margin-top: 8px;
+  font-size: 13px;
+}
 
 /* ==========================================
    📄 IMPORMASYON
@@ -236,7 +262,7 @@ html, body {
 }
 
 /* ==========================================
-   📋 LISTAHAN — ✅ DALAWANG HANAY PALAGI
+   📋 LISTAHAN
    ========================================== */
 .section-title {
   font-size: 19px;
@@ -374,8 +400,14 @@ html, body {
       <div class="download-info-row">
         <strong>Lokasyon:</strong> GitHub → docs/
       </div>
+      <div id="cachedNote" class="cached-note hidden">
+        💜 <strong>Ginagamit ang huling nakuhang impormasyon</strong> — Hindi kailangang maghintay sa GitHub
+      </div>
       <button id="dlBtn" class="download-btn" onclick="startDownload()">
         ⬇️ Hinahanap ang APK...
+      </button>
+      <button class="clear-btn" onclick="clearDownloadState()">
+        🔄 Ibalik ang Download Button
       </button>
       <div class="progress-wrap hidden" id="progressWrap">
         <div class="progress-bar-bg">
@@ -385,7 +417,21 @@ html, body {
       </div>
     </div>
     <div id="offlineState" class="hidden">
-      <div class="offline-msg">📡 Walang koneksyon sa internet — hindi makuha ang pag-update.</div>
+      <div class="offline-msg">📡 Walang koneksyon sa internet — gamit ang huling nakuhang bersyon.</div>
+      <div class="download-info-row">
+        <strong>Bersyon:</strong>
+        <div class="version-display" id="verDisplayOffline">v1.0</div>
+      </div>
+      <div class="download-info-row">
+        <strong>APK File:</strong>
+        <div class="apk-name" id="apkDisplayOffline">—</div>
+      </div>
+      <button id="dlBtnOffline" class="download-btn" onclick="startDownload()">
+        ⬇️ Gamitin ang huling APK
+      </button>
+      <button class="clear-btn" onclick="clearDownloadState()">
+        🔄 Ibalik ang Download Button
+      </button>
     </div>
     <div id="inAppNote" class="inapp-msg hidden">
       📱 Nasa loob ka na ng aplikasyon — kusang mag-i-install ang pag-update.
@@ -407,94 +453,15 @@ html, body {
   </ul>
 </div>
 
-<!-- ==================================================
-   ✅ DITO LAGAY ANG PAMAGAT — HINDI SA LOOB NG MARKA!
-   ================================================== -->
 <h3 class="section-title">📖 Mga Uri ng Bisyo</h3>
 <h4 class="section-subtitle">Basahin at unawain ang panganib</h4>
 
 <!-- AUTO-LIST-START -->
-<div class="grid">
-<a href="pages/alak.html" class="page-btn">
-  <span class="page-num">1</span>
-  <span class="page-name">Alak</span>
-</a>
-<a href="pages/cocaine.html" class="page-btn">
-  <span class="page-num">2</span>
-  <span class="page-name">Cocaine</span>
-</a>
-<a href="pages/ecstasy.html" class="page-btn">
-  <span class="page-num">3</span>
-  <span class="page-name">Ecstasy</span>
-</a>
-<a href="pages/heroin.html" class="page-btn">
-  <span class="page-num">4</span>
-  <span class="page-name">Heroin</span>
-</a>
-<a href="pages/ibang-sugal.html" class="page-btn">
-  <span class="page-num">5</span>
-  <span class="page-name">Ibang Sugal</span>
-</a>
-<a href="pages/inhalants.html" class="page-btn">
-  <span class="page-num">6</span>
-  <span class="page-name">Inhalants</span>
-</a>
-<a href="pages/internet-laro.html" class="page-btn">
-  <span class="page-num">7</span>
-  <span class="page-name">Internet Laro</span>
-</a>
-<a href="pages/ketamine.html" class="page-btn">
-  <span class="page-num">8</span>
-  <span class="page-name">Ketamine</span>
-</a>
-<a href="pages/labis-pagkain.html" class="page-btn">
-  <span class="page-num">9</span>
-  <span class="page-name">Labis Pagkain</span>
-</a>
-<a href="pages/lsd.html" class="page-btn">
-  <span class="page-num">10</span>
-  <span class="page-name">Lsd</span>
-</a>
-<a href="pages/marijuana.html" class="page-btn">
-  <span class="page-num">11</span>
-  <span class="page-name">Marijuana</span>
-</a>
-<a href="pages/pag-aabuso-gamot.html" class="page-btn">
-  <span class="page-num">12</span>
-  <span class="page-name">Pag Aabuso Gamot</span>
-</a>
-<a href="pages/shabu.html" class="page-btn">
-  <span class="page-num">13</span>
-  <span class="page-name">Shabu</span>
-</a>
-<a href="pages/sigarilyo.html" class="page-btn">
-  <span class="page-num">14</span>
-  <span class="page-name">Sigarilyo</span>
-</a>
-<a href="pages/sugal.html" class="page-btn">
-  <span class="page-num">15</span>
-  <span class="page-name">Sugal</span>
-</a>
-<a href="pages/tinuturok-gamot.html" class="page-btn">
-  <span class="page-num">16</span>
-  <span class="page-name">Tinuturok Gamot</span>
-</a>
-<a href="pages/tuklaw.html" class="page-btn">
-  <span class="page-num">17</span>
-  <span class="page-name">Tuklaw</span>
-</a>
-<a href="pages/vaping.html" class="page-btn">
-  <span class="page-num">18</span>
-  <span class="page-name">Vaping</span>
-</a>
-<a href="pages/aral-sa-bibliya.html" class="page-btn">
-  <span class="page-num">19</span>
-  <span class="page-name">Aral Sa Bibliya</span>
-</a>
+<div class="grid" id="bisyoGrid">
+  <div class="loading-state" id="loadingMsg">⏳ Naglo-load...</div>
 </div>
 <!-- AUTO-LIST-END -->
 
-<!-- 📘 KARAGDAGANG PAHINA -->
 <div id="extraSection" class="hidden">
   <div class="divider" style="max-width:720px;margin:0 auto"></div>
   <h3 class="section-title">📘 Karagdagang Pahina</h3>
@@ -502,18 +469,15 @@ html, body {
   <div class="grid" id="extraGrid"></div>
 </div>
 
-<!-- ⚙️ ADMIN -->
 <div class="admin-footer">
   <a href="admin.html">⚙️ Admin Panel</a>
 </div>
 
-<!-- 🧠 LOGIC -->
 <script>
 const REPO_OWNER = "fbvlink2026-lab";
 const REPO_NAME  = "bisyo";
 const BRANCH     = "main";
 
-// ✅ TAMA NA PATH — docs/ sa ugat ng repository
 const GITHUB_API_DOCS = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/docs?ref=${BRANCH}`;
 const RAW_DOCS_BASE   = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/docs/`;
 
@@ -524,6 +488,9 @@ const PAGES_FOLDER = "pages/";
 const ORDER_KEY    = "bisyo_page_order";
 const HIDDEN_KEY   = "bisyo_page_visible";
 const CACHE_VER_KEY = "bisyo_cached_apk_ver";
+const CACHE_APK_NAME_KEY = "bisyo_last_apk_name";
+const CACHE_APK_URL_KEY  = "bisyo_last_apk_url";
+const DOWNLOADING_KEY    = "bisyo_downloading";
 
 let apkFilename = null, downloadLink = null, isDownloading = false;
 
@@ -539,6 +506,24 @@ function closeSidebar() {
   document.getElementById("sidebarOverlay").classList.remove("show");
 }
 
+// ==================================================
+// ✅ IBALIK ANG BUTTON — LINISIN ANG ESTADO
+// ==================================================
+function clearDownloadState() {
+  localStorage.removeItem(DOWNLOADING_KEY);
+  // Huwag burahin ang bersyon at APK — kailangan pa iyon!
+  isDownloading = false;
+  
+  const btn = document.getElementById("dlBtn");
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = "⬇️ I-download ang APK";
+  }
+  document.getElementById("progressWrap").classList.add("hidden");
+  
+  alert("✅ Naibalik na ang Download Button!\n\n📱 Sa App: Burahin ang lumang APK sa Downloads folder kung kailangan.\n🌐 Sa Browser: Handa na ulit.");
+}
+
 function extractVersion(name) {
   const m = name.match(/[vV](\d+(?:[.-]\d+)+)/);
   if (m) return `v${m[1]}`;
@@ -546,36 +531,88 @@ function extractVersion(name) {
   return v ? `v${v[1]}` : "v1.0";
 }
 
+// ==================================================
+// ✅ KUNIN ANG NAKASAVE NA IMPORMASYON
+// ==================================================
+function loadCachedApkInfo() {
+  const savedVer = localStorage.getItem(CACHE_VER_KEY);
+  const savedApk = localStorage.getItem(CACHE_APK_NAME_KEY);
+  const savedUrl = localStorage.getItem(CACHE_APK_URL_KEY);
+  
+  if (savedVer && savedApk && savedUrl) {
+    apkFilename = savedApk;
+    downloadLink = savedUrl;
+    return { version: savedVer, name: savedApk, url: savedUrl };
+  }
+  return null;
+}
+
+// ==================================================
+// ✅ PINAHUSAY NA findApk — HINDI NA NAWAWALA
+// ==================================================
 async function findApk() {
   const statusEl = document.getElementById("apkStatus");
   const apkEl = document.getElementById("apkDisplay");
   const verEl = document.getElementById("verDisplay");
   const btn = document.getElementById("dlBtn");
+  const cachedNote = document.getElementById("cachedNote");
+
+  // ✅ UNANG-UNA: Ipakita agad ang nakasave habang tinitingnan ang bago
+  const cached = loadCachedApkInfo();
+  if (cached) {
+    verEl.textContent = cached.version;
+    apkEl.textContent = cached.name;
+    btn.textContent = isInsideApp() ? "🔄 I-update ang Aplikasyon" : "⬇️ I-download ang APK";
+    btn.disabled = false;
+  }
 
   if (!isOnline()) {
     statusEl.className = "apk-status status-error";
-    statusEl.textContent = "📴 Walang internet — hindi mase-check";
-    return null;
+    statusEl.textContent = "📴 Walang internet — gamit ang huling bersyon";
+    if (cached) {
+      document.getElementById("verDisplayOffline").textContent = cached.version;
+      document.getElementById("apkDisplayOffline").textContent = cached.name;
+      document.getElementById("onlineState").classList.add("hidden");
+      document.getElementById("offlineState").classList.remove("hidden");
+    }
+    return cached?.name || null;
   }
 
   try {
     statusEl.className = "apk-status status-checking";
     statusEl.textContent = "🔍 Binabasa ang docs/...";
+    cachedNote.classList.add("hidden");
 
     const res = await fetch(GITHUB_API_DOCS, { 
       cache: "no-store",
       headers: { "Accept": "application/vnd.github.v3+json" }
     });
 
+    // ==================================================
+    // ✅ LIMITASYON NG GITHUB — GAMITIN ANG NAKASAVE
+    // ==================================================
     if (res.status === 403) {
       statusEl.className = "apk-status status-error";
-      statusEl.textContent = "⚠️ Limitado ang GitHub API — subukan mamaya";
-      throw new Error("API rate limit");
+      statusEl.textContent = "⚠️ GitHub abala — gamit ang huling bersyon";
+      if (cached) {
+        cachedNote.classList.remove("hidden");
+        btn.disabled = false;
+        return cached.name; // ✅ HINDI BUMABALIK SA V1.0!
+      }
+      btn.textContent = "⏳ Subukan mamaya";
+      btn.disabled = true;
+      return null;
     }
     if (res.status === 404) {
       statusEl.className = "apk-status status-error";
-      statusEl.textContent = "❌ Walang nakitang docs/ folder";
-      throw new Error("Folder not found");
+      statusEl.textContent = "❌ Walang docs/ folder";
+      if (cached) {
+        statusEl.textContent += " — gamit ang huling nakuhang";
+        btn.disabled = false;
+        return cached.name;
+      }
+      btn.disabled = true;
+      return null;
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -587,31 +624,51 @@ async function findApk() {
     if (apk) {
       apkFilename = apk.name;
       downloadLink = RAW_DOCS_BASE + apk.name;
-      localStorage.setItem(CACHE_VER_KEY, extractVersion(apk.name));
+      const version = extractVersion(apk.name);
+
+      // ✅ I-SAVE — HINDI NA MAWAWALA KAHIT LIMITADO ANG GITHUB
+      localStorage.setItem(CACHE_VER_KEY, version);
+      localStorage.setItem(CACHE_APK_NAME_KEY, apk.name);
+      localStorage.setItem(CACHE_APK_URL_KEY, downloadLink);
 
       statusEl.className = "apk-status status-found";
       statusEl.textContent = "✅ Nakita!";
       apkEl.textContent = apk.name;
-      verEl.textContent = extractVersion(apk.name);
+      verEl.textContent = version;
       btn.textContent = isInsideApp()
         ? "🔄 I-update ang Aplikasyon"
         : "⬇️ I-download ang APK";
       btn.disabled = false;
       return apk.name;
+      
     } else {
       statusEl.className = "apk-status status-none";
-      statusEl.textContent = "❌ Walang .apk sa docs/ folder";
-      apkEl.textContent = "Wala pang APK";
-      verEl.textContent = "v1.0";
-      btn.textContent = "❌ Walang APK na nakita";
+      statusEl.textContent = "⚠️ Walang bagong APK — gamit ang nakatabi";
+      if (cached) {
+        verEl.textContent = cached.version;
+        apkEl.textContent = cached.name;
+        btn.textContent = isInsideApp() ? "🔄 I-update" : "⬇️ I-download";
+        btn.disabled = false;
+        return cached.name;
+      }
+      btn.textContent = "❌ Walang APK";
       btn.disabled = true;
       return null;
     }
   } catch (err) {
     console.error("APK Check Error:", err);
     statusEl.className = "apk-status status-error";
-    statusEl.textContent = `⚠️ ${err.message}`;
-    apkEl.textContent = "Hindi makuha";
+    statusEl.textContent = `⚠️ ${err.message} — gamit ang huling bersyon`;
+    
+    // ✅ KAHIT MAY ERROR — GUMAMIT PA RIN NG NAKASAVE
+    if (cached) {
+      cachedNote.classList.remove("hidden");
+      verEl.textContent = cached.version;
+      apkEl.textContent = cached.name;
+      btn.textContent = isInsideApp() ? "🔄 I-update" : "⬇️ I-download";
+      btn.disabled = false;
+      return cached.name;
+    }
     btn.textContent = "❌ Hindi mase-check";
     btn.disabled = true;
     return null;
@@ -749,6 +806,8 @@ function setProgress(percent, text) {
 async function startDownload() {
   if (!downloadLink || isDownloading) return;
   isDownloading = true;
+  localStorage.setItem(DOWNLOADING_KEY, "true");
+  
   const btn = document.getElementById("dlBtn");
   btn.disabled = true;
   btn.textContent = "⏳ Nagsisimula...";
@@ -760,6 +819,8 @@ async function startDownload() {
       setProgress(100, "✅ Tapos — kusang mag-i-install");
       btn.textContent = "✅ Handa na ang Pag-update";
       isDownloading = false;
+      localStorage.removeItem(DOWNLOADING_KEY);
+      btn.disabled = false;
     }, 600);
   } else {
     try {
@@ -791,23 +852,34 @@ async function startDownload() {
       URL.revokeObjectURL(url);
 
       setProgress(100, "✅ Tapos na ang pag-download!");
-      btn.textContent = "✅ Tapos na!";
+      btn.textContent = "⬇️ I-download ang APK";
+      isDownloading = false;
+      localStorage.removeItem(DOWNLOADING_KEY);
+      btn.disabled = false;
+
     } catch {
       window.location.href = downloadLink;
       setProgress(100, "✅ Sinisimulan...");
       btn.textContent = "⬇️ Simulan ulit";
+      isDownloading = false;
+      localStorage.removeItem(DOWNLOADING_KEY);
+      btn.disabled = false;
     }
-    isDownloading = false;
-    btn.disabled = false;
   }
 }
 
 window.onload = async function () {
+  // ✅ Burahin ang natirang estado bago mag-load
+  if (localStorage.getItem(DOWNLOADING_KEY) === "true") {
+    localStorage.removeItem(DOWNLOADING_KEY);
+  }
+
   if (isInsideApp()) document.getElementById("inAppNote").classList.remove("hidden");
 
   if (!isOnline()) {
     document.getElementById("onlineState").classList.add("hidden");
     document.getElementById("offlineState").classList.remove("hidden");
+    loadCachedApkInfo();
   } else {
     document.getElementById("onlineState").classList.remove("hidden");
     document.getElementById("offlineState").classList.add("hidden");
@@ -824,6 +896,7 @@ window.addEventListener("online",  async () => {
 window.addEventListener("offline", () => {
   document.getElementById("onlineState").classList.add("hidden");
   document.getElementById("offlineState").classList.remove("hidden");
+  loadCachedApkInfo();
 });
 </script>
 </body>
