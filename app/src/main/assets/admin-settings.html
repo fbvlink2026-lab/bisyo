@@ -4,111 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<title>⚙️ Mga Setting</title>
+<title>⚙️ Mga Setting — Panimula</title>
 <style>
-/* ✅ PROBLEMA 1 INAYOS — TIYAK NA KULAY NG TEKSTO SA BUTTON */
-.btn-primary:disabled,
-.btn-primary.saving,
-.btn-secondary:disabled,
-.btn-secondary.saving,
-.btn-danger:disabled,
-.btn-danger.saving {
-  background: #9ca3af !important;
-  color: #e5e7eb !important;
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
+.container{max-width:620px;margin:0 auto;padding:20px}
+.page-card{
+  background:white;
+  padding:24px;
+  border-radius:16px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:16px;
+  text-decoration:none;
+  color:inherit;
+  border-left:4px solid #b91c1c;
+  transition:all 0.25s
 }
-.btn-primary { color: #ffffff !important; }
-.btn-secondary { color: #1f2937 !important; }
-.btn-danger { color: #ffffff !important; }
-
-.hidden{display:none !important}
-.nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
-.nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
-.nav-bar a:hover,.nav-bar a.active{background:#b91c1c}
-.container{max-width:580px;margin:0 auto;padding:16px}
-.card{background:white;padding:24px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:16px}
-h2{font-size:18px;margin:0 0 16px 0;color:#1f2937}
-label{font-weight:bold;margin:16px 0 4px 0;display:block}
-input,select,textarea{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-family:inherit}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-shadow:0 0 0 3px rgba(185,28,28,0.12)}
-.btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:12px}
-.btn-small{width:auto;padding:8px 12px;margin:0 4px 0 0;font-size:14px}
-.status{padding:14px;border-radius:8px;margin-top:16px;display:none;font-weight:500}
-.status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
-.status.error{background:#fee2e2;color:#991b1b;display:block;border-left:4px solid #dc2626}
-.status.info{background:#eff6ff;color:#1e40af;display:block;border-left:4px solid #3b82f6}
-.note{background:#fffbeb;border-left:3px solid #f59e0b;padding:10px 14px;margin:8px 0;border-radius:0 8px 8px 0;font-size:14px;color:#78350f}
-.check-row{display:flex;align-items:center;gap:10px;margin:8px 0}
-.check-row input[type="checkbox"]{width:20px;height:20px;cursor:pointer}
-.check-row label{margin:0;font-weight:normal}
-.config-preview{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:10px;white-space:pre-wrap;font-family:monospace;font-size:12px;max-height:250px;overflow:auto}
-
-/* ✅ LISTAHAN NG DETEKTDONG HTML PAHINA */
-.html-file-item{
-  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-  padding:12px 14px;
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-left:3px solid #b91c1c;
-  border-radius:10px;
-  margin-top:6px;
-  transition:all 0.2s
+.page-card:hover{
+  transform:translateX(4px);
+  border-left-color:#dc2626;
+  background:#fef2f2
 }
-.html-file-item:hover{background:#fef2f2;border-color:#dc2626}
-.html-file-item.no-copyright{border-left-color:#f59e0b}
-.html-file-info{flex:1;min-width:180px}
-.html-file-path{font-family:monospace;font-size:13px;color:#374151}
-.html-file-status{font-size:12px;margin-top:2px}
-.status-ok{color:#16a34a}
-.status-missing{color:#d97706}
-
-/* ✅ CO-ADMIN LISTAHAN */
-.co-admin-item{
-  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-  padding:14px 16px;
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-left:3px solid #b91c1c;
-  border-radius:10px;
-  margin-top:8px;
-  transition:all 0.2s
-}
-.co-admin-item:hover{background:#fef2f2;border-color:#dc2626}
-.co-admin-info{flex:1;min-width:180px}
-.co-admin-name{font-weight:bold;color:#1f2937;font-size:15px}
-.co-admin-role{font-size:13px;color:#6b7280;margin-top:2px}
-.co-admin-actions{display:flex;gap:6px;align-items:center}
-.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
-.perm-item{background:#f3f4f6;padding:8px 10px;border-radius:6px;display:flex;align-items:center;gap:6px}
-.perm-item label{margin:0;font-weight:normal;font-size:14px}
-.role-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;margin-left:6px}
-.role-badge.full{background:#dcfce7;color:#166534}
-.role-badge["content-editor"]{background:#dbeafe;color:#1e40af}
-.role-badge.moderator{background:#fef3c7;color:#92400e}
-.perm-note{font-size:13px;color:#6b7280;margin-top:6px;padding-left:4px;border-left:3px solid #3b82f6}
-.copyright-preview{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:10px}
-.copyright-preview .footer-copy{padding:12px;text-align:center;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:10px}
-
-/* ✨ MGA PAHINA SA ADMIN PANEL */
-.page-item{
-  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-  padding:12px 14px;
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-left:3px solid #b91c1c;
-  border-radius:10px;
-  margin-top:8px;
-  transition:all 0.2s
-}
-.page-item:hover{background:#fef2f2;border-color:#dc2626}
-.page-icon{font-size:22px;line-height:1}
-.page-info{flex:1;min-width:160px}
-.page-name{font-weight:bold;color:#1f2937;font-size:15px}
-.page-file{font-size:13px;color:#6b7280;margin-top:1px;font-family:monospace}
-.page-visible{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:bold;background:#dcfce7;color:#166534;margin-left:4px}
-.page-visible.hidden{background:#f3f4f6;color:#6b7280}
+.page-icon{font-size:36px;line-height:1}
+.page-info h2{margin:0 0 4px 0;font-size:18px;color:#1f2937}
+.page-info p{margin:0;color:#6b7280;font-size:14px}
+h1{text-align:center;color:#1f2937;margin:20px 0 30px 0;font-size:22px}
 </style>
 </head>
 <body>
@@ -125,458 +44,40 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#b91c1c;box-sh
 </div>
 
 <div class="container">
+  <h1>⚙️ Mga Setting ng Sistema</h1>
 
-  <!-- ✨ BAGO — SCAN ASSETS/ PARA SA COPYRIGHT + DETECT HTML -->
-  <div class="card">
-    <h2>🔍 Suriin ang assets/ — Mga Pahina</h2>
-    <p style="color:#6b7280;margin-bottom:14px">Hanapin ang lahat ng <code>.html</code> sa <code>assets/</code> at mga subfolder — alamin kung may copyright at piliin kung lalabas sa Dashboard.<br><small>💻 Kailangan ng internet + GitHub Token</small></p>
-
-    <button id="scan-assets-btn" class="btn btn-primary" onclick="scanAssetsFolder()">🔍 Simulan ang Pagsusuri</button>
-    <button id="add-copyright-btn" class="btn btn-secondary hidden" onclick="batchAddCopyright()">© Idagdag sa Walang Mayroon</button>
-    <button id="save-dashboard-btn" class="btn btn-primary hidden" onclick="saveDashboardVisibility()">💾 I-save ang Dashboard Listahan</button>
-
-    <div id="scan-progress" class="hidden" style="margin-top:12px;color:#3b82f6">⏳ Naghahanap ng mga file...</div>
-    <div id="html-files-list" style="margin-top:16px"></div>
-    <p id="no-files-msg" style="color:#6b7280;padding:12px;display:none">Wala pang nasusuri — pindutin ang "Simulan ang Pagsusuri"</p>
-  </div>
-
-  <!-- ✨ MGA PAHINA SA ADMIN PANEL -->
-  <div class="card">
-    <h2>📋 Mga Pahina sa Admin Panel</h2>
-    <p style="color:#6b7280;margin-bottom:14px">Idagdag, ayusin, o itago ang mga pahinang lalabas sa Dashboard at Menu Bar.</p>
-
-    <div style="background:#f9fafb;padding:16px;border-radius:12px;margin-bottom:16px">
-      <input type="hidden" id="editing-page-id" value="">
-      <label>Emoji / Ikon:</label>
-      <input type="text" id="page-icon" placeholder="Hal. 📄" maxlength="4">
-      <label>Pangalan ng Pahina:</label>
-      <input type="text" id="page-name" placeholder="Hal. Editor + Preview">
-      <label>File Name / Link:</label>
-      <input type="text" id="page-file" placeholder="Hal. editor-preview.html">
-      <div class="check-row">
-        <input type="checkbox" id="page-show-dashboard" checked>
-        <label for="page-show-dashboard">✅ Ipakita sa Dashboard</label>
-      </div>
-      <div class="check-row">
-        <input type="checkbox" id="page-show-menu" checked>
-        <label for="page-show-menu">✅ Ipakita sa Menu Bar</label>
-      </div>
-      <button id="add-page-btn" class="btn btn-primary" onclick="savePageEntry()">➕ Magdagdag ng Pahina</button>
+  <a href="admin-settings-general.html" class="page-card">
+    <span class="page-icon">🔧</span>
+    <div class="page-info">
+      <h2>Pangkalahatang Setting</h2>
+      <p>Tagal ng login, karapatang-ari, at pangalan ng may-ari</p>
     </div>
-    <h3 style="font-size:16px;margin:20px 0 8px 0">📋 Kasalukuyang Listahan</h3>
-    <div id="admin-page-list"></div>
-  </div>
+  </a>
 
-  <!-- ⏰ TAGAL NG SESSION -->
-  <div class="card">
-    <h2>⏰ Tagal ng Login Session</h2>
-    <label>Piliin kung gaano katagal mananatiling naka-login:</label>
-    <select id="session-duration" onchange="updateSessionPreview()">
-      <option value="1800">30 Minuto</option>
-      <option value="3600">1 Oras</option>
-      <option value="86400">1 Araw (24 Oras)</option>
-      <option value="604800">1 Linggo</option>
-      <option value="2592000">1 Buwan</option>
-      <option value="0">Walang Hanggan</option>
-    </select>
-    <div class="check-row">
-      <input type="checkbox" id="remember-login">
-      <label for="remember-login">🔄 Tandaan ako — laging handang mag-login</label>
+  <a href="admin-settings-coadmins.html" class="page-card">
+    <span class="page-icon">👥</span>
+    <div class="page-info">
+      <h2>Mga Co-Admin</h2>
+      <p>Magdagdag, magbago, o magtakda ng antas ng pahintulot</p>
     </div>
-    <p id="session-preview" style="color:#6b7280;font-size:14px;margin-top:8px">Kasalukuyang: 30 Minuto</p>
-    <button class="btn btn-primary" onclick="saveSessionSetting()">✅ I-save ang Tagal</button>
-  </div>
+  </a>
 
-  <!-- 📄 KARAPATANG-ARI -->
-  <div class="card">
-    <h2>📄 Karapatang-ari at May-ari ng App</h2>
-    <p style="color:#6b7280;margin-bottom:14px">Ilagay nang isang beses — awtomatikong ilalagay sa lahat ng pahinang walang copyright.</p>
-    <label>👤 Pangalan ng May-ari:</label>
-    <input type="text" id="copy-owner" oninput="updateCopyrightPreview()">
-    <label>📅 Taon:</label>
-    <input type="text" id="copy-year" value="2026" oninput="updateCopyrightPreview()">
-    <label>📝 Karagdagang Teksto:</label>
-    <input type="text" id="copy-extra" value="Lahat ng Karapatan ay Nakareserba" oninput="updateCopyrightPreview()">
-    <div class="copyright-preview"><div class="footer-copy" id="copyright-render">© 2026 May-ari — Lahat ng Karapatan ay Nakareserba</div></div>
-    <button class="btn btn-primary" onclick="saveCopyright()">✅ I-save</button>
-  </div>
+  <a href="admin-settings-files.html" class="page-card">
+    <span class="page-icon">📄</span>
+    <div class="page-info">
+      <h2>Suriin ang mga Pahina</h2>
+      <p>Hanapin ang HTML, idagdag ang copyright, at piliin ang lalabas sa Dashboard</p>
+    </div>
+  </a>
 
-  <!-- 👤 CO-ADMIN + IBA PANG SETTING -->
-  <div class="card">
-    <h2>👤 Mga Co-Admin</h2>
-    <div id="coadmin-list"></div>
-  </div>
-
-  <div id="status-msg" class="status"></div>
+  <a href="admin-settings-config.html" class="page-card">
+    <span class="page-icon">🗂️</span>
+    <div class="page-info">
+      <h2>config.json — Sa GitHub</h2>
+      <p>I-preview, i-edit, at i-save ang kabuuang konpigurasyon</p>
+    </div>
+  </a>
 </div>
 
-<script>
-const REPO_OWNER = "fbvlink2026-lab", REPO_NAME = "bisyo", BRANCH = "main";
-const GITHUB_API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/`;
-const ASSETS_PATH = "assets/";
-const CONFIG_PATH = "docs/config.json";
-const HTML_FILES_KEY = "bisyo_detected_html_files";
-const SESSION_DURATION_KEY = "bisyo_session_duration";
-const REMEMBER_LOGIN_KEY = "bisyo_remember_login";
-const COPYRIGHT_KEY = "bisyo_copyright_info";
-const CO_ADMIN_KEY = "bisyo_co_admins";
-const DASHBOARD_PAGES_KEY = "bisyo_dashboard_pages";
-const ADMIN_PAGES_KEY = "bisyo_admin_panel_pages";
-
-let scannedHtmlFiles = [];
-let configSha = null;
-let currentUser = null;
-
-function getDecryptedToken() {
-  const encrypted = localStorage.getItem("bisyo_encrypted_token");
-  const s = sessionStorage.getItem("bisyo_admin_session");
-  if (!encrypted || !s) return null;
-  try {
-    const pwd = JSON.parse(s).password;
-    let d = atob(encrypted), t = "";
-    for (let i=0; i<d.length; i++) t += String.fromCharCode(d.charCodeAt(i) ^ pwd.charCodeAt(i % pwd.length));
-    return t;
-  } catch { return null; }
-}
-
-// ==================================================
-// ✨ 1. SCAN ASSETS/ — HANAPIN LAHAT NG .HTML
-// ==================================================
-async function scanAssetsFolder() {
-  const token = getDecryptedToken();
-  if (!token) return showStatus("❌ Kailangan muna ng GitHub Token — pumunta sa Token page", "error");
-  if (!navigator.onLine) return showStatus("❌ Kailangan ng internet para mag-scan", "error");
-
-  document.getElementById("scan-progress").classList.remove("hidden");
-  document.getElementById("scan-assets-btn").disabled = true;
-  scannedHtmlFiles = [];
-
-  await scanDirectory(ASSETS_PATH, token);
-
-  localStorage.setItem(HTML_FILES_KEY, JSON.stringify(scannedHtmlFiles));
-  renderHtmlFilesList();
-
-  document.getElementById("scan-progress").classList.add("hidden");
-  document.getElementById("add-copyright-btn").classList.remove("hidden");
-  document.getElementById("save-dashboard-btn").classList.remove("hidden");
-  showStatus(`✅ Nasuri: ${scannedHtmlFiles.length} HTML file — ${scannedHtmlFiles.filter(f=>!f.hasCopyright).length} walang copyright`, "success");
-  document.getElementById("scan-assets-btn").disabled = false;
-}
-
-async function scanDirectory(dirPath, token) {
-  try {
-    const res = await fetch(`${GITHUB_API_BASE}${dirPath}?ref=${BRANCH}`, {
-      headers: { Authorization: `token ${token}` }
-    });
-    if (!res.ok) return;
-    const items = await res.json();
-
-    for (const item of items) {
-      if (item.type === "dir") {
-        await scanDirectory(`${dirPath}${item.name}/`, token);
-      } else if (item.type === "file" && item.name.endsWith(".html")) {
-        await checkHtmlFile(item.path, item.sha, token);
-      }
-    }
-  } catch {}
-}
-
-async function checkHtmlFile(filePath, sha, token) {
-  try {
-    const res = await fetch(`${GITHUB_API_BASE}${filePath}?ref=${BRANCH}`, {
-      headers: { Authorization: `token ${token}` }
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    const content = atob(data.content);
-
-    const hasCopyright = /©|copyright|karapatang-ari/i.test(content);
-    const titleMatch = content.match(/<title>([^<]+)<\/title>/i);
-    const title = titleMatch ? titleMatch[1].trim() : filePath.split("/").pop();
-
-    const savedList = JSON.parse(localStorage.getItem(DASHBOARD_PAGES_KEY) || "[]");
-    const existing = savedList.find(p => p.path === filePath);
-
-    scannedHtmlFiles.push({
-      path: filePath,
-      sha: data.sha,
-      title: title,
-      hasCopyright: hasCopyright,
-      showInDashboard: existing ? existing.showInDashboard : false,
-      content: content
-    });
-  } catch {}
-}
-
-function renderHtmlFilesList() {
-  const container = document.getElementById("html-files-list");
-  if (!scannedHtmlFiles.length) {
-    container.innerHTML = `<p style="color:#6b7280">Walang nakitang .html sa ${ASSETS_PATH}</p>`;
-    return;
-  }
-  container.innerHTML = scannedHtmlFiles.map((f, idx) => `
-    <div class="html-file-item ${f.hasCopyright ? '' : 'no-copyright'}">
-      <div class="html-file-info">
-        <div class="html-file-path">${f.title}</div>
-        <div class="html-file-path" style="font-size:12px;color:#6b7280">📂 ${f.path}</div>
-        <div class="html-file-status ${f.hasCopyright ? 'status-ok' : 'status-missing'}">
-          ${f.hasCopyright ? '✅ May Copyright' : '⚠️ WALANG COPYRIGHT — Kailangan idagdag'}
-        </div>
-      </div>
-      <div class="check-row" style="margin:0;white-space:nowrap">
-        <input type="checkbox" id="dash-${idx}" ${f.showInDashboard ? 'checked' : ''} onchange="toggleDashboard(${idx}, this.checked)">
-        <label for="dash-${idx}" style="margin:0">Dashboard</label>
-      </div>
-    </div>
-  `).join("");
-}
-
-function toggleDashboard(idx, value) {
-  scannedHtmlFiles[idx].showInDashboard = value;
-}
-
-// ==================================================
-// ✨ 2. AWTOMATIKONG IDAGDAG ANG COPYRIGHT
-// ==================================================
-async function batchAddCopyright() {
-  const token = getDecryptedToken();
-  if (!token || !navigator.onLine) return showStatus("❌ Kailangan ng internet at Token", "error");
-
-  const copyrightText = buildCopyrightFooter();
-  const filesToUpdate = scannedHtmlFiles.filter(f => !f.hasCopyright);
-  if (!filesToUpdate.length) return showStatus("✅ Lahat ay mayroon nang copyright", "info");
-
-  if (!confirm(`Idadagdag ang copyright sa ${filesToUpdate.length} file(s)?`)) return;
-
-  let successCount = 0;
-  for (const file of filesToUpdate) {
-    try {
-      let newContent = file.content;
-      if (newContent.includes("</body>")) {
-        newContent = newContent.replace("</body>", `${copyrightText}\n</body>`);
-      } else {
-        newContent += copyrightText;
-      }
-
-      const res = await fetch(`${GITHUB_API_BASE}${file.path}`, {
-        method: "PUT",
-        headers: { Authorization: `token ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `© Idinagdag ang copyright — ${new Date().toLocaleString('tl-PH')}`,
-          content: btoa(unescape(encodeURIComponent(newContent))),
-          sha: file.sha,
-          branch: BRANCH
-        })
-      });
-
-      if (res.ok) {
-        file.hasCopyright = true;
-        file.content = newContent;
-        successCount++;
-      }
-    } catch {}
-  }
-
-  renderHtmlFilesList();
-  showStatus(`☁️✅ Na-update: ${successCount}/${filesToUpdate.length} file(s)`, "success");
-}
-
-function buildCopyrightFooter() {
-  const owner = document.getElementById("copy-owner").value || "May-ari";
-  const year = document.getElementById("copy-year").value || "2026";
-  const extra = document.getElementById("copy-extra").value || "Lahat ng Karapatan ay Nakareserba";
-  return `\n<footer style="text-align:center;padding:16px;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;margin-top:32px">© ${year} ${owner} — ${extra}</footer>`;
-}
-
-// ==================================================
-// ✨ 3. I-SAVE ANG DASHBOARD VISIBILITY
-// ==================================================
-function saveDashboardVisibility() {
-  const dashboardPages = scannedHtmlFiles
-    .filter(f => f.showInDashboard)
-    .map(f => ({ title: f.title, path: f.path }));
-
-  localStorage.setItem(DASHBOARD_PAGES_KEY, JSON.stringify(dashboardPages));
-  localStorage.setItem(HTML_FILES_KEY, JSON.stringify(scannedHtmlFiles));
-
-  showStatus(`✅ Nai-save: ${dashboardPages.length} pahina ang lalabas sa Dashboard`, "success");
-}
-
-// ==================================================
-// ✨ 4. MGA PAHINA SA ADMIN PANEL — I-ADD / EDIT / DELETE
-// ==================================================
-function getAllAdminPages() { return JSON.parse(localStorage.getItem(ADMIN_PAGES_KEY) || "[]"); }
-function saveAdminPages(list) { localStorage.setItem(ADMIN_PAGES_KEY, JSON.stringify(list)); renderAdminPages(); }
-
-function savePageEntry() {
-  const editId = document.getElementById("editing-page-id").value;
-  const icon = document.getElementById("page-icon").value.trim() || "📄";
-  const name = document.getElementById("page-name").value.trim();
-  const file = document.getElementById("page-file").value.trim();
-  const showDash = document.getElementById("page-show-dashboard").checked;
-  const showMenu = document.getElementById("page-show-menu").checked;
-
-  if (!name || !file) return showStatus("❌ Punan ang pangalan at file", "error");
-
-  let list = getAllAdminPages();
-  if (editId) {
-    const idx = list.findIndex(x => x.id == editId);
-    if (idx !== -1) Object.assign(list[idx], { icon, name, file, showDash, showMenu });
-    document.getElementById("editing-page-id").value = "";
-    document.getElementById("add-page-btn").textContent = "➕ Magdagdag ng Pahina";
-    showStatus("✅ Na-update ang pahina", "success");
-  } else {
-    list.push({ id: Date.now(), icon, name, file, showDash, showMenu });
-    showStatus("✅ Naidagdag ang pahina", "success");
-  }
-  saveAdminPages(list);
-  document.getElementById("page-icon").value = "";
-  document.getElementById("page-name").value = "";
-  document.getElementById("page-file").value = "";
-}
-
-function editPage(id) {
-  const page = getAllAdminPages().find(x => x.id == id);
-  if (!page) return;
-  document.getElementById("editing-page-id").value = id;
-  document.getElementById("page-icon").value = page.icon;
-  document.getElementById("page-name").value = page.name;
-  document.getElementById("page-file").value = page.file;
-  document.getElementById("page-show-dashboard").checked = page.showDash;
-  document.getElementById("page-show-menu").checked = page.showMenu;
-  document.getElementById("add-page-btn").textContent = "✅ I-update ang Pahina";
-}
-
-function deletePage(id, name) {
-  if (!confirm(`Alisin ang "${name}"?`)) return;
-  saveAdminPages(getAllAdminPages().filter(x => x.id != id));
-  showStatus(`🗑️ Tinanggal: ${name}`, "info");
-}
-
-function renderAdminPages() {
-  const list = getAllAdminPages();
-  const container = document.getElementById("admin-page-list");
-  if (!list.length) {
-    container.innerHTML = `<p style="color:#6b7280">Wala pang pahinang idinagdag</p>`;
-    return;
-  }
-  container.innerHTML = list.map(p => `
-    <div class="page-item">
-      <span class="page-icon">${p.icon}</span>
-      <div class="page-info">
-        <div class="page-name">${p.name}</div>
-        <div class="page-file">📄 ${p.file}</div>
-      </div>
-      <span class="page-visible ${p.showDash ? '' : 'hidden'}">${p.showDash ? 'Dashboard' : 'Nakatago'}</span>
-      <div class="co-admin-actions">
-        <button class="btn btn-small btn-secondary" onclick="editPage(${p.id})">✏️</button>
-        <button class="btn btn-small btn-danger" onclick="deletePage(${p.id}, '${p.name.replace(/'/g,"\\'")}')">🗑️</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-// ==================================================
-// ✨ 5. SESSION SETTINGS
-// ==================================================
-function formatDuration(sec) {
-  if (sec === 0) return "Walang Hanggan";
-  if (sec < 3600) return `${Math.floor(sec/60)} Minuto`;
-  if (sec < 86400) return `${Math.floor(sec/3600)} Oras`;
-  if (sec < 604800) return `${Math.floor(sec/86400)} Araw`;
-  return `${Math.floor(sec/2592000)} Buwan`;
-}
-function updateSessionPreview() {
-  const sec = parseInt(document.getElementById("session-duration").value);
-  document.getElementById("session-preview").textContent = `Kasalukuyang: ${formatDuration(sec)}`;
-}
-function saveSessionSetting() {
-  localStorage.setItem(SESSION_DURATION_KEY, parseInt(document.getElementById("session-duration").value));
-  localStorage.setItem(REMEMBER_LOGIN_KEY, document.getElementById("remember-login").checked);
-  showStatus("✅ Nai-save ang tagal ng session", "success");
-}
-
-// ==================================================
-// ✨ 6. COPYRIGHT SETTINGS
-// ==================================================
-function updateCopyrightPreview() {
-  document.getElementById("copyright-render").textContent = buildCopyrightFooter().replace(/<[^>]+>/g, '');
-}
-function saveCopyright() {
-  localStorage.setItem(COPYRIGHT_KEY, JSON.stringify({
-    owner: document.getElementById("copy-owner").value,
-    year: document.getElementById("copy-year").value,
-    extra: document.getElementById("copy-extra").value
-  }));
-  updateCopyrightPreview();
-  showStatus("✅ Nai-save ang Karapatang-ari", "success");
-}
-
-// ==================================================
-// ✨ 7. CO-ADMIN — BUONG SISTEMA
-// ==================================================
-function getAllCoAdmins() { return JSON.parse(localStorage.getItem(CO_ADMIN_KEY) || "[]"); }
-function saveCoAdmins(list) { localStorage.setItem(CO_ADMIN_KEY, JSON.stringify(list)); renderCoAdmins(); }
-function renderCoAdmins() {
-  const list = getAllCoAdmins();
-  const cont = document.getElementById("coadmin-list");
-  if (!list.length) { cont.innerHTML = `<p style="color:#6b7280">Wala pang Co-Admin</p>`; return; }
-  const roleLabels = { moderator: "🔵 Moderator", "content-editor": "🟡 Tagapamahala", full: "🟢 Buong Pag-access" };
-  cont.innerHTML = list.map(a => `
-    <div class="co-admin-item">
-      <div class="co-admin-info">
-        <div class="co-admin-name">${a.name} <span class="role-badge ${a.role}">${roleLabels[a.role]?.split(' ')[0] || a.role}</span></div>
-        <div class="co-admin-role">${roleLabels[a.role] || a.role}</div>
-      </div>
-      <div class="co-admin-actions">
-        <button class="btn btn-small btn-secondary">✏️ I-edit</button>
-        <button class="btn btn-small btn-danger">🗑️ Burahin</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-// ==================================================
-// KARANIWANG TULONG
-// ==================================================
-function showStatus(txt, cls) {
-  const el = document.getElementById("status-msg");
-  el.textContent = txt; el.className = `status ${cls}`; el.style.display="block";
-  setTimeout(()=>el.style.display="none", 10000);
-}
-
-window.onload = () => {
-  // I-load ang nakaraang scan
-  const savedFiles = localStorage.getItem(HTML_FILES_KEY);
-  if (savedFiles) {
-    scannedHtmlFiles = JSON.parse(savedFiles);
-    renderHtmlFilesList();
-    if (scannedHtmlFiles.length) {
-      document.getElementById("add-copyright-btn").classList.remove("hidden");
-      document.getElementById("save-dashboard-btn").classList.remove("hidden");
-    }
-  }
-
-  // Session
-  const savedDur = localStorage.getItem(SESSION_DURATION_KEY);
-  if (savedDur !== null) document.getElementById("session-duration").value = savedDur;
-  const savedRemember = localStorage.getItem(REMEMBER_LOGIN_KEY);
-  if (savedRemember !== null) document.getElementById("remember-login").checked = savedRemember === "true";
-  updateSessionPreview();
-
-  // Copyright
-  const c = JSON.parse(localStorage.getItem(COPYRIGHT_KEY) || '{"owner":"Proyekto Bisyo","year":"2026","extra":"Lahat ng Karapatan ay Nakareserba"}');
-  document.getElementById("copy-owner").value = c.owner;
-  document.getElementById("copy-year").value = c.year;
-  document.getElementById("copy-extra").value = c.extra;
-  updateCopyrightPreview();
-
-  // Admin Pages
-  renderAdminPages();
-
-  // Co-Admin
-  renderCoAdmins();
-};
-</script>
 </body>
 </html>
