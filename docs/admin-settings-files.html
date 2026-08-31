@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>📄 Suriin ang mga Pahina</title>
+<style>
+.container{max-width:580px;margin:0 auto;padding:16px}
+.card{background:white;padding:24px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:16px;border-left:4px solid #b91c1c}
+h2{font-size:18px;margin:0 0 16px 0;color:#1f2937}
+.btn{padding:12px 20px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:8px}
+.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white}
+.btn-secondary{background:#e5e7eb;color:#1f2937;margin-left:6px}
+.file-item{padding:12px;background:#fafafa;border-radius:10px;margin-top:8px;border-left:3px solid #b91c1c}
+.file-item.no-copy{border-left-color:#f59e0b}
+.status-ok{color:#16a34a}
+.status-warn{color:#d97706}
+.check-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+.check-row input{width:20px;height:20px;cursor:pointer}
+.status{padding:14px;border-radius:8px;margin-top:16px;display:none;font-weight:500}
+.status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="admin-settings.html">⬅️ Bumalik</a>
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-settings-files.html" class="active">📄 Mga Pahina</a>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h2>🔍 Suriin ang assets/</h2>
+    <p style="color:#6b7280;margin-bottom:12px">Hanapin ang lahat ng HTML file at alamin kung may copyright.</p>
+    <button id="scan-btn" class="btn btn-primary" onclick="startScan()">🔍 Simulan ang Pagsusuri</button>
+    <p id="scan-msg" class="hidden" style="color:#3b82f6;margin-top:10px">⏳ Naghahanap...</p>
+    <button id="copy-btn" class="btn btn-secondary hidden" onclick="addCopyright()">© Idagdag sa Walang Mayroon</button>
+    <div id="file-list" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Lalabas sa Dashboard</h2>
+    <p id="dash-info" style="color:#6b7280">Suriin muna ang mga file sa itaas.</p>
+    <button id="save-dash" class="btn btn-primary hidden" onclick="saveDash()">💾 I-save ang Listahan</button>
+  </div>
+
+  <div id="status-msg" class="status"></div>
+</div>
+
+<script>
+const KEY_FILES = "bisyo_scanned_files";
+const KEY_DASH = "bisyo_dashboard_pages";
+let files = [];
+
+async function startScan(){
+  document.getElementById("scan-msg").classList.remove("hidden");
+  document.getElementById("scan-btn").disabled=true;
+  // SIMULASYON — sa aktuwal na code dito tatawagin ang GitHub API
+  files = [
+    {path:"assets/main.html",title:"Pangunahing Pahina",hasCopyright:true,show:true},
+    {path:"assets/pages/bisyo-alkohol.html",title:"Alkohol",hasCopyright:false,show:true},
+    {path:"assets/pages/bisyo-sigarilyo.html",title:"Sigarilyo",hasCopyright:false,show:false}
+  ];
+  localStorage.setItem(KEY_FILES, JSON.stringify(files));
+  renderList();
+  document.getElementById("scan-msg").classList.add("hidden");
+  document.getElementById("copy-btn").classList.remove("hidden");
+  document.getElementById("save-dash").classList.remove("hidden");
+  document.getElementById("dash-info").textContent = `${files.length} file — ${files.filter(f=>!f.hasCopyright).length} walang copyright`;
+  showMsg(`✅ Nasuri: ${files.length} file`,"success");
+  document.getElementById("scan-btn").disabled=false;
+}
+function renderList(){
+  const c=document.getElementById("file-list");
+  c.innerHTML=files.map((f,i)=>`
+    <div class="file-item ${f.hasCopyright?'':'no-copy'}">
+      <div><strong>${f.title}</strong></div>
+      <div style="font-size:13px;color:#6b7280">📂 ${f.path}</div>
+      <div class="${f.hasCopyright?'status-ok':'status-warn'}" style="font-size:14px;margin-top:4px">
+        ${f.hasCopyright?'✅ May Copyright':'⚠️ Walang Copyright'}
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="d${i}" ${f.show?'checked':''} onchange="files[${i}].show=this.checked">
+        <label for="d${i}">Ipakita sa Dashboard</label>
+      </div>
+    </div>
+  `).join("");
+}
+function addCopyright(){
+  const need=files.filter(f=>!f.hasCopyright).length;
+  if(!need)return showMsg("✅ Lahat ay mayroon na","success");
+  if(!confirm(`Idadagdag sa ${need} file?`))return;
+  files.forEach(f=>f.hasCopyright=true);
+  renderList();
+  showMsg(`✅ Na-update: ${need} file`,"success");
+}
+function saveDash(){
+  const sel=files.filter(f=>f.show);
+  localStorage.setItem(KEY_DASH, JSON.stringify(sel));
+  showMsg(`✅ Nai-save: ${sel.length} pahina sa Dashboard`,"success");
+}
+function showMsg(t,cls){const s=document.getElementById("status-msg");s.textContent=t;s.className=`status ${cls}`;s.style.display="block";setTimeout(()=>s.style.display="none",4000);}
+window.onload=()=>{
+  const s=localStorage.getItem(KEY_FILES);
+  if(s){files=JSON.parse(s);renderList();document.getElementById("copy-btn").classList.remove("hidden");document.getElementById("save-dash").classList.remove("hidden");}
+}
+</script>
+</body>
+</html>
