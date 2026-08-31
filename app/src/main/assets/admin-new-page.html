@@ -251,7 +251,7 @@
       <div class="autosave-indicator">✅ Naka-save — i-type lang</div>
     </div>
 
-    <!-- ✅ IMAHE MODE — INAYOS NA -->
+    <!-- ✅ IMAHE MODE -->
     <div id="image-mode-area">
       <label>Pumili ng Imahe:</label>
       <div class="image-upload-area" id="image-drop" 
@@ -312,13 +312,10 @@ const MAX_FILE_SIZE = 1024 * 1024;
 
 let currentMode = "image";
 let contentType = "content";
-let originalFile = null;    // ✅ Itinago ang orihinal na file
-let selectedImageData = null; // ✅ Pinaliliit na imahe
+let originalFile = null;
+let selectedImageData = null;
 let sizeMode = "single";
 
-// ==================================================
-// 🎨 VISUAL EDITOR
-// ==================================================
 function execCmd(cmd, val=null) {
   document.execCommand(cmd, false, val);
   document.getElementById("visual-editor").focus();
@@ -332,9 +329,6 @@ function syncVisualToText() {
   saveDraft();
 }
 
-// ==================================================
-// 💾 AUTO-SAVE
-// ==================================================
 function saveDraft() {
   const contentVal = currentMode === "visual"
     ? document.getElementById("visual-editor").innerHTML
@@ -403,9 +397,6 @@ function selectSizeMode(mode) {
   document.getElementById("sizes-preview").style.display = mode === "android" ? "block" : "none";
 }
 
-// ==================================================
-// 🖼️ RESIZE IMAGE — Gumagawa ng iba't ibang laki
-// ==================================================
 async function resizeImageToSize(file, scale) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -436,13 +427,11 @@ async function resizeImageToSize(file, scale) {
   });
 }
 
-// ✅ HANDLE FILE SELECT — PREVIEW AGAD!
 async function handleFileSelect(files) {
   if (!files || !files[0]) return;
   const f = files[0];
-  originalFile = f; // ✅ Itinago — hindi nawawala
+  originalFile = f;
 
-  // ✅ PREVIEW — AGAD LALABAS, HINDI HIHINTAY SA RESIZE
   document.getElementById("img-name").textContent = f.name;
   document.getElementById("img-size").textContent = (f.size/1024).toFixed(1) + " KB";
   document.getElementById("image-info").style.display = "block";
@@ -456,14 +445,12 @@ async function handleFileSelect(files) {
   };
   reader.readAsDataURL(f);
 
-  // ✅ Kusang ilalagay ang pangalan ng file
   if (!document.getElementById("filename").value) {
     document.getElementById("filename").value = f.name.toLowerCase()
       .replace(/\s+/g, "_")
       .replace(/[^a-z0-9._-]/g, "_");
   }
 
-  // ✅ Resize — para sa Single Mode
   selectedImageData = await resizeImageToSize(f, 1.0);
   if (!selectedImageData) {
     showStatus("❌ Hindi mabasa ang imahe", "error");
@@ -483,7 +470,7 @@ function explainStatusCode(s) {
 function safeEncodeContent(t) { return btoa(unescape(encodeURIComponent(t))); }
 function checkSession() {
   const s = sessionStorage.getItem(SESSION_KEY);
-  if (!s || Date.now() > s.expiresAt) {
+  if (!s || Date.now() > JSON.parse(s).expiresAt) {
     alert("Nakalipas na ang session — mag-login muli");
     location.href = "admin.html"; return false;
   }
@@ -502,9 +489,6 @@ function decryptToken(enc, pwd) {
   } catch { return ""; }
 }
 
-// ==================================================
-// ✅ PALITAN ANG EDITOR MODE
-// ==================================================
 function switchMode(mode) {
   saveDraft();
   currentMode = mode;
@@ -580,7 +564,7 @@ function switchContentType(type) {
 }
 
 // ==================================================
-// ✅ UPLOAD — I-SAVE SA GITHUB
+// ✅ UPLOAD — INAYOS NA ANG BUTTON RESET!
 // ==================================================
 async function createFile() {
   if (!checkSession()) return;
@@ -594,6 +578,8 @@ async function createFile() {
     showStatus("❌ Ilagay ang pangalan at lokasyon", "error");
     resetBtn(); return;
   }
+
+  let success = false;
 
   // 🖼️ IMAHE MODE
   if (currentMode === "image") {
@@ -620,40 +606,39 @@ async function createFile() {
         if (await uploadOneFile(fullPath, sized.base64)) successCount++;
       }
       showStatus(`✅ ${successCount}/5 Nai-upload sa res/drawable-*`, "success");
+      success = true;
 
     // ✅ ISANG BERSYON LANG
     } else {
-      if (await uploadOneFile(folderPath + filename, selectedImageData.base64)) {
-        showStatus(`✅ Nai-upload: ${filename}`, "success");
-      }
+      success = await uploadOneFile(folderPath + filename, selectedImageData.base64);
+      if (success) showStatus(`✅ Nai-upload: ${filename}`, "success");
     }
-    resetForm(); resetBtn();
-    return;
-  }
 
   // 📄 TEKSTO / VISUAL MODE
-  let content = currentMode === "visual"
-    ? document.getElementById("visual-editor").innerHTML
-    : document.getElementById("file-content").value;
+  } else {
+    let content = currentMode === "visual"
+      ? document.getElementById("visual-editor").innerHTML
+      : document.getElementById("file-content").value;
 
-  if (!content.trim()) { showStatus("❌ Walang laman", "error"); resetBtn(); return; }
-  if (await uploadOneFile(folderPath + filename, safeEncodeContent(content))) {
-    showStatus(`✅ Nai-upload: ${filename}`, "success");
+    if (!content.trim()) { showStatus("❌ Walang laman", "error"); resetBtn(); return; }
+    success = await uploadOneFile(folderPath + filename, safeEncodeContent(content));
+    if (success) showStatus(`✅ Nai-upload: ${filename}`, "success");
   }
-  resetForm(); resetBtn();
+
+  if (success) resetForm();
+  resetBtn(); // ✅ SIGURADONG BABALIK ANG BUTTON — SA LAHAT NG KASO!
 
   function resetBtn() {
     btn.disabled = false; btn.classList.remove("saving"); btn.textContent = "✅ I-SAVE SA GITHUB";
   }
 }
 
-// ✅ I-UPLOAD ANG ISANG FILE — MAY OFFLINE SUPPORT
 async function uploadOneFile(filePath, b64Content) {
   const pending = JSON.parse(localStorage.getItem(PENDING_KEY) || "[]");
   pending.push({ filePath, content: b64Content, timestamp: new Date().toISOString(), synced: false });
   localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
-  if (!navigator.onLine) return true; // ✅ Nai-save lokal
+  if (!navigator.onLine) return true;
 
   const token = decryptToken(getEncryptedToken(), getPassword());
   if (!token) {
