@@ -3,77 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<title>🔧 I-setup ang Token</title>
+<title>I-setup ang GitHub Token</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+body {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+.card h1 {
+  font-size: 20px;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+.card p.desc {
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0 6px;
+}
+label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+.password-status {
+  font-size: 13px;
+  color: #16a34a;
+}
+input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+}
+input:focus {
+  outline: none;
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
+}
+.btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  color: white;
+}
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+.status {
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 16px;
+  display: none;
+}
+.status.show { display: block; }
+.status.error { background: #fee2e2; color: #b91c1c; border-left: 3px solid #ef4444; }
+.status.success { background: #dcfce7; color: #166534; border-left: 3px solid #22c55e; }
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 14px;
+}
+</style>
 </head>
 <body>
 
-<div class="nav-bar">
-  <a href="admin.html">🏠 Dashboard</a>
-  <a href="admin-order.html">🔢 Ayusin Ayos</a>
-  <a href="admin-edit.html">✏️ I-edit</a>
-  <a href="admin-new-page.html">➕ Bagong Pahina</a>
-  <a href="admin-pending.html">⏳ Nakabinbin</a>
-  <a href="setup-token.html" class="active">🔧 Token</a>
-  <a href="admin-settings.html">⚙️ Setting</a>
-</div>
+<div class="card">
+  <h1>⚙️ I-setup ang GitHub Token</h1>
+  <p class="desc">Ipasok ang iyong GitHub Token — awtomatikong ise-encrypt gamit ang iyong password mula sa pag-login.</p>
 
-<div class="container">
-  <div class="card">
-    <h1>🔧 I-setup ang GitHub Token</h1>
+  <div id="status" class="status"></div>
 
-    <div class="note">
-      ⚠️ Ang token ay I-e-encrypt gamit ang iyong Admin Password — hindi ito makikita nang malinaw.<br>
-      Gumamit ng Personal Access Token (Classic) mula sa GitHub na may sakop na: <code>repo</code>
+  <form onsubmit="saveToken(event)">
+    <div class="label-row">
+      <label>Admin Password</label>
+      <span class="password-status">✅ Nakuha mula sa session</span>
+    </div>
+    <input type="hidden" id="adminPass">
+    <div style="padding:13px 16px; background:#f3f4f6; border-radius:10px; color:#4b5563; font-size:14px;">
+      🔒 Hindi na kailangang i-type — nakukuha nang kusa
     </div>
 
-    <label>Admin Password:</label>
-    <input type="password" id="admin-pass" placeholder="Ipasok ang password...">
+    <label style="margin-top:20px;">GitHub Token</label>
+    <input type="password" id="gitToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
 
-    <label>GitHub Token:</label>
-    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx">
+    <button type="button" class="btn btn-secondary" onclick="toggleShow()">👁️ Ipakita / Itago ang Token</button>
+    <button type="submit" class="btn btn-primary">💾 I-save ang Token</button>
+  </form>
 
-    <label>Encrypted Token:</label>
-    <input type="text" id="encrypted-output" readonly placeholder="Lalabas dito pagkatapos i-encrypt...">
-
-    <button class="btn btn-primary" onclick="doEncrypt()">🔐 I-ENCRYPT ANG TOKEN</button>
-
-    <div id="status-msg" class="status"></div>
-  </div>
+  <a href="admin-settings.html" class="back-link">← Bumalik sa Dashboard</a>
 </div>
 
 <script>
-// Simple XOR Encryption — susi = password
-function encryptToken(token, password) {
-  let result = "";
-  for (let i = 0; i < token.length; i++) {
-    result += String.fromCharCode(token.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+const STORAGE_TOKEN = "bisyo_encrypted_token";
+const SESSION_KEY = "bisyo_admin_session";
+
+// ==================================================
+// ✅ KUSANG KUKUHA NG PASSWORD MULA SA SESSION
+// ==================================================
+function getSessionPassword(){
+  const sess = sessionStorage.getItem(SESSION_KEY);
+  if(!sess){
+    showStatus("❌ Hindi nahanap ang session — Mag-login muna!", "error");
+    setTimeout(()=> location="admin.html", 2000);
+    return null;
   }
-  return btoa(result);
+  return atob(sess);
 }
 
-function doEncrypt() {
-  const pw = document.getElementById("admin-pass").value.trim();
-  const token = document.getElementById("github-token").value.trim();
+function showStatus(msg, type="error"){
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.className = `status ${type} show`;
+}
 
-  if (!pw || !token) {
-    showStatus("❌ Punan ang password at token", "error");
-    return;
+function toggleShow(){
+  const el = document.getElementById("gitToken");
+  el.type = el.type === "password" ? "text" : "password";
+}
+
+// ✅ I-encrypt — password ay galing sa session, hindi mula sa input
+function encryptToken(token, password){
+  let out = "";
+  for(let i=0;i<token.length;i++){
+    out += String.fromCharCode(token.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+  }
+  return btoa(out);
+}
+
+function saveToken(e){
+  e.preventDefault();
+  const password = getSessionPassword();
+  if(!password) return;
+
+  const token = document.getElementById("gitToken").value.trim();
+  if(!token) return showStatus("❌ Ipasok ang GitHub Token");
+
+  if(!token.startsWith("ghp_") && !token.startsWith("github_pat_")){
+    return showStatus("⚠️ Hindi tugma ang format — dapat magsimula sa ghp_ o github_pat_");
   }
 
-  const encrypted = encryptToken(token, pw);
-  document.getElementById("encrypted-output").value = encrypted;
-  showStatus("✅ Nai-encrypt! Pumunta sa Dashboard — kusang lalabas na doon", "success");
-
-  // ✅ KUSANG IPASA SA DASHBOARD — HINDI NA KAILANGANG KOPYAHIN
-  localStorage.setItem("bisyo_pending_token", encrypted);
+  const encrypted = encryptToken(token, password);
+  localStorage.setItem(STORAGE_TOKEN, encrypted);
+  showStatus("✅ Nai-save at naka-encrypt na — Ligtas!", "success");
+  document.getElementById("gitToken").value = "";
 }
 
-function showStatus(txt, cls) {
-  const el = document.getElementById("status-msg");
-  el.textContent = txt;
-  el.className = `status ${cls}`;
-}
+// ==================================================
+// ✅ SA PAGBUKAS NG PAHINA — KUHAIN AGAD ANG PASSWORD
+// ==================================================
+document.addEventListener("DOMContentLoaded", ()=>{
+  const pass = getSessionPassword();
+  if(pass){
+    document.getElementById("adminPass").value = "***nakatago***";
+  }
+});
 </script>
+
 </body>
 </html>

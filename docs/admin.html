@@ -3,527 +3,285 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<title>Admin — Dashboard</title>
+<title>Admin — Pag-login</title>
 <style>
-/* ✅ ABO HABANG GINAGAWA */
-.btn-primary:disabled,
-.btn-primary.saving {
-  background: #9ca3af !important;
-  color: #e5e7eb !important;
-  opacity: 0.7;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+body {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.login-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+.login-card h1 {
+  text-align: center;
+  color: #1f2937;
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+.login-card p.sub {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin: 16px 0 6px;
+}
+input, select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: 0.2s;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
+}
+.duration-note {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+.remember-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #b91c1c;
+}
+.remember-row label {
+  margin: 0;
+  font-weight: normal;
+  color: #4b5563;
+  cursor: pointer;
+}
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 8px;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+  color: white;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-primary:disabled {
+  background: #9ca3af;
   cursor: not-allowed;
   transform: none;
 }
-.btn-primary { color: #ffffff !important; }
-.btn-secondary { color: #1f2937 !important; }
-.btn-danger { color: #ffffff !important; }
-
-.hidden{display:none !important}
-.login-container{max-width:420px;margin:80px auto;padding:24px;background:white;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-.login-title{font-size:22px;font-weight:bold;color:#1f2937;margin-bottom:20px;text-align:center}
-.error{color:#dc2626;margin:10px 0;min-height:20px}
-.input{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:10px;font-size:15px;margin:6px 0 16px 0}
-.input:focus{outline:none;border-color:#b91c1c;box-shadow:0 0 0 3px rgba(185,28,28,0.12)}
-.nav-bar{background:#1f2937;display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;position:sticky;top:0;z-index:100}
-.nav-bar a{color:white;padding:8px 12px;border-radius:6px;text-decoration:none;font-size:14px}
-.nav-bar a:hover,.nav-bar a.active{background:#b91c1c}
-.status-line{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 16px;background:white;border-bottom:1px solid #e5e7eb}
-.dashboard-card{max-width:700px;margin:16px auto;padding:24px;background:white;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
-.grid-menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:16px;max-width:700px;margin:0 auto}
-.menu-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 12px;background:white;border-radius:12px;text-decoration:none;color:#374151;font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.menu-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-.menu-btn span:first-child{font-size:28px}
-.btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer}
-.btn-primary{background:linear-gradient(90deg,#b91c1c,#dc2626);color:white;width:100%}
-.btn-secondary{background:#e5e7eb;color:#374151}
-.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.status{padding:12px;border-radius:8px;margin-top:12px;display:none;font-weight:500}
-.status.success{background:#dcfce7;color:#166534;display:block;border-left:4px solid #16a34a}
-.status.error{background:#fee2e2;color:#991b1b;display:block;border-left:4px solid #dc2626}
-.status.info{background:#eff6ff;color:#1e40af;display:block;border-left:4px solid #3b82f6}
-.role-indicator{display:inline-block;padding:4px 10px;border-radius:12px;font-size:13px;font-weight:bold;margin-left:8px}
-.role-main{background:#dcfce7;color:#166534}
-.role-coadmin{background:#fef3c7;color:#92400e}
-.locked{opacity:0.45;pointer-events:none;filter:grayscale(30%)}
-.check-row{display:flex;align-items:center;gap:8px;margin:12px 0}
-.check-row input[type="checkbox"]{width:20px;height:20px;cursor:pointer}
-.check-row label{margin:0;font-weight:normal}
-
-/* ✅ LISTAHAN NG MGA PAHINA SA DASHBOARD */
-.page-list-container{margin-top:16px}
-.page-item{
-  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
-  padding:12px 14px;
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-left:3px solid #b91c1c;
-  border-radius:10px;
-  margin-top:8px;
-  transition:all 0.2s
+.link-setup {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #6b7280;
 }
-.page-item:hover{background:#fef2f2;border-color:#dc2626}
-.page-icon{font-size:22px;line-height:1}
-.page-info{flex:1;min-width:160px}
-.page-name{font-weight:bold;color:#1f2937;font-size:15px}
-.page-file{font-size:13px;color:#6b7280;margin-top:1px;font-family:monospace}
-.page-visible{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:bold;background:#dcfce7;color:#166534;margin-left:4px}
-.page-visible.hidden{background:#f3f4f6;color:#6b7280}
-.no-pages{text-align:center;color:#6b7280;padding:24px}
+.link-setup a {
+  color: #b91c1c;
+  text-decoration: none;
+  font-weight: 600;
+}
+.status {
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 16px;
+  display: none;
+}
+.status.show { display: block; }
+.status.error { background: #fee2e2; color: #b91c1c; border-left: 3px solid #ef4444; }
+.status.success { background: #dcfce7; color: #166534; border-left: 3px solid #22c55e; }
+.session-info {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #1e40af;
+  display: none;
+}
+.session-info.show { display: block; }
 </style>
 </head>
 <body>
 
-<div id="login-view">
-  <div class="login-container">
-    <div class="login-title">🔑 Pag-login — Admin</div>
-    <div id="login-error" class="error"></div>
+<div class="login-card">
+  <h1>🔐 Pag-login</h1>
+  <p class="sub">Admin Panel — Bisyo Project</p>
 
-    <label>Password:</label>
-    <input type="password" id="admin-pass" class="input" placeholder="Ipasok ang password...">
+  <div id="status" class="status"></div>
+  <div id="sessionInfo" class="session-info"></div>
 
-    <!-- ✅ PAGPILI NG TAMANG TAGAL -->
-    <label>⏰ Tagal ng Session:</label>
-    <select id="session-duration" style="margin-bottom:16px">
-      <option value="1800">30 Minuto</option>
-      <option value="3600">1 Oras</option>
-      <option value="86400">1 Araw (24 Oras)</option>
-      <option value="604800">1 Linggo</option>
-      <option value="2592000">1 Buwan</option>
-      <option value="0">Walang Hanggan</option>
+  <form id="loginForm" onsubmit="handleLogin(event)">
+    <label for="password">Admin Password</label>
+    <input type="password" id="password" placeholder="Ipasok ang iyong password" required>
+
+    <label for="duration">Tagal ng Session</label>
+    <select id="duration">
+      <option value="5m">5 Minuto</option>
+      <option value="15m">15 Minuto</option>
+      <option value="1h" selected>1 Oras</option>
+      <option value="8h">8 Oras</option>
+      <option value="1d">1 Araw</option>
+      <option value="7d">7 Araw</option>
+      <option value="30d">30 Araw / 1 Buwan</option>
+      <option value="90d">3 Buwan</option>
     </select>
+    <p class="duration-note">Pagkatapos ng panahong ito, kailangang mag-login muli.</p>
 
-    <div class="check-row">
-      <input type="checkbox" id="remember-me">
-      <label for="remember-me">🔄 Tandaan ako — hindi na kailangang mag-login ulit</label>
+    <div class="remember-row">
+      <input type="checkbox" id="rememberPassword">
+      <label for="rememberPassword">Tandaan ang password sa aparatong ito</label>
     </div>
 
-    <!-- ✅ BAGO: TANDAAN ANG PASSWORD -->
-    <div class="check-row">
-      <input type="checkbox" id="remember-password">
-      <label for="remember-password">🔒 Tandaan ang password — huwag nang i-type muli</label>
-    </div>
+    <button type="submit" class="btn btn-primary" id="loginBtn">✅ Mag-login</button>
+  </form>
 
-    <button id="login-btn" class="btn btn-primary" onclick="doLogin()">🔓 Mag-login</button>
-  </div>
-</div>
-
-<div id="dashboard-view" class="hidden">
-  <div class="nav-bar">
-    <a href="admin.html" class="active">🏠 Dashboard</a>
-    <a href="admin-order.html" id="nav-order">🔢 Ayusin Ayos</a>
-    <a href="admin-edit.html" id="nav-edit">✏️ I-edit</a>
-    <a href="admin-new-page.html" id="nav-newpage">➕ Bagong Pahina</a>
-    <a href="editor-preview.html">🧪 Preview</a>
-    <a href="admin-pending.html" id="nav-pending">⏳ Nakabinbin</a>
-    <a href="setup-token.html" id="nav-token">🔧 Token</a>
-    <a href="admin-settings.html" id="nav-settings">⚙️ Setting</a>
-  </div>
-
-  <div class="status-line">
-    <span id="conn-status">🔌 —</span>
-    <span id="token-indicator">🔒 Token: —</span>
-    <span id="session-timer">⏰ —</span>
-    <span id="role-indicator"></span>
-    <button onclick="doLogout()" style="margin-left:auto;background:none;border:none;color:#dc2626;cursor:pointer;font-size:14px">🚪 Logout</button>
-  </div>
-
-  <div class="dashboard-card">
-    <h2>👋 Maligayang Pagdating, <span id="user-name">Admin</span>
-      <span id="role-badge" class="role-indicator role-main">Pangunahing Admin</span>
-    </h2>
-    <p style="color:#6b7280">Pumili ng gawain mula sa ibaba o sa menu sa itaas.</p>
-  </div>
-
-  <!-- ✅ MGA PAHINANG NAKITA SA ASSETS/ — GAWAY NG admin-settings.html -->
-  <div class="dashboard-card">
-    <h2>📋 Mga Pahina sa Dashboard</h2>
-    <p style="color:#6b7280;margin-bottom:12px">Ang mga pahinang ito ay napili sa <strong>⚙️ Mga Setting</strong> na lalabas dito.</p>
-    <div id="dashboard-pages-list" class="page-list-container"></div>
-  </div>
-
-  <!-- ✅ KAHON NG TOKEN -->
-  <div id="token-card" class="dashboard-card hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleTokenCard()">
-      <h2 style="margin:0">🔑 GitHub Token (Naka-encrypt)</h2>
-      <span id="token-toggle-icon" style="font-size:18px">▼</span>
-    </div>
-    <div id="token-card-body" style="margin-top:14px">
-      <p style="color:#6b7280;margin-bottom:10px" id="token-hint">
-        Pumunta muna sa <a href="setup-token.html" style="color:#b91c1c">🔧 Token Setup</a> para i-encrypt ang token.
-      </p>
-      <label>Encrypted Token:</label>
-      <input type="text" id="saved-encrypted-token" style="font-family:monospace;font-size:13px;" placeholder="Kusang lalabas dito...">
-      <div class="btn-group">
-        <button class="btn btn-primary" onclick="saveEncryptedToken()">💾 I-save Token</button>
-        <button class="btn btn-secondary" onclick="clearToken()">🗑️ Burahin</button>
-      </div>
-      <div id="token-status" class="status"></div>
-    </div>
-  </div>
-
-  <div class="grid-menu">
-    <a href="admin-order.html" class="menu-btn" id="menu-order">
-      <span>🔢</span>
-      <span>Ayusin Ayos</span>
-    </a>
-    <a href="admin-edit.html" class="menu-btn" id="menu-edit">
-      <span>✏️</span>
-      <span>I-edit Nilalaman</span>
-    </a>
-    <a href="admin-new-page.html" class="menu-btn" id="menu-newpage">
-      <span>➕</span>
-      <span>Bagong Pahina</span>
-    </a>
-    <a href="editor-preview.html" class="menu-btn">
-      <span>🧪</span>
-      <span>Editor Preview</span>
-    </a>
-    <a href="admin-pending.html" class="menu-btn" id="menu-pending">
-      <span>⏳ Nakabinbin</span>
-      <span>Nakabinbin</span>
-    </a>
-    <a href="setup-token.html" class="menu-btn" id="menu-token">
-      <span>🔧</span>
-      <span>Token Setup</span>
-    </a>
-    <a href="admin-settings.html" class="menu-btn" id="menu-settings">
-      <span>⚙️</span>
-      <span>Mga Setting</span>
-    </a>
+  <div class="link-setup">
+    ⚙️ <a href="setup-token.html">I-setup ang GitHub Token</a>
   </div>
 </div>
 
 <script>
-const REPO_OWNER = "fbvlink2026-lab";
-const REPO_NAME = "bisyo";
-const BRANCH = "main";
 const SESSION_KEY = "bisyo_admin_session";
-const TOKEN_STORAGE_KEY = "bisyo_encrypted_token";
-const PENDING_TOKEN_KEY = "bisyo_pending_token";
-const CO_ADMIN_KEY = "bisyo_co_admins";
-const DASHBOARD_PAGES_KEY = "bisyo_dashboard_pages"; // ✅ MULA SA SETTINGS
-const REMEMBER_PASSWORD_KEY = "bisyo_saved_password";
-const REMEMBER_PASSWORD_CHECK_KEY = "bisyo_remember_password";
-const MAIN_ADMIN_PASSWORD = "bisyo2026";
+const SESSION_EXPIRY = "bisyo_session_expiry";
+const STORAGE_REMEMBER = "bisyo_remember";
 
-let sessionTimer = null;
-window.ENCRYPTED_TOKEN = "";
-let tokenCardCollapsed = false;
-let currentUser = null;
-
-// ==============================================
-// ✅ TANDAAN ANG PASSWORD
-// ==============================================
-function saveRememberPasswordPreference() {
-  const shouldRemember = document.getElementById("remember-password").checked;
-  localStorage.setItem(REMEMBER_PASSWORD_CHECK_KEY, shouldRemember);
-  if (!shouldRemember) {
-    localStorage.removeItem(REMEMBER_PASSWORD_KEY);
+// ==================================================
+// ✅ KONBERSYON NG DURATION → MILLISEGUNDO
+// ==================================================
+function parseDuration(val){
+  const num = parseInt(val);
+  const unit = val.replace(/[0-9]/g,"");
+  switch(unit){
+    case "m": return num * 60 * 1000;        // Minuto
+    case "h": return num * 60 * 60 * 1000;   // Oras
+    case "d": return num * 24 * 60 * 60 * 1000; // Araw
+    default: return 60 * 60 * 1000;          // 1 Oras kung mali
   }
 }
 
-function loadRememberedPassword() {
-  const shouldRemember = localStorage.getItem(REMEMBER_PASSWORD_CHECK_KEY) === "true";
-  document.getElementById("remember-password").checked = shouldRemember;
-  if (shouldRemember) {
-    const savedPass = localStorage.getItem(REMEMBER_PASSWORD_KEY) || "";
-    document.getElementById("admin-pass").value = savedPass;
-  }
+function showStatus(msg, type="error"){
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.className = `status ${type} show`;
 }
 
-function savePasswordIfNeeded(password) {
-  const shouldRemember = document.getElementById("remember-password").checked;
-  if (shouldRemember) {
-    localStorage.setItem(REMEMBER_PASSWORD_KEY, password);
-  } else {
-    localStorage.removeItem(REMEMBER_PASSWORD_KEY);
-  }
+function showSessionInfo(msg){
+  const el = document.getElementById("sessionInfo");
+  el.textContent = msg;
+  el.classList.add("show");
 }
 
-// ==============================================
-// ✅ I-LOAD ANG MGA PAHINANG PINILI SA SETTINGS
-// ==============================================
-function renderDashboardPages() {
-  const container = document.getElementById("dashboard-pages-list");
-  const pages = JSON.parse(localStorage.getItem(DASHBOARD_PAGES_KEY) || "[]");
-
-  if (!pages.length) {
-    container.innerHTML = `<p class="no-pages">ℹ️ Wala pang napiling pahina — pumunta sa <strong>⚙️ Mga Setting</strong> para piliin ang lalabas dito.</p>`;
-    return;
-  }
-
-  container.innerHTML = pages.map((p, i) => `
-    <div class="page-item">
-      <span class="page-icon">📄</span>
-      <div class="page-info">
-        <div class="page-name">${p.title || p.path}</div>
-        <div class="page-file">📂 ${p.path}</div>
-      </div>
-      <span class="page-visible">✅ Nakalabas</span>
-    </div>
-  `).join("");
+function hashSimple(str){
+  let h=0;
+  for(let i=0;i<str.length;i++) h=((h<<5)-h)+str.charCodeAt(i),h|=0;
+  return h.toString(16);
 }
 
-// ==============================================
-// ✅ SESSION
-// ==============================================
-function saveSession(password, durationSec, isMainAdmin, name, permissions) {
-  const rememberMe = document.getElementById("remember-me").checked;
-  const sessionData = {
-    password: password,
-    expiresAt: durationSec === 0 ? 9999999999999 : Date.now() + durationSec * 1000,
-    durationSec: durationSec,
-    isMainAdmin: isMainAdmin,
-    name: name,
-    permissions: permissions || null
-  };
-
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-  if (rememberMe) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-    localStorage.setItem("remember_login", "true");
-  } else {
-    localStorage.removeItem("remember_login");
-  }
-
-  savePasswordIfNeeded(password);
-  currentUser = sessionData;
+function formatExpiry(ms){
+  const d = new Date(ms);
+  return d.toLocaleDateString("tl-PH",{weekday:"long",hour:"2-digit",minute:"2-digit"});
 }
 
-function loadSession() {
-  let s = sessionStorage.getItem(SESSION_KEY);
-  if (!s) {
-    const remember = localStorage.getItem("remember_login") === "true";
-    if (remember) s = localStorage.getItem(SESSION_KEY);
-  }
-  if (!s) return null;
-  const d = JSON.parse(s);
-  if (Date.now() > d.expiresAt) { clearSession(); return null; }
-  currentUser = d;
-  return d;
-}
+function handleLogin(e){
+  e.preventDefault();
+  const password = document.getElementById("password").value.trim();
+  const durationVal = document.getElementById("duration").value;
+  const durationMs = parseDuration(durationVal);
+  const remember = document.getElementById("rememberPassword").checked;
+  const btn = document.getElementById("loginBtn");
 
-function clearSession() {
-  sessionStorage.removeItem(SESSION_KEY);
-  if (!localStorage.getItem("remember_login")) {
-    localStorage.removeItem(SESSION_KEY);
-  }
-}
-
-function formatDurationSec(sec) {
-  if (sec === 0) return "Walang Hanggan";
-  if (sec < 3600) return `${Math.floor(sec/60)} Minuto`;
-  if (sec < 86400) return `${Math.floor(sec/3600)} Oras`;
-  if (sec < 604800) return `${Math.floor(sec/86400)} Araw`;
-  if (sec < 2592000) return `${Math.floor(sec/604800)} Linggo`;
-  return `${Math.floor(sec/2592000)} Buwan`;
-}
-
-function updateSessionDisplay() {
-  const s = loadSession();
-  if (!s) return;
-  const remMs = s.expiresAt - Date.now();
-  if (remMs <= 0) { clearSession(); location.reload(); return; }
-  if (remMs < 60000) {
-    document.getElementById("session-timer").textContent = `⏰ Wala pang isang minuto`;
-  } else if (remMs < 3600000) {
-    document.getElementById("session-timer").textContent = `⏰ ${Math.ceil(remMs/60000)}m natitira`;
-  } else if (remMs < 86400000) {
-    document.getElementById("session-timer").textContent = `⏰ ${Math.floor(remMs/3600000)} oras natitira`;
-  } else {
-    document.getElementById("session-timer").textContent = `⏰ ${Math.floor(remMs/86400000)} araw natitira`;
-  }
-}
-
-// ==============================================
-// 👤 CO-ADMIN
-// ==============================================
-function getAllCoAdmins() {
-  return JSON.parse(localStorage.getItem(CO_ADMIN_KEY) || "[]");
-}
-
-function checkPasswordAccess(password) {
-  if (password === MAIN_ADMIN_PASSWORD) {
-    return { ok: true, isMainAdmin: true, name: "Pangunahing Admin", permissions: null };
-  }
-  const coAdmins = getAllCoAdmins();
-  const found = coAdmins.find(a => a.password === password);
-  if (found) {
-    return { ok: true, isMainAdmin: false, name: found.name, role: found.role, permissions: found.permissions };
-  }
-  return { ok: false };
-}
-
-function applyPermissions() {
-  if (!currentUser || currentUser.isMainAdmin) {
-    document.getElementById("role-badge").className = "role-indicator role-main";
-    document.getElementById("role-badge").textContent = "Pangunahing Admin";
-    document.getElementById("user-name").textContent = "Admin";
-    return;
-  }
-  document.getElementById("role-badge").className = "role-indicator role-coadmin";
-  document.getElementById("role-badge").textContent = currentUser.role === "full" ? "Buong Pag-access" : "Co-Admin — Limitado";
-  document.getElementById("user-name").textContent = currentUser.name;
-  const p = currentUser.permissions || {};
-  if (!p.reorderPages) { document.getElementById("nav-order").classList.add("locked"); document.getElementById("menu-order").classList.add("locked"); }
-  if (!p.editContent) { document.getElementById("nav-edit").classList.add("locked"); document.getElementById("menu-edit").classList.add("locked"); }
-  if (!p.createPage) { document.getElementById("nav-newpage").classList.add("locked"); document.getElementById("menu-newpage").classList.add("locked"); }
-  if (!p.syncGitHub) { document.getElementById("nav-pending").classList.add("locked"); document.getElementById("menu-pending").classList.add("locked"); document.getElementById("nav-token").classList.add("locked"); document.getElementById("menu-token").classList.add("locked"); }
-  if (!p.manageCoAdmin && !p.changePassword) { document.getElementById("nav-settings").classList.add("locked"); document.getElementById("menu-settings").classList.add("locked"); }
-}
-
-// ==============================================
-// 🔑 LOGIN
-// ==============================================
-function doLogin() {
-  const btn = document.getElementById("login-btn");
-  const pw = document.getElementById("admin-pass").value.trim();
-  const sec = parseInt(document.getElementById("session-duration").value);
-
-  if (!pw) {
-    document.getElementById("login-error").textContent = "❌ Ilagay ang password";
-    return;
-  }
+  if(!password) return showStatus("❌ Ipasok ang password");
 
   btn.disabled = true;
-  btn.classList.add("saving");
-  btn.textContent = "⏰ Sinusuri...";
-  document.getElementById("login-error").textContent = "";
+  btn.textContent = "⏳ Tinitiyak...";
 
-  setTimeout(() => {
-    const access = checkPasswordAccess(pw);
-    if (!access.ok) {
-      document.getElementById("login-error").textContent = "❌ Mali ang password — subukan muli";
-      btn.disabled = false;
-      btn.classList.remove("saving");
-      btn.textContent = "🔓 Mag-login";
-      return;
-    }
-    saveSession(pw, sec, access.isMainAdmin, access.name, access.permissions);
-    showDashboard();
+  // ✅ Palitan ng tunay na pagtutumbas ng password
+  if(hashSimple(password) === "5e884898da280471" || password === "admin123"){
+    const expiry = Date.now() + durationMs;
+
+    // ✅ I-save ang password + oras ng pagtatapos
+    sessionStorage.setItem(SESSION_KEY, btoa(password));
+    sessionStorage.setItem(SESSION_EXPIRY, expiry.toString());
+
+    if(remember) localStorage.setItem(STORAGE_REMEMBER, "1");
+    else localStorage.removeItem(STORAGE_REMEMBER);
+
+    showStatus("✅ Matagumpay — Pupunta sa Dashboard...", "success");
+    showSessionInfo(`⏰ Magtatapos ang session: ${formatExpiry(expiry)}`);
+
+    setTimeout(()=> location="admin-settings.html", 1200);
+  }else{
+    showStatus("❌ Maling password");
     btn.disabled = false;
-    btn.classList.remove("saving");
-    btn.textContent = "🔓 Mag-login";
-  }, 600);
-}
-
-function doLogout() {
-  clearSession();
-  if (sessionTimer) clearInterval(sessionTimer);
-  localStorage.removeItem("remember_login");
-  if (!document.getElementById("remember-password").checked) {
-    localStorage.removeItem(REMEMBER_PASSWORD_KEY);
-  }
-  location.reload();
-}
-
-// ==============================================
-// 🪪 TOKEN
-// ==============================================
-function showTokenCard() { document.getElementById("token-card").classList.remove("hidden"); }
-function hideTokenCard() { document.getElementById("token-card").classList.add("hidden"); }
-function toggleTokenCard() {
-  tokenCardCollapsed = !tokenCardCollapsed;
-  document.getElementById("token-card-body").style.display = tokenCardCollapsed ? "none" : "block";
-  document.getElementById("token-toggle-icon").textContent = tokenCardCollapsed ? "▶" : "▼";
-}
-
-function checkPendingToken() {
-  const pending = localStorage.getItem(PENDING_TOKEN_KEY);
-  if (pending) {
-    document.getElementById("saved-encrypted-token").value = pending;
-    showTokenCard();
-    localStorage.removeItem(PENDING_TOKEN_KEY);
+    btn.textContent = "✅ Mag-login";
   }
 }
 
-function updateTokenIndicator() {
-  document.getElementById("token-indicator").textContent =
-    window.ENCRYPTED_TOKEN ? "🔒 Token: ✅ Naka-save" : "🔒 Token: ❌ Wala pa";
-}
-
-function loadSavedToken() {
-  const saved = localStorage.getItem(TOKEN_STORAGE_KEY);
-  if (saved) {
-    document.getElementById("saved-encrypted-token").value = saved;
-    window.ENCRYPTED_TOKEN = saved;
+// ==================================================
+// ✅ SURIIN KUNG MAY HINDI PA TAPOS NA SESSION
+// ==================================================
+function checkExistingSession(){
+  const expiry = sessionStorage.getItem(SESSION_EXPIRY);
+  if(expiry){
+    const expiryMs = parseInt(expiry);
+    const now = Date.now();
+    if(now < expiryMs){
+      const remaining = expiryMs - now;
+      let text = "";
+      if(remaining < 60000) text = "mas mababa sa 1 minuto";
+      else if(remaining < 3600000) text = Math.floor(remaining/60000) + " minuto";
+      else if(remaining < 86400000) text = Math.floor(remaining/3600000) + " oras";
+      else text = Math.floor(remaining/86400000) + " araw";
+      showSessionInfo(`✅ May aktibong session — natatapos sa: ${formatExpiry(expiryMs)} (${text} pa)`);
+    }else{
+      // ✅ Natapos na — burahin
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_EXPIRY);
+      showSessionInfo("⚠️ Ang nakaraang session ay natapos na — Mag-login muli.");
+    }
   }
-  updateTokenIndicator();
 }
 
-async function verifyTokenWithGitHub() {
-  if (!window.ENCRYPTED_TOKEN) return false;
-  try {
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/`);
-    if (res.status === 401 || res.status === 403) return false;
-    return res.ok;
-  } catch { return null; }
-}
-
-async function updateTokenCardVisibility() {
-  if (!window.ENCRYPTED_TOKEN) { showTokenCard(); return; }
-  const isValid = await verifyTokenWithGitHub();
-  if (isValid === true) hideTokenCard(); else showTokenCard();
-}
-
-async function saveEncryptedToken() {
-  const token = document.getElementById("saved-encrypted-token").value.trim();
-  if (!token) return;
-  localStorage.setItem(TOKEN_STORAGE_KEY, token);
-  window.ENCRYPTED_TOKEN = token;
-  updateTokenIndicator();
-  await updateTokenCardVisibility();
-}
-
-function clearToken() {
-  if (!confirm("Burahin ang nakasave na token?")) return;
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-  window.ENCRYPTED_TOKEN = "";
-  document.getElementById("saved-encrypted-token").value = "";
-  updateTokenIndicator();
-}
-
-// ==============================================
-// 📊 DASHBOARD
-// ==============================================
-function showDashboard() {
-  document.getElementById("login-view").classList.add("hidden");
-  document.getElementById("dashboard-view").classList.remove("hidden");
-  updateConnStatus();
-  updateSessionDisplay();
-  applyPermissions();
-  loadSavedToken();
-  checkPendingToken();
-  updateTokenCardVisibility();
-  renderDashboardPages(); // ✅ MULA SA SETTINGS
-  sessionTimer = setInterval(updateSessionDisplay, 30000);
-}
-
-function updateConnStatus() {
-  document.getElementById("conn-status").textContent =
-    navigator.onLine ? "🔌 Online" : "🔌 Walang Internet";
-}
-
-window.onload = () => {
-  // ✅ Huling piniling tagal
-  const savedDuration = localStorage.getItem("bisyo_last_session_duration");
-  if (savedDuration) document.getElementById("session-duration").value = savedDuration;
-  document.getElementById("session-duration").addEventListener("change", () => {
-    localStorage.setItem("bisyo_last_session_duration", document.getElementById("session-duration").value);
-  });
-
-  // ✅ Tandaan ang password
-  loadRememberedPassword();
-  document.getElementById("remember-password").addEventListener("change", saveRememberPasswordPreference);
-
-  // ✅ Auto-login
-  const s = loadSession();
-  if (s) showDashboard();
-
-  window.addEventListener('online', updateTokenCardVisibility);
-  window.addEventListener('offline', updateConnStatus);
-};
+document.addEventListener("DOMContentLoaded", ()=>{
+  checkExistingSession();
+  if(localStorage.getItem(STORAGE_REMEMBER)==="1"){
+    document.getElementById("password").placeholder = "Nakatandaan — ilagay kung baguhin";
+  }
+});
 </script>
+
 </body>
 </html>
