@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>🔢 Ayusin Ayos ng Menu — Admin</title>
+</head>
+<body>
+
+<button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="sidebar" id="sidebar">
+  <a href="admin-settings.html">🏠 Dashboard</a>
+  <span class="menu-section">Pamamahala</span>
+  <a href="admin-settings-coadmins.html">👥 Co-Admin</a>
+  <a href="admin-menu-order.html" class="active">🔢 Ayusin Ayos ng Menu</a>
+  <a href="admin-order.html">📄 Ayusin Nilalaman</a>
+  <a href="admin-edit.html">✏️ I-edit ang Pahina</a>
+  <a href="admin-new-page.html">➕ Bagong Pahina / File</a>
+  <a href="admin-styles.html">🎨 Estilo — style.css</a>
+  <span class="menu-section">Sistema</span>
+  <a href="setup-token.html">🔧 I-setup ang Token</a>
+  <a href="#" onclick="logout();return false;">🚪 Mag-logout</a>
+</div>
+
+<div class="page-content">
+  <a href="admin-settings.html" class="back-link">← Bumalik sa Dashboard</a>
+  <div class="card">
+    <h2>🔢 Ayusin Pagkakasunod-sunod sa Menu</h2>
+    <p style="color:#6b7280; margin-bottom:16px; font-size:14px">I-drag pataas/pababa o baguhin ang numero. Pindutin ang 💾 I-save para ilapat sa menu.</p>
+    <div id="order-list"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="saveOrder()">💾 I-save ang Ayos</button>
+  </div>
+</div>
+
+<script>
+const REPO_OWNER = "fbvlink2026-lab";
+const REPO_NAME  = "bisyo";
+const BRANCH     = "main";
+const ORDER_PATH = "assets/page-order.json";
+
+function toggleMenu(){
+  const sb=document.getElementById("sidebar"), ov=document.getElementById("overlay");
+  sb.classList.toggle("open"); ov.classList.toggle("open");
+}
+function closeMenu(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("open");
+}
+document.addEventListener("click",e=>{ if(e.target.closest(".sidebar a")) closeMenu(); });
+
+async function getKey(password){
+  const enc=new TextEncoder(), salt=new TextEncoder().encode("bisyo-fixed-salt-v1");
+  const mat=await crypto.subtle.importKey("raw", enc.encode(password), {name:"PBKDF2"}, false, ["deriveKey"]);
+  return await crypto.subtle.deriveKey(
+    {name:"PBKDF2", salt:salt, iterations:150000, hash:"SHA-256"},
+    mat, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]
+  );
+}
+async function decryptAES(encrypted, password){
+  try{
+    const key=await getKey(password);
+    const all=Uint8Array.from(atob(encrypted),c=>c.charCodeAt(0));
+    const dec=await crypto.subtle.decrypt({name:"AES-GCM", iv:all.subarray(0,12)}, key, all.subarray(12));
+    return new TextDecoder().decode(dec);
+  }catch{return null;}
+}
+async function getToken(){
+  const encrypted=localStorage.getItem("bisyo_encrypted_token");
+  if(!encrypted){ alert("❌ Walang Token"); location="admin.html"; return null; }
+  const pass=sessionStorage.getItem("bisyo_admin_session");
+  if(!pass){ alert("❌ Hindi naka-login"); location="admin.html"; return null; }
+  const token=await decryptAES(encrypted, atob(pass));
+  if(!token){ alert("❌ Maling Password"); logout(); return null; }
+  return token;
+}
+function isLoggedIn(){ return !!sessionStorage.getItem("bisyo_admin_session"); }
+function requireLogin(){ if(!isLoggedIn()){ alert("❌ Kailangan mag-login"); location="admin.html"; return false; } return true; }
+function logout(){
+  sessionStorage.removeItem("bisyo_admin_session");
+  localStorage.removeItem("bisyo_remember");
+  location="admin.html";
+}
+
+let orderData = []; let orderSha = null;
+
+async function loadOrder(){
+  if(!requireLogin()) return;
+  const token=await getToken();
+  if(!token) return;
+  try{
+    const res=await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ORDER_PATH}?ref=${BRANCH}`, {
+      headers: {"Authorization":`token ${token}`}
+    });
+    if(res.status===404){
+      orderData = JSON.parse(localStorage.getItem("bisyo_menu_order")||"[]");
+    }else{
+      const d=await res.json(); orderSha=d.sha;
+      orderData=JSON.parse(atob(d.content));
+    }
+    renderList();
+  }catch(e){ console.error(e); }
+}
+function renderList(){
+  const c=document.getElementById("order-list");
+  c.innerHTML=orderData.map((item,i)=>`<div class="order-row" draggable="true" data-index="${i}">
+    <span class="drag-handle">⋮⋮</span>
+    <input type="number" class="order-num" value="${i+1}" min="1" max="${orderData.length}"
+           onchange="reorderAt(${i},this.value)">
+    <span class="order-name">${item.name||item.path}</span>
+  </div>`).join("");
+  enableDrag();
+}
+function reorderAt(idx,val){
+  const newPos=parseInt(val)-1;
+  if(newPos<0||newPos>=orderData.length) return;
+  const [item]=orderData.splice(idx,1);
+  orderData.splice(newPos,0,item);
+  renderList();
+}
+function enableDrag(){
+  const rows=document.querySelectorAll(".order-row"); let dragged=null;
+  rows.forEach(r=>{
+    r.ondragstart=()=>{ dragged=r; r.classList.add("dragging"); };
+    r.ondragend=()=>{ dragged.classList.remove("dragging"); dragged=null; };
+    r.ondragover=e=>e.preventDefault();
+    r.ondrop=e=>{
+      e.preventDefault(); if(!dragged||dragged===r) return;
+      const i1=parseInt(dragged.dataset.index);
+      const i2=parseInt(r.dataset.index);
+      const [item]=orderData.splice(i1,1);
+      orderData.splice(i2,0,item);
+      renderList();
+    };
+  });
+}
+async function saveOrder(){
+  const token=await getToken(); if(!token) return;
+  localStorage.setItem("bisyo_menu_order", JSON.stringify(orderData));
+  try{
+    const body={
+      message:`I-update ayos ng menu — ${new Date().toLocaleString('fil-PH')}`,
+      content:btoa(JSON.stringify(orderData,null,2)),
+      branch:BRANCH
+    };
+    if(orderSha) body.sha=orderSha;
+    const res=await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ORDER_PATH}`, {
+      method:"PUT", headers:{"Authorization":`token ${token}`,"Content-Type":"application/json"},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error(await res.text());
+    alert("✅ Nai-save na ang ayos ng menu!");
+  }catch(e){ alert("❌ Nabigo: "+e.message); }
+}
+document.addEventListener("DOMContentLoaded", loadOrder);
+</script>
+
+</body>
+</html>
