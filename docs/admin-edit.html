@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>✏️ I-edit ang Pahina</title>
+<!-- ✅ DAGDAGANG ESTILO LANG NG PAHINANG ITO -->
+<style>
+.editor { padding: 20px; max-width: 700px; margin: 0 auto; }
+/* ...iyong estilo lang ng pahinang ito... */
+</style>
+</head>
+<body>
+
+<!-- ==================================================
+     ✅ ILAGAY DITO ANG BUONG NAV+MONITOR CODE SA ITAAS
+     ================================================== -->
+<!-- [KOPYAHIN DITO ANG BUONG NAV+MONITOR CODE MULA SA ITAAS] -->
+
+<!-- ==================================================
+     ✅ SIMULA NG TUNAY NA LAMAN NG PAHINA — MAIKLI NA!
+     ================================================== -->
+<div class="editor">
+  <h1>✏️ I-edit ang Pahina</h1>
+  <!-- iyong laman lang -->
+</div>
+
+<script>
+// ✅ TAWAGIN LANG ITO KAPAG MAY PAGBABAGO:
+// recordChange("pangalan.html", "Inilarawan ang ginawa");
+
+// ✅ Ibigay ang laman kapag hinihingi para i-sync
+window.getContentForFile = async function(filename){
+  if(filename === "main.html") return "<!-- bagong laman -->";
+  return null;
+};
+
+// ✅ Markahan bilang aktibo sa menu
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("nav-edit")?.classList.add("active");
+});
+</script>
+
+</body>
+</html>
