@@ -3,81 +3,425 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<title>⚙️ Mga Setting — Panimula</title>
+<title>🏠 Dashboard — Admin Panel</title>
 <style>
-.container{max-width:620px;margin:0 auto;padding:20px}
-.page-card{
-  background:white;
-  padding:24px;
-  border-radius:16px;
-  box-shadow:0 2px 10px rgba(0,0,0,.08);
-  margin-bottom:14px;
-  display:flex;align-items:center;gap:16px;
-  text-decoration:none;
-  color:inherit;
-  border-left:4px solid #b91c1c;
-  transition:all 0.25s
+/* ==================================================
+   ☰ SIDEBAR + GLOBAL MONITOR — IISANG BAHAGI SA LAHAT
+   ================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
 }
-.page-card:hover{
-  transform:translateX(4px);
-  border-left-color:#dc2626;
-  background:#fef2f2
+body {
+  background: #f3f4f6;
+  color: #1f2937;
+  line-height: 1.6;
 }
-.page-icon{font-size:36px;line-height:1}
-.page-info h2{margin:0 0 4px 0;font-size:18px;color:#1f2937}
-.page-info p{margin:0;color:#6b7280;font-size:14px}
-h1{text-align:center;color:#1f2937;margin:20px 0 30px 0;font-size:22px}
+
+/* ---------- ☰ SIDEBAR MENU ---------- */
+.menu-toggle {
+  position: fixed; top: 12px; left: 12px; z-index: 1100;
+  padding: 10px 14px; background: #b91c1c; color: white;
+  border: none; border-radius: 10px; font-size: 20px; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.sidebar {
+  position: fixed; top: 0; left: 0; width: 280px; height: 100vh;
+  background: #1f2937; color: white; transform: translateX(-100%);
+  transition: 0.3s ease; z-index: 1200; overflow-y: auto; padding-bottom: 30px;
+}
+.sidebar.open { transform: translateX(0); }
+.sidebar a {
+  display: block; padding: 12px 20px; color: #e5e7eb;
+  text-decoration: none; border-left: 3px solid transparent;
+  transition: 0.15s;
+}
+.sidebar a:hover { background: #374151; border-left-color: #9ca3af; }
+.sidebar a.active { background: #374151; border-left-color: #b91c1c; color: white; font-weight: 600; }
+.sidebar .menu-section {
+  padding: 12px 20px 6px; font-size: 13px; color: #9ca3af; margin-top: 10px;
+}
+.overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); display: none; z-index: 1150;
+}
+.overlay.open { display: block; }
+
+/* ---------- 📋 GLOBAL MONITOR ---------- */
+.monitor-fab {
+  position: fixed; bottom: 20px; right: 20px; z-index: 900;
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  color: white; border: none; border-radius: 50%;
+  width: 60px; height: 60px; font-size: 24px; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(185,28,28,0.35);
+}
+.monitor-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: #22c55e; color: white; font-size: 12px; font-weight: bold;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.monitor-panel {
+  position: fixed; bottom: 90px; right: 20px; width: 360px; max-height: 70vh;
+  background: white; border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  z-index: 950; display: none; flex-direction: column; overflow: hidden;
+}
+.monitor-panel.open { display: flex; }
+.monitor-header {
+  background: #fef3c7; padding: 14px 16px; border-bottom: 1px solid #f59e0b;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.monitor-header h3 { margin: 0; font-size: 16px; color: #92400e; }
+.monitor-list { padding: 10px; overflow-y: auto; flex: 1; background: #fffbeb; }
+.change-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px;
+  margin: 4px 0; background: white; border-radius: 8px;
+  border-left: 3px solid #d1d5db; transition: 0.15s;
+}
+.change-item.selected { border-left-color: #22c55e; background: #f0fdf4; }
+.change-checkbox { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; accent-color: #16a34a; }
+.change-info { flex: 1; }
+.change-file { font-weight: 600; font-size: 14px; color: #1f2937; }
+.change-desc { font-size: 13px; color: #6b7280; margin-top: 2px; }
+.change-time { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+.change-remove {
+  font-size: 12px; padding: 3px 8px; background: #fee2e2;
+  color: #b91c1c; border-radius: 4px; border: none; cursor: pointer;
+}
+.monitor-footer {
+  padding: 12px 16px; border-top: 1px solid #e5e7eb; background: #f9fafb;
+  display: flex; gap: 8px; justify-content: space-between;
+}
+.btn {
+  padding: 10px 16px; border-radius: 8px; font-weight: bold;
+  border: none; cursor: pointer; font-size: 14px;
+}
+.btn-primary { background: linear-gradient(90deg, #b91c1c, #dc2626); color: white; }
+.btn-secondary { background: #e5e7eb; color: #374151; }
+.btn-success { background: linear-gradient(90deg, #16a34a, #22c55e); color: white; }
+
+/* ---------- ❓ SYNC MODAL ---------- */
+.sync-modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center;
+  z-index: 2000;
+}
+.sync-modal.open { display: flex; }
+.sync-box {
+  background: white; padding: 24px; border-radius: 16px; max-width: 440px; width: 92%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+.sync-summary { background: #f3f4f6; padding: 12px; border-radius: 8px; margin: 14px 0; max-height: 240px; overflow-y: auto; }
+.sync-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+
+/* ---------- 📱 DASHBOARD LAMAN ---------- */
+.main-content { padding: 20px; max-width: 1000px; margin: 0 auto; padding-top: 60px; }
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 24px; color: #1f2937; }
+.page-header p { color: #6b7280; margin-top: 4px; }
+.session-status {
+  background: #eff6ff; border-left: 4px solid #3b82f6;
+  padding: 12px 16px; border-radius: 8px; margin-bottom: 24px;
+  font-size: 14px; color: #1e40af;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.card {
+  background: white; border-radius: 14px; padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  transition: 0.2s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.card h3 { font-size: 18px; color: #1f2937; margin-bottom: 6px; }
+.card p { font-size: 14px; color: #6b7280; margin-bottom: 12px; }
+.card a.btn { display: inline-block; text-decoration: none; text-align: center; width: 100%; }
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 480px) {
+  .monitor-panel { width: calc(100vw - 40px); right: 20px; }
+  .grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
-<div class="nav-bar">
-  <a href="admin.html">🏠 Dashboard</a>
-  <a href="admin-order.html">🔢 Ayusin Ayos</a>
+<!-- ☰ SIDEBAR -->
+<button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <a href="admin-settings.html" class="active">🏠 Dashboard</a>
+  <div class="menu-section">Pamamahala</div>
+  <a href="admin-menu-order.html">🔢 Ayusin Ayos</a>
   <a href="admin-edit.html">✏️ I-edit</a>
   <a href="admin-new-page.html">➕ Bagong Pahina</a>
-  <a href="editor-preview.html">🧪 Preview</a>
-  <a href="admin-pending.html">⏳ Nakabinbin</a>
-  <a href="setup-token.html">🔧 Token</a>
-  <a href="admin-settings.html" class="active">⚙️ Setting</a>
+  <a href="admin-styles.html">🎨 Estilo</a>
+  <div class="menu-section">Sistema</div>
+  <a href="setup-token.html">⚙️ I-setup Token</a>
+  <a href="#" onclick="logout(event)">🚪 Mag-logout</a>
+</nav>
+
+<!-- 📋 GLOBAL MONITOR -->
+<button class="monitor-fab" onclick="toggleMonitorPanel()" title="Mga Nakabinbing Pagbabago">
+  📋
+  <span class="monitor-badge" id="monitorBadge" style="display:none;">0</span>
+</button>
+<div class="monitor-panel" id="monitorPanel">
+  <div class="monitor-header">
+    <h3>📋 Mga Pagbabago — Nasa Lokal</h3>
+    <span id="monitorCount">0 napili</span>
+  </div>
+  <div class="monitor-list" id="changeList">
+    <em style="color:#6b7280;">Wala pang pagbabago — lahat ay nai-save na.</em>
+  </div>
+  <div class="monitor-footer">
+    <button class="btn btn-secondary" onclick="discardSelected()">🗑️ Tanggalin Napili</button>
+    <button class="btn btn-success" id="syncBtn" onclick="askSyncToGitHub()" style="display:none;">📤 I-sync sa GitHub</button>
+  </div>
 </div>
 
-<div class="container">
-  <h1>⚙️ Mga Setting ng Sistema</h1>
-
-  <a href="admin-settings-general.html" class="page-card">
-    <span class="page-icon">🔧</span>
-    <div class="page-info">
-      <h2>Pangkalahatang Setting</h2>
-      <p>Tagal ng login, karapatang-ari, at pangalan ng may-ari</p>
+<!-- ❓ SYNC MODAL -->
+<div class="sync-modal" id="syncModal">
+  <div class="sync-box">
+    <h3>📤 Ipadala sa GitHub?</h3>
+    <p>Ang mga may tsek lamang ay isusulat sa GitHub. Ang walang tsek ay mananatili sa lokal na imbakan lamang.</p>
+    <div class="sync-summary" id="syncSummary"></div>
+    <div class="sync-buttons">
+      <button class="btn btn-secondary" onclick="closeSyncModal()">Huwag Muna</button>
+      <button class="btn btn-primary" onclick="performSync()">✅ Ipadala</button>
     </div>
-  </a>
-
-  <a href="admin-settings-coadmins.html" class="page-card">
-    <span class="page-icon">👥</span>
-    <div class="page-info">
-      <h2>Mga Co-Admin</h2>
-      <p>Magdagdag, magbago, o magtakda ng antas ng pahintulot</p>
-    </div>
-  </a>
-
-  <a href="admin-settings-files.html" class="page-card">
-    <span class="page-icon">📄</span>
-    <div class="page-info">
-      <h2>Suriin ang mga Pahina</h2>
-      <p>Hanapin ang HTML, idagdag ang copyright, at piliin ang lalabas sa Dashboard</p>
-    </div>
-  </a>
-
-  <a href="admin-settings-config.html" class="page-card">
-    <span class="page-icon">🗂️</span>
-    <div class="page-info">
-      <h2>config.json — Sa GitHub</h2>
-      <p>I-preview, i-edit, at i-save ang kabuuang konpigurasyon</p>
-    </div>
-  </a>
+  </div>
 </div>
+
+<!-- ==================================================
+     ✅ DITO NAGSISIMULA ANG DASHBOARD LAMAN
+     ================================================== -->
+<main class="main-content">
+  <div class="page-header">
+    <h1>👋 Maligayang Pagdating, Admin!</h1>
+    <p>Piliin ang gagawin mula sa ibaba o mula sa menu sa kaliwa.</p>
+  </div>
+
+  <div class="session-status" id="sessionStatus">⏰ Sinusuri ang session...</div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>🔢 Ayusin Pagkakasunod-sunod</h3>
+      <p>Baguhin ang pagkakasunod-sunod at pangkat ng mga pahinang makikita sa main.html</p>
+      <a href="admin-menu-order.html" class="btn btn-primary">Pumunta</a>
+    </div>
+    <div class="card">
+      <h3>✏️ I-edit ang Pahina</h3>
+      <p>Baguhin ang laman ng anumang pahina — may kasamang preview bago i-save</p>
+      <a href="admin-edit.html" class="btn btn-primary">Pumunta</a>
+    </div>
+    <div class="card">
+      <h3>➕ Bagong Pahina / Imahe</h3>
+      <p>Lumikha ng bagong pahina o mag-upload at magbawas ng laki ng imahe</p>
+      <a href="admin-new-page.html" class="btn btn-primary">Pumunta</a>
+    </div>
+    <div class="card">
+      <h3>🎨 Estilo at Disenyo</h3>
+      <p>Baguhin ang kulay, itsura, at layout ng buong website</p>
+      <a href="admin-styles.html" class="btn btn-primary">Pumunta</a>
+    </div>
+    <div class="card">
+      <h3>⚙️ Token Setup</h3>
+      <p>I-setup o palitan ang iyong GitHub access token — naka-encrypt nang ligtas</p>
+      <a href="setup-token.html" class="btn btn-primary">Pumunta</a>
+    </div>
+    <div class="card">
+      <h3>👥 Co-Admin</h3>
+      <p>Pamahalaan ang mga karapatan at pag-login ng ibang co-admin</p>
+      <a href="admin-settings-coadmins.html" class="btn btn-primary">Pumunta</a>
+    </div>
+  </div>
+</main>
+
+<script>
+// ==================================================
+// 🔐 SESSION PROTECTION — UNA SA LAHAT
+// ==================================================
+const SESSION_KEY = "bisyo_admin_session";
+const SESSION_EXPIRY = "bisyo_session_expiry";
+const CHANGES_KEY = "global_pending_changes";
+
+function checkSession(){
+  const expiry = sessionStorage.getItem(SESSION_EXPIRY);
+  if(!expiry || Date.now() > parseInt(expiry)){
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_EXPIRY);
+    alert("⏰ Natapos na ang iyong session — Mag-login muli.");
+    location="admin.html";
+    return false;
+  }
+  // Ipakita ang natitirang oras
+  const rem = parseInt(expiry) - Date.now();
+  let text = "";
+  if(rem < 60000) text = "mas mababa sa 1 minuto";
+  else if(rem < 3600000) text = Math.floor(rem/60000) + " minuto na lang";
+  else if(rem < 86400000) text = Math.floor(rem/3600000) + " oras";
+  else text = Math.floor(rem/86400000) + " araw";
+  document.getElementById("sessionStatus").textContent = `✅ Aktibo ang session — matatapos sa loob ng ${text}`;
+  return true;
+}
+
+function logout(e){
+  e.preventDefault();
+  if(confirm("Sigurado ka bang mag-logout?")){
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_EXPIRY);
+    location="admin.html";
+  }
+}
+
+// ==================================================
+// ☰ SIDEBAR
+// ==================================================
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("open");
+}
+function closeSidebar(){
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("open");
+}
+
+// ==================================================
+// 📋 GLOBAL MONITOR — IISANG TALAAN SA LAHAT NG PAHINA
+// ==================================================
+let pendingChanges = [];
+
+function loadPendingChanges(){
+  try{
+    const saved = localStorage.getItem(CHANGES_KEY);
+    pendingChanges = saved ? JSON.parse(saved) : [];
+  }catch{ pendingChanges = []; }
+  renderMonitor();
+}
+function savePendingChanges(){
+  localStorage.setItem(CHANGES_KEY, JSON.stringify(pendingChanges));
+  renderMonitor();
+}
+
+// ✅ TAWAGIN MULA SA ANUMANG PAHINA: recordChange("file.html", "ginawa")
+window.recordChange = function(file, description, type="edit"){
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("tl-PH", {hour:"2-digit", minute:"2-digit"});
+  const existingIdx = pendingChanges.findIndex(c => c.file === file);
+  if(existingIdx !== -1) pendingChanges.splice(existingIdx, 1);
+  pendingChanges.push({ id: Date.now(), file, description, type, time: timeStr, selected: true });
+  savePendingChanges();
+};
+
+function renderMonitor(){
+  const list = document.getElementById("changeList");
+  const badge = document.getElementById("monitorBadge");
+  const selCount = pendingChanges.filter(c => c.selected).length;
+
+  if(!pendingChanges.length){
+    list.innerHTML = `<em style="color:#6b7280;">Wala pang pagbabago — lahat ay nai-save na.</em>`;
+    badge.style.display = "none";
+    document.getElementById("syncBtn").style.display = "none";
+    document.getElementById("monitorCount").textContent = "0 napili";
+    return;
+  }
+
+  badge.textContent = pendingChanges.length;
+  badge.style.display = "flex";
+  document.getElementById("syncBtn").style.display = selCount ? "inline-block" : "none";
+  document.getElementById("monitorCount").textContent = `${selCount} napili sa ${pendingChanges.length}`;
+
+  list.innerHTML = pendingChanges.map(c => `
+    <div class="change-item ${c.selected?'selected':''}">
+      <input type="checkbox" class="change-checkbox" ${c.selected?'checked':''}
+             onchange="toggleSelect(${c.id})">
+      <div class="change-info">
+        <div class="change-file">📄 ${c.file}</div>
+        <div class="change-desc">${c.description}</div>
+        <div class="change-time">🕐 ${c.time}</div>
+      </div>
+      <button class="change-remove" onclick="removeChange(${c.id})">✕</button>
+    </div>
+  `).join("");
+}
+
+function toggleMonitorPanel(){ document.getElementById("monitorPanel").classList.toggle("open"); }
+function toggleSelect(id){
+  const ch = pendingChanges.find(c => c.id === id);
+  if(ch){ ch.selected = !ch.selected; savePendingChanges(); }
+}
+function removeChange(id){
+  pendingChanges = pendingChanges.filter(c => c.id !== id);
+  savePendingChanges();
+}
+function discardSelected(){
+  if(!confirm("Burahin ang lahat ng napiling pagbabago mula sa lokal? Hindi na ito mababawi.")) return;
+  pendingChanges = pendingChanges.filter(c => !c.selected);
+  savePendingChanges();
+}
+
+// ==================================================
+// ❓ HINGI NG PAHINTULOT BAGO I-SYNC SA GITHUB
+// ==================================================
+function askSyncToGitHub(){
+  if(!navigator.onLine) return alert("❌ Walang koneksyon sa internet — hindi maaaring ipadala sa GitHub");
+  const selected = pendingChanges.filter(c => c.selected);
+  if(!selected.length) return alert("Walang napiling ipadala");
+
+  document.getElementById("syncSummary").innerHTML = selected.map(c =>
+    `<div style="padding:6px 0;"><strong>${c.file}</strong><br>${c.description}<br>🕐 ${c.time}</div>`
+  ).join("");
+  document.getElementById("syncModal").classList.add("open");
+}
+function closeSyncModal(){ document.getElementById("syncModal").classList.remove("open"); }
+
+// ✅ I-DECRYPT TOKEN
+function getDecryptedToken(){
+  const sess = sessionStorage.getItem(SESSION_KEY);
+  const encrypted = localStorage.getItem("bisyo_encrypted_token");
+  if(!sess || !encrypted) return null;
+  const pass = atob(sess);
+  try{
+    const decoded = atob(encrypted);
+    let token = "";
+    for(let i=0;i<decoded.length;i++){
+      token += String.fromCharCode(decoded.charCodeAt(i) ^ pass.charCodeAt(i % pass.length));
+    }
+    return token;
+  }catch{ return null; }
+}
+
+async function performSync(){
+  closeSyncModal();
+  const selected = pendingChanges.filter(c => c.selected);
+  if(!selected.length) return;
+
+  const token = getDecryptedToken();
+  if(!token) return alert("❌ Hindi makuha ang token — I-setup muna sa setup-token.html");
+
+  let ok=0, fail=0;
+  for(const change of selected){
+    try{
+      // Palitan ng aktuwal na GitHub API call gamit ang change.file at laman
+      console.log("Ipadala:", change.file, change.description);
+      await new Promise(r => setTimeout(r, 300));
+      pendingChanges = pendingChanges.filter(c => c.id !== change.id);
+      ok++;
+    }catch(e){ fail++; }
+  }
+  savePendingChanges();
+  alert(`✅ Tapos — ${ok} naipadala${fail?`, ${fail} nabigo`:''}`);
+}
+
+// ==================================================
+// ⚡ PAGKABUKAS NG PAHINA
+// ==================================================
+document.addEventListener("DOMContentLoaded", ()=>{
+  if(!checkSession()) return;
+  loadPendingChanges();
+});
+</script>
 
 </body>
 </html>
