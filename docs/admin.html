@@ -145,7 +145,7 @@ input:focus, select:focus {
 
   <form id="loginForm" onsubmit="handleLogin(event)">
     <label for="password">Admin Password</label>
-    <input type="password" id="password" placeholder="Ipasok ang iyong password" required>
+    <input type="password" id="password" placeholder="Iyong password" required>
 
     <label for="duration">Tagal ng Session</label>
     <select id="duration">
@@ -179,16 +179,21 @@ const SESSION_EXPIRY = "bisyo_session_expiry";
 const STORAGE_REMEMBER = "bisyo_remember";
 
 // ==================================================
-// ✅ KONBERSYON NG DURATION → MILLISEGUNDO
+// ✅ IYONG PASSWORD — bisyo2026 — HANDA NA
+// ==================================================
+const CORRECT_PASSWORD = "bisyo2026";
+
+// ==================================================
+// KONBERSYON NG DURATION → MILLISEGUNDO
 // ==================================================
 function parseDuration(val){
   const num = parseInt(val);
   const unit = val.replace(/[0-9]/g,"");
   switch(unit){
-    case "m": return num * 60 * 1000;        // Minuto
-    case "h": return num * 60 * 60 * 1000;   // Oras
-    case "d": return num * 24 * 60 * 60 * 1000; // Araw
-    default: return 60 * 60 * 1000;          // 1 Oras kung mali
+    case "m": return num * 60 * 1000;
+    case "h": return num * 60 * 60 * 1000;
+    case "d": return num * 24 * 60 * 60 * 1000;
+    default: return 60 * 60 * 1000;
   }
 }
 
@@ -202,12 +207,6 @@ function showSessionInfo(msg){
   const el = document.getElementById("sessionInfo");
   el.textContent = msg;
   el.classList.add("show");
-}
-
-function hashSimple(str){
-  let h=0;
-  for(let i=0;i<str.length;i++) h=((h<<5)-h)+str.charCodeAt(i),h|=0;
-  return h.toString(16);
 }
 
 function formatExpiry(ms){
@@ -228,11 +227,9 @@ function handleLogin(e){
   btn.disabled = true;
   btn.textContent = "⏳ Tinitiyak...";
 
-  // ✅ Palitan ng tunay na pagtutumbas ng password
-  if(hashSimple(password) === "5e884898da280471" || password === "admin123"){
+  // ✅ TAMA NA — bisyo2026 ang tinatanggap
+  if(password === CORRECT_PASSWORD){
     const expiry = Date.now() + durationMs;
-
-    // ✅ I-save ang password + oras ng pagtatapos
     sessionStorage.setItem(SESSION_KEY, btoa(password));
     sessionStorage.setItem(SESSION_EXPIRY, expiry.toString());
 
@@ -241,18 +238,15 @@ function handleLogin(e){
 
     showStatus("✅ Matagumpay — Pupunta sa Dashboard...", "success");
     showSessionInfo(`⏰ Magtatapos ang session: ${formatExpiry(expiry)}`);
-
     setTimeout(()=> location="admin-settings.html", 1200);
   }else{
-    showStatus("❌ Maling password");
+    showStatus("❌ Maling password — Subukan muli");
     btn.disabled = false;
     btn.textContent = "✅ Mag-login";
   }
 }
 
-// ==================================================
-// ✅ SURIIN KUNG MAY HINDI PA TAPOS NA SESSION
-// ==================================================
+// SURIIN ANG SESSION
 function checkExistingSession(){
   const expiry = sessionStorage.getItem(SESSION_EXPIRY);
   if(expiry){
@@ -267,7 +261,6 @@ function checkExistingSession(){
       else text = Math.floor(remaining/86400000) + " araw";
       showSessionInfo(`✅ May aktibong session — natatapos sa: ${formatExpiry(expiryMs)} (${text} pa)`);
     }else{
-      // ✅ Natapos na — burahin
       sessionStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(SESSION_EXPIRY);
       showSessionInfo("⚠️ Ang nakaraang session ay natapos na — Mag-login muli.");
