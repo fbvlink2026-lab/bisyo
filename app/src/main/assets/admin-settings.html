@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<title>⚙️ Mga Setting — Panimula</title>
+<style>
+.container{max-width:620px;margin:0 auto;padding:20px}
+.page-card{
+  background:white;
+  padding:24px;
+  border-radius:16px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:16px;
+  text-decoration:none;
+  color:inherit;
+  border-left:4px solid #b91c1c;
+  transition:all 0.25s
+}
+.page-card:hover{
+  transform:translateX(4px);
+  border-left-color:#dc2626;
+  background:#fef2f2
+}
+.page-icon{font-size:36px;line-height:1}
+.page-info h2{margin:0 0 4px 0;font-size:18px;color:#1f2937}
+.page-info p{margin:0;color:#6b7280;font-size:14px}
+h1{text-align:center;color:#1f2937;margin:20px 0 30px 0;font-size:22px}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <a href="admin.html">🏠 Dashboard</a>
+  <a href="admin-order.html">🔢 Ayusin Ayos</a>
+  <a href="admin-edit.html">✏️ I-edit</a>
+  <a href="admin-new-page.html">➕ Bagong Pahina</a>
+  <a href="editor-preview.html">🧪 Preview</a>
+  <a href="admin-pending.html">⏳ Nakabinbin</a>
+  <a href="setup-token.html">🔧 Token</a>
+  <a href="admin-settings.html" class="active">⚙️ Setting</a>
+</div>
+
+<div class="container">
+  <h1>⚙️ Mga Setting ng Sistema</h1>
+
+  <a href="admin-settings-general.html" class="page-card">
+    <span class="page-icon">🔧</span>
+    <div class="page-info">
+      <h2>Pangkalahatang Setting</h2>
+      <p>Tagal ng login, karapatang-ari, at pangalan ng may-ari</p>
+    </div>
+  </a>
+
+  <a href="admin-settings-coadmins.html" class="page-card">
+    <span class="page-icon">👥</span>
+    <div class="page-info">
+      <h2>Mga Co-Admin</h2>
+      <p>Magdagdag, magbago, o magtakda ng antas ng pahintulot</p>
+    </div>
+  </a>
+
+  <a href="admin-settings-files.html" class="page-card">
+    <span class="page-icon">📄</span>
+    <div class="page-info">
+      <h2>Suriin ang mga Pahina</h2>
+      <p>Hanapin ang HTML, idagdag ang copyright, at piliin ang lalabas sa Dashboard</p>
+    </div>
+  </a>
+
+  <a href="admin-settings-config.html" class="page-card">
+    <span class="page-icon">🗂️</span>
+    <div class="page-info">
+      <h2>config.json — Sa GitHub</h2>
+      <p>I-preview, i-edit, at i-save ang kabuuang konpigurasyon</p>
+    </div>
+  </a>
+</div>
+
+</body>
+</html>
